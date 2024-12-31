@@ -15,7 +15,7 @@ Gazelle is a suite of Azure and GitHub services designed to streamline landing z
 
 Gazelle serves as a sandbox for designing and deploying Azure landing zones using GitHub, offering a practical environment to experiment and innovate. By replicating real-world challenges faced by platform teams, it bridges the gap between theory and practice. This focus not only supports the design and construction of platforms but also delegate application teams with self-service capabilities to create and manage their own landing zones.
 
-The core of Gazelle is its [deployment logic](/azure-platform-management), which includes:
+The core of Gazelle is its [deployment logic](/managing-azure-platform), which includes:
 
 - **Isolated, Production-Like Test Environment**: Ensures that all updates are tested before introduced into production. 
 - **Service-Oriented deployments**: Divides platform functionality into manageable, purpose-driven workflows.  
