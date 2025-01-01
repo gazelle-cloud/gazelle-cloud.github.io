@@ -10,7 +10,11 @@
     {{ end }}
     {{ partial "scripts.html" . }}
     <!-- 100% privacy-first analytics -->
-    <script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+    <script src="https://getinsights.io/js/insights.js"></script>
+    <script>
+        insights.init('FmZET1tjnAMD1Qwe');
+        insights.trackPages();
+    </script>
 </body>
 
 </html>
