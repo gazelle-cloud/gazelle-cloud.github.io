@@ -4,9 +4,11 @@
   <url>
     <loc>//localhost:1313/getting-started/</loc>
   </url><url>
-    <loc>//localhost:1313/azure-platform-design/</loc>
+    <loc>//localhost:1313/platform-design/</loc>
   </url><url>
-    <loc>//localhost:1313/managing-azure-platform/</loc>
+    <loc>//localhost:1313/managing-platform/</loc>
+  </url><url>
+    <loc>//localhost:1313/github-workflows/</loc>
   </url><url>
     <loc>//localhost:1313/</loc>
   </url><url>

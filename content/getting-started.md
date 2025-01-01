@@ -7,7 +7,7 @@ weight: 10
 
 This guide will walk you through replicating the latest release of the Gazelle platform setup in your Azure tenant, providing you with a solid foundation for your Azure platform. Feel free to tweak the setup as needed to match your specific requirements.
 
-By completing this guide and successfully running the deployment pipelines, you will achieve an Azure tenant setup that aligns with the principles and configurations outlined in the [Managing Azure Platform](/managing-azure-platform) and [Azure Platform Design](/azure-platform-design) pages.
+By completing this guide and successfully running the deployment pipelines, you will achieve an Azure tenant setup that aligns with the principles and configurations outlined in the [Managing Azure Platform](/managing-platform) and [Azure Platform Design](/platform-design) pages.
 
 The current platform costs are close to zero, reflecting its efficient design. However, cost alerts are configured to notify at 1 EUR for the production environment and 4 EUR for test environments per month, ensuring that spending remains well within budget.
 
@@ -72,7 +72,7 @@ AZURE_PLATFORM_ADMIN_GROUP_ID = object_id
 ### GitHub
 
 **Setup GitHub App**
-- to be continued... have to find a solution how to share the app
+- **to be continued... have to find a solution how to share the app settings**
 - generate a 'private key'
 - copy the private key as GitHub repository secret:
   ```
@@ -96,10 +96,10 @@ RUNNER_IMAGE_VERSION = ubuntu-latest
 - create a new label called 'approved'
   
 ## Run the pipeline
-- trigger the 'platform-flow-BigBang' github Action 
+- trigger the [platform-flow-BigBang](/github-workflows/#bigbang) GitHub Action 
 
 
 
-## ...
+## Misc
 
-This guide is designed to set up the initial configuration, with no further manual actions required on the platform. Although triggering the "Destroy the Platform" pipeline will remove the environment, it will not touch the initial configuration.
+This guide is designed to set up the initial configuration, with no further manual actions required on the platform. Although triggering the [Destroy the Platform](/github-workflows/#destroy-azure-platform) pipeline will remove the environment, it will not touch the initial configuration.

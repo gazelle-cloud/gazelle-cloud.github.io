@@ -10,16 +10,14 @@ toc: true
 {{< hextra/hero-headline >}}
   in Azure with GitHub
 {{< /hextra/hero-headline >}}
- 
-Gazelle is a suite of Azure and GitHub services designed to streamline landing zone deployment and management with flexibility and scalability. It adapts to diverse tenant requirements, enabling the creation of tailored Azure platform.
 
-Gazelle serves as a sandbox for designing and deploying Azure landing zones using GitHub, offering a practical environment to experiment and innovate. By replicating real-world challenges faced by platform teams, it bridges the gap between theory and practice. This focus not only supports the design and construction of platforms but also delegate application teams with self-service capabilities to create and manage their own landing zones.
+Gazelle is a suite of Azure and GitHub services designed to create a lightweight, fast, and flexible Azure landing zone setup with a focus on subscription democratization. It provides a structured approach to cost transparency and ensures full control over Azure resource configuration to meet organizational requirements, while empowering application teams to innovate at their own pace.
 
-The core of Gazelle is its [deployment logic](/managing-azure-platform), which includes:
+Gazelle serves as a playground to bring innovative ideas to life, simulating real-world scenarios. This playground is not a chaotic space; it is a well-structured environment designed for exploration within defined boundaries:
 
-- **Isolated, Production-Like Test Environment**: Ensures that all updates are tested before introduced into production. 
-- **Service-Oriented deployments**: Divides platform functionality into manageable, purpose-driven workflows.  
-- **Optimize workflow processes**: Handles inputs/outputs mechanisms, authentication, and Azure configuration.  
-- **Automated Deployments**: Eliminates direct human interaction from all platform development tasks.
+- **Small Modular Deployments**: Modularity allows to test new features in isolation, without jeopardizing the larger system.
+- **Fully Automated Workflows**: Spinning up clean environments is automated, ensuring consistency and reliability for testing.
+- **Isolated Test Environment**: Changes are validated in a production-like environment before being deployed live.
+- **Consumption-Based Billing**: Services are selected based on actual usage, keeping costs minimal— often close to zero.
 
-The entire Gazelle codebase, along with the current configuration of the Gazelle tenant, is available in a public GitHub repository. Follow the [Quick Start Guide](/getting-started) for the initial configuration, and let the automated workflows handle the rest.
+The entire Gazelle codebase and configurations are available in a public GitHub repository. Follow the [Quick Start Guide](/getting-started) to replicate the latest Gazelle setup in your own Azure tenant. Once you're up and running, let us know in a GitHub Discussions what solutions you’re building on top of Gazelle—we’d love to hear your stories and ideas!
