@@ -1,10 +1,10 @@
 ---
-title: GitHub Workflows
+title: GitHub Actions
 breadcrumbs: false
 toc: true
 weight: 40
 ---
-## Overview
+## Workflows
 
 GitHub Actions serve as the backbone of Gazelle’s deployment automation, enabling consistent operations across diverse environments. They are designed with maintainability in mind and support scalability in both breadth and depth. To achieve this flexibility, workflows are divided into two distinct parts: template workflows and deployment workflows.
 

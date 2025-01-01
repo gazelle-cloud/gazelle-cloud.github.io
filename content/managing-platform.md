@@ -4,7 +4,7 @@ breadcrumbs: false
 toc: true
 weight: 30
 ---
-Managing Azure landing zones is about achieving a reliable, consistent, and repeatable system. This means minimizing direct human interaction as much as possible. By using Bicep, Deployment Stack, and GitHub Actions, you can automate provisioning, configuration, and the removal of resources that are no longer defined in templates. This approach makes templates the single source of truth and reduces the need for direct access to Azure.
+Managing Azure landing zones is about achieving a reliable, consistent, and repeatable system. This means minimizing direct human interaction as much as possible. By using tools like Bicep, Deployment Stack, and GitHub Actions, you can automate provisioning, configuration, and the removal of resources that are no longer defined in templates. This approach makes templates the single source of truth and reduces the need for direct access to Azure.
 
 ## Modular Deployments
 

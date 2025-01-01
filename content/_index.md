@@ -20,4 +20,4 @@ Gazelle serves as a playground to bring innovative ideas to life, simulating rea
 - **Isolated Test Environment**: Changes are validated in a production-like environment before being deployed live.
 - **Consumption-Based Billing**: Services are selected based on actual usage, keeping costs minimal— often close to zero.
 
-The entire Gazelle codebase and configurations are available in a public GitHub repository. Follow the [Quick Start Guide](/getting-started) to replicate the latest Gazelle setup in your own Azure tenant. Once you're up and running, let us know in a GitHub Discussions what solutions you’re building on top of Gazelle—we’d love to hear your stories and ideas!
+The entire Gazelle codebase and configurations are available in a public GitHub repository. Follow the [Quick Start Guide](/getting-started) to replicate the latest Gazelle setup in your own Azure tenant. Let us know in a GitHub Discussions what solutions you’re building on top of Gazelle—we’d love to hear your stories and ideas!
