@@ -13,8 +13,6 @@ toc: true
 
 Gazelle is a suite of Azure and GitHub services designed to build lightweight, flexible Azure landing zones with a focus on subscription democratization. It provides a structure for cost transparency and ensures complete control over resource configurations, while empowering application teams to innovate at their own pace.
 
-Gazelle serves as a playground to bring innovative ideas to life, simulating real-world scenarios. Unlike a chaotic development space; it is a well-structured environment for exploration within clear guidelines:
-
 Gazelle is a playground for bringing innovative ideas to life, designed to simulate real-world challenges. Unlike chaotic development spaces, it offers a well-structured environment with clear guidelines for exploration:
 
 - **Small Modular Deployments**: Modularity allows to test new features in isolation, without jeopardizing the larger system.
