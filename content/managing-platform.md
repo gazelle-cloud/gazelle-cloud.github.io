@@ -15,7 +15,9 @@ This method brings several advantages.
 - The modular design makes it easier to scale the platform by adding new features or expanding existing ones.
 - Updates and troubleshooting become more manageable since each module operates independently.
 
-Bicep templates are essential for this modular approach. Each deployment pipeline uses templates designed for specific tasks, making them easy to read, understand, and adjust. These templates focus on clarity and adaptability rather than reusability, ensuring they remain practical and straightforward.
+![Azure-platform-modular-Deployments](/Azure-platform-modular-Deployments.png)
+
+Bicep templates are essential for this modular approach. Each deployment workflow uses Bicep templates designed for specific tasks, making them easy to read, understand, and adjust. These templates focus on clarity and adaptability rather than reusability, ensuring they remain practical and straightforward.
 
 ## Azure Deployment Stack
 
