@@ -5,19 +5,38 @@ cascade:
 toc: true
 ---
 {{< hextra/hero-headline >}}
-  Build landing zones
+  Your Platform
 {{< /hextra/hero-headline >}}
 {{< hextra/hero-headline >}}
-  in Azure with GitHub
+  Their Innovation
+{{< /hextra/hero-headline >}}
+{{< hextra/hero-headline >}}
+ Zero Bottlenecks
 {{< /hextra/hero-headline >}}
 
-Gazelle is a suite of Azure and GitHub services designed to build lightweight, flexible Azure landing zones with a focus on subscription democratization. It provides a structure for cost transparency and ensures complete control over resource configurations, while empowering application teams to innovate at their own pace.
+Gazelle is a suite  of Azure and GitHub services designed to build lightweight, flexible Azure Landing Zones with a focus on subscription democratization. It provides a structure for cost transparency and ensures complete control over all Azure resource configurations, while empowering application teams to innovate at their own pace.
 
-Gazelle is a playground for bringing innovative ideas to life, designed to simulate real-world challenges. Unlike chaotic development spaces, it offers a well-structured environment with clear guidelines for exploration:
+## Core Principles
 
-- **Small Modular Deployments**: Modularity allows to test new features in isolation, without jeopardizing the larger system.
-- **Fully Automated Workflows**: Spinning up clean environments is automated, ensuring consistency and reliability for testing.
-- **Isolated Test Environment**: Changes are validated in a production-like environment before being deployed live.
-- **Consumption-Based Billing**: Services are selected based on actual usage, keeping costs minimal— often close to zero.
+Gazelle’s driving factors reflect a commitment to autonomy and efficiency.
 
-The entire Gazelle codebase and configurations are available in a public GitHub repository. Follow the [Quick Start Guide](/getting-started) to replicate the latest Gazelle setup in your own Azure tenant. Let us know in a GitHub Discussions what solutions you’re building on top of Gazelle—we’d love to hear your stories and ideas!
+- **Shift Left**: Allowing teams to take a full ownership of their landing zones, while compliance is seamlessly integrated into their workflows.
+- **Minimized Shared Services**: Centralized services reduced to the bare essentials, offering application teams the tools to manage their environments independently.
+- **Tailored for Specific Needs**: Every service aligns with the specific requirements, ensuring maximum efficiency.
+
+## Playground for Innovation
+
+Gazelle is a sandbox for experimentation. It's designed to bring innovating ideas to life, simulating a real-world challenges in a structured environment.
+
+- **Small Modular Deployments**: The heart of Gazelle consists of small, tailored modules to solve a singular task.
+- **Fully Automated workflows**: Eliminate direct human interaction from all platform configuration tasks.
+- **Isolated Testing**: Validate changes in production-like environments before releasing them live.
+- **Consumption-Based Billing**: Services for Azure platform are selected based on actual consumption, keeping cost efficiency.
+
+## Get Started
+
+Ready to build your own lightweight Azure platform?
+
+- **Explore the Code**: The entire Gazelle codebase and configurations are open source and available on GitHub.
+- **Follow the Guide**: Use the [Quick Start Guide](/getting-started) to deploy Gazelle in your Azure tenant.
+- **Share Your Story**: Join GitHub Discussions to share what you’ve built. We’d love to hear your ideas and insights!
