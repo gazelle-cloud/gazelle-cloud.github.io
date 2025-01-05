@@ -14,24 +14,19 @@ toc: true
  Zero Bottlenecks
 {{< /hextra/hero-headline >}}
 
-Gazelle is a suite  of Azure and GitHub services designed to build lightweight, flexible Azure Landing Zones with a focus on subscription democratization. It provides a structure for cost transparency and ensures complete control over all Azure resource configurations, while empowering application teams to innovate at their own pace.
+Gazelle is a suite  of Azure and GitHub services designed to build lightweight, flexible Azure Landing zones. It offers clear cost visibility and full control over Azure resource configuration, all while giving application teams to innovate at their own speed.
 
-## Core Principles
+## Lightweight Azure Landing Zone
 
-Gazelle’s driving factors reflect a commitment to autonomy and efficiency.
+Gazelle reflects the essence of lightweight Azure landing zone management through automation, lean architecture, and empowering application teams. Here's how:
 
-- **Shift Left**: Allowing teams to take a full ownership of their landing zones, while compliance is seamlessly integrated into their workflows.
-- **Minimized Shared Services**: Centralized services reduced to the bare essentials, offering application teams the tools to manage their environments independently.
-- **Tailored for Specific Needs**: Every service aligns with the specific requirements, ensuring maximum efficiency.
-
-## Playground for Innovation
-
-Gazelle is a sandbox for experimentation. It's designed to bring innovating ideas to life, simulating a real-world challenges in a structured environment.
-
-- **Small Modular Deployments**: The heart of Gazelle consists of small, tailored modules to solve a singular task.
-- **Fully Automated workflows**: Eliminate direct human interaction from all platform configuration tasks.
-- **Isolated Testing**: Validate changes in production-like environments before releasing them live.
-- **Consumption-Based Billing**: Services for Azure platform are selected based on actual consumption, keeping cost efficiency.
+- **Maintainability and Scalability**: small, task-focused Bicep modules paired with streamlined deployment logic create a platform that's adaptable and easy to scale with evolving needs.
+- **Tailored Solutions**: centralized services are minimized to essentials, ensuring a lean footprint. This approach reduces bottlenecks and grants application teams the autonomy they need.
+- **Landing Zone Operations**: fully automated using GitHub issue templates and workflows, application teams can create, update, or delete landing zones without requiring centralized support.
+- **Fast Deployments**: wWith small, independent services at its core, the platform supports deployments in minutes, enabling quick feedback loops for iterative development.
+- **Cost Efficiency**: Azure services are selected based on actual consumption, ensuring costs scale only with operational needs.
+- **Fully Automated**: platform deployment and configuration are fully automated, eliminating human intervention for consistent, reproducible setups.
+- **Testing Flow**: changes are validated in an isolated, production-like environment before release, ensuring a stable, clean live setup.
 
 ## Get Started
 
