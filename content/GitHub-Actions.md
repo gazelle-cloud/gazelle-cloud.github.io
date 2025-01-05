@@ -16,6 +16,7 @@ This division ensures the Azure platform is consistently maintained across envir
 
 
 ### Landing Zone Workflows
+![landing zone GitHub workflows](/landingzone-GitHub-workflows.png)
 
 Landing zone workflows follow a 1-to-many relationship: a single template workflow serves as the foundation for all landing zone deployment workflows. 
 - During the landing zone setup process, deployment workflow is generated. 
