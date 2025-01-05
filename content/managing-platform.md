@@ -5,7 +5,7 @@ toc: true
 weight: 30
 ---
 
-Managing Azure landing zones is about achieving a reliable, consistent, and repeatable system. This means minimizing direct human interaction as much as possible. By using tools like Bicep, Deployment Stack, and GitHub Actions, you can automate provisioning, configuration, and the removal of resources that are no longer defined in templates. This approach makes templates the single source of truth and reduces the need for direct access to Azure.
+This page highlights Gazelle's approach to managing platform operations, focusing on automation, modularity, and governance. From deploying in a test environment to cleaning up production, discover how the platform ensures consistency and efficiency at every stage.
 
 ## Modular Deployments
 ![Azure-platform-modular-Deployments](/Azure-platform-modular-Deployments.png)
@@ -20,6 +20,7 @@ This method brings several advantages.
 Bicep templates are the backbone of this approach. Each deployment workflow uses task-specific Bicep templates that prioritize clarity and adaptability over reusability. This keeps them easy to read, adjust, and align with the lightweight, modular philosophy
 
 ## Azure Deployment Stack
+The Deployment Stack in Gazelle provides management of the Azure resource lifecycle, from deployment to deletion. Resources defined in Bicep templates are  provisioned in Azure, and any resources no longer defined in the templates are seamlessly removed. This approach ensures that templates remain the single source of truth, reducing the need for manual clean-up tasks.
 
 The Deployment Stack adds an extra layer of control with 'deny settings', which prevent write or delete actions on managed resources—even if a service principal has the necessary RBAC permissions. This safeguard ensures critical resources remain secure from accidental modifications or deletions.
 
@@ -39,3 +40,7 @@ This approach ensures every change is tested before being promoted to production
 ## Custom Role Definitions
 
 To maintain the principles of Infrastructure-as-Code and ensure smooth operations, custom RBAC roles are used for platform management. These roles are designed to provide just enough access to handle tasks that require manual intervention without allowing changes that could violate Infrastructure-as-Code principles. This approach provides the flexibility to perform essential tasks while maintaining control and consistency across the platform.
+
+## Singular Region Deployments
+
+To minimize cost and complexity, single-region deployments are implemented. This approach focuses on deploying Azure resources to a specific region, defined as a GitHub variable. During deployment pipelines, the region value is dynamically fetched and applied, streamlining the deployment process. To ensure all resources are deployed exclusively within the designated region, Azure policies are enforced, maintaining compliance and consistency.
