@@ -1,12 +1,12 @@
 ---
-title: GitHub Actions
+title: Deployment Automation
 breadcrumbs: false
 toc: true
 weight: 40
 ---
-## Workflows
 
-GitHub Actions are the engine behind Gazelle’s deployment automation, ensuring seamless operations across environments. Built for simplicity and scalability, these workflows are structured into two key parts: template workflows and deployment workflows
+## GitHub Actions
+GitHub Actions are the engine behind Gazelle’s deployment automation, ensuring seamless operations across environments. Built for maintainability and scalability, these workflows are structured into two key parts: template workflows and deployment workflows
 
 - **Template Workflows**: focus on what needs to be deployed. They include the core deployment logic, handling everything from start to finish. 
 
@@ -29,7 +29,9 @@ Platform workflows are grouped by Azure platform capabilities, as outlined in th
 
 ### BigBang
 
-BigBang is a suite of workflows that quickly sets up an Azure platform environment from scratch to full operation. It serves as a recovery tool for unexpected failures or make it easy to clone an entire platform setup into a different Azure tenant.
+Unforeseen failures shouldn’t lead to downtime or complex recovery processes. The BigBang principle ensures that platform services can always be redeployed from scratch, providing a reliable fallback mechanism. By treating the platform as fully disposable and repeatable, BigBang simplifies recovery and guarantees operational continuity.
+
+
 
 ### Destroy Azure Platform
 

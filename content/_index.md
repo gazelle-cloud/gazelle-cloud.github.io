@@ -18,7 +18,7 @@ Gazelle is a suite  of Azure and GitHub services designed to build lightweight, 
 
 ## Lightweight Azure Landing Zone
 
-Gazelle reflects the essence of lightweight Azure landing zone management through automation, lean architecture, and empowering application teams. Here's how:
+Gazelle reflects the essence of lightweight Azure landing zone management through automation, modern software engineering principles, and frictionless End-To-End flow. Here's how:
 
 - **Maintainability and Scalability**: small, task-focused Bicep modules paired with streamlined deployment logic create a platform that's adaptable and easy to scale with evolving needs.
 - **Tailored Solutions**: centralized services are minimized to essentials, ensuring a lean footprint. This approach reduces bottlenecks and grants application teams the autonomy they need.
