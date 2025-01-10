@@ -1,0 +1,5 @@
+﻿{
+  "Description": "Domain ownership verification file for Microsoft 365 - place in the website root",
+  "Domain": "gazelle.cloud",
+  "Id": "bc3728a6-8e61-42d1-883a-4f6f7609afa5"
+}
