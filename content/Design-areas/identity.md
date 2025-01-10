@@ -2,7 +2,7 @@
 title: Identity
 breadcrumbs: false
 toc: true
-weight: 50
+weight: 20  
 ---
 
 ### Platform Identity

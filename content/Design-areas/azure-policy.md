@@ -2,7 +2,7 @@
 title: Azure Policy
 breadcrumbs: false
 toc: true
-weight: 20
+weight: 40
 ---
 
 

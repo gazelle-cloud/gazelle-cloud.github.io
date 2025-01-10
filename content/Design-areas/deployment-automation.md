@@ -2,7 +2,7 @@
 title: Deployment Automation
 breadcrumbs: false
 toc: true
-weight: 40
+weight: 50
 ---
 
 ## GitHub Actions
