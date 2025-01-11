@@ -14,15 +14,15 @@ toc: true
  Zero Bottlenecks
 {{< /hextra/hero-headline >}}
 
-Gazelle is a suite  of Azure and GitHub services designed to build lightweight, flexible Azure Landing zones. It offers clear cost visibility and full control over Azure resource configuration, all while giving application teams to innovate at their own speed.
+Gazelle is a suite  of Azure and GitHub services designed to build lightweight, flexible Azure Landing zones. It offers clear cost visibility and full control over Azure resource configuration, all while enabling application teams to adopt Azure at their own speed.
 
 ## Lightweight Azure Landing Zone
 
-Gazelle reflects the essence of lightweight Azure landing zone management through automation, lean architecture, and empowering application teams. Here's how:
+Gazelle reflects the essence of lightweight Azure landing zone management through automation, modern software engineering principles, and frictionless End-To-End flow.
 
-- **Maintainability and Scalability**: small, task-focused Bicep modules paired with streamlined deployment logic create a platform that's adaptable and easy to scale with evolving needs.
-- **Tailored Solutions**: centralized services are minimized to essentials, ensuring a lean footprint. This approach reduces bottlenecks and grants application teams the autonomy they need.
-- **Landing Zone Operations**: fully automated using GitHub issue templates and workflows, application teams can create, update, or delete landing zones without requiring centralized support.
+- **Tailored Solutions**: small, task-focused Bicep modules paired with streamlined deployment logic create a platform that's adaptable and easy to scale with evolving needs.
+- **Lean footprint**: centralized services are minimized to essentials, reducing bottlenecks and granting application teams the autonomy they need.
+- **Self-service**: with full automation powered by GitHub issue templates and workflows, application teams can efficiently create, update, or delete landing zones, eliminating the need for centralized support
 - **Fast Deployments**: with small, independent services at its core, the platform supports deployments in minutes, enabling quick feedback loops for iterative development.
 - **Cost Efficiency**: Azure services are selected based on actual consumption, ensuring costs tied with operational needs.
 - **Fully Automated**: platform deployment and configuration are fully automated, eliminating human intervention for consistent, reproducible setups.
