@@ -1,17 +1,14 @@
 ---
 title: Platform Design
 weight: 20
-
 ---
 
-This page outlines the pillars that form the foundation of Gazelle’s tenant setup. From resource organization to cost, and compliance, these principles define how landing zones are structured and managed to meet the needs of modern cloud platform.
+### Playground
+Gazelle offers a playground environment to explore and experiment with Azure landing zone management. Designed for hands-on learning, it provides a safe and controlled space where engineers can freely test new capabilities, refine their skills, and understand the nuances of managing Azure landing zones.
 
-Design Principles 
-Self-Service 
-Self-service is critical for reducing dependency on centralized platform teams and empowering application teams to manage their own landing zones. Using predefined GitHub issues and automated workflows, Gazelle allows teams to create landing zones, edit budgets, exempt policies, or deactivate subscription independently. This approach enhances efficiency by putting essential tasks directly into the hands of the teams.
+### Everything-as-Code
+At its core, Gazelle embraces the Everything-as-Code philosophy, ensuring consistency, repeatability, and scalability through automation. All provisioning and configuration tasks are done as code, allowing engineers to maintain high standards of quality and portability. The codebase is designed to be easily replicated across GitHub repositories and deployed to Azure tenants. It offers a solid foundation to dive into the mechanisms of Azure landing zone management. 
 
-Consumption-Based Billing 
-Managing platform costs effectively starts with avoiding fixed-cost services whenever possible. Gazelle focuses on selecting Azure services that charge based on actual consumption, aligning costs with actual usage to maintain efficiency. By prioritizing pay-as-you-go resources over those with predefined pricing, the platform ensures that costs remain directly tied to operational needs.
+### Focus on Real-World Challenges
 
-BigBang 
-Unforeseen failures shouldn’t lead to downtime or complex recovery processes. The BigBang principle ensures that platform services can always be redeployed from scratch, providing a reliable fallback mechanism. By treating the platform as fully disposable and repeatable, BigBang simplifies recovery and guarantees operational continuity.
+It addresses the daily challenges faced by cloud engineers, such as ensuring cost transparency, configuring network restrictions for all resources, and making it easy to adapt the code as requirements evolve. By bridging the gap between experimentation and real-world landing zone setups, it provides foundations for building resilient and efficient cloud infrastructures.
