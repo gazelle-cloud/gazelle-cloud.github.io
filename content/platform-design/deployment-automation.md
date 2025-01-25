@@ -5,8 +5,6 @@ toc: true
 weight: 50
 ---
 
-
-
 ### Modular Deployments
 ![Azure-platform-modular-Deployments](/Azure-platform-modular-Deployments.png)
 
@@ -24,18 +22,16 @@ The Deployment Stack in Gazelle provides management of the Azure resource lifecy
 
 The Deployment Stack adds an extra layer of control with 'deny settings', which prevent write or delete actions on managed resources—even if a service principal has the necessary RBAC permissions. This safeguard ensures critical resources remain secure from accidental modifications or deletions.
 
-This feature is particularly useful for platform-managed resources within application landing zones. It lets application teams perform predefined tasks while keeping these resources protected from unauthorized changes. The result is a balance that empowers teams to work efficiently while maintaining the stability of the landing zones
+This feature is particularly useful for platform-managed resources within application landing zones. It lets application teams perform predefined tasks while keeping these resources protected from unwanted changes. The result is a balance that empowers teams to work efficiently while maintaining the stability of the landing zones
 
 ### Test Environment
 
-All platform changes are first deployed to a fully isolated test environment, designed as a complete replica of production. This environment includes its own identity, management group hierarchy, policy assignments, and all other Azure components, ensuring thorough testing without risking live systems. Isolation is achieved through practices such as:
+All platform changes are first deployed to a fully isolated test environment, designed as a complete replica of production. This environment includes its own identity, management group hierarchy, policy assignments, and all other Azure components, ensuring testing without risking live systems. Isolation is achieved through practices such as:
 
 - Main Branch Protection
 - GitHub Environments
 - Automated Workflows
 - Eliminating direct human access
-
-This approach ensures every change is tested before being promoted to production, keeping the platform stable and predictable.
 
 ## GitHub Actions
 GitHub Actions are the engine behind Gazelle’s deployment automation, ensuring seamless operations across environments. Built for maintainability and scalability, these workflows are structured into two key parts: template workflows and deployment workflows

@@ -22,7 +22,7 @@ Gazelle reflects the essence of lightweight Azure landing zone management throug
 
 - **Tailored Solutions**: small, task-focused Bicep modules paired with streamlined deployment logic create a platform that's adaptable and easy to scale with evolving needs.
 - **Lean footprint**: centralized services are minimized to essentials, reducing bottlenecks and granting application teams the autonomy they need.
-- **Self-service**: with full automation powered by GitHub issue templates and workflows, application teams can efficiently create, update, or delete landing zones, eliminating the need for centralized support
+- **Self-service**: with full automation powered by GitHub issue templates and workflows, application teams can  create, update, or delete landing zones, eliminating the need for centralized support
 - **Fast Deployments**: with small, independent services at its core, the platform supports deployments in minutes, enabling quick feedback loops for iterative development.
 - **Cost Efficiency**: Azure services are selected based on actual consumption, ensuring costs tied with operational needs.
 - **Fully Automated**: platform deployment and configuration are fully automated, eliminating human intervention for consistent, reproducible setups.

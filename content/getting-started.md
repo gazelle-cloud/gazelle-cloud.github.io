@@ -7,7 +7,7 @@ weight: 10
 
 This guide will walk you through replicating the latest release of the Gazelle platform setup in your Azure tenant, providing you with a solid foundation for your Azure platform. Feel free to tweak the setup as needed to match your specific requirements.
 
-By completing this guide and successfully running the deployment pipelines, you will achieve an Azure tenant setup that aligns with the principles and configurations outlined in the [Managing Azure Platform](/managing-platform) and [Azure Platform Design](/platform-design) pages.
+By completing this guide and successfully running the deployment pipelines, you will get an Azure tenant setup that aligns with the principles and configurations outlined in the [Platform Design](/platform-design/) pages.
 
 The current platform costs are close to zero, reflecting its efficient design. However, cost alerts are configured to notify at 1 EUR for the production environment and 4 EUR for test environments per month, ensuring that spending remains well within budget.
 

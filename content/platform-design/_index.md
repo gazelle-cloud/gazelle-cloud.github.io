@@ -5,7 +5,7 @@ weight: 20
 
 ### Playground
 
-This playground environment is designed to test new Azure features, apply platform engineering principles, and explore the nuances of managing Azure landing zones as code. It provides a hands-on learning experience in a safe space where users can experiment not only with Azure services such as Identity, Networking, or Azure Policy but also with modern Infrastructure-as-Code tools like Bicep, and GitHub Actions. While it functions as a playground, it follows to the same development principles as a production tenant.
+This environment is designed to test new Azure features, apply platform engineering principles, and explore the nuances of managing Azure landing zones as code. It provides a hands-on learning experience in a safe space where users can experiment not only with Azure services such as Identity, Networking, or Azure Policy but also with modern Infrastructure-as-Code tools like Bicep, and GitHub Actions. While it functions as a playground, it follows to the same development principles as a production tenant.
 
 
 ### Everything-as-Code

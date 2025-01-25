@@ -6,9 +6,7 @@ weight: 40
 ---
 
 
-Azure Policy is a service for enforcing compliance standards within a cloud environment. It ensures resources are configured to meet specific requirements, such as disabling public network access or centralizing audit logs in a Log Analytics workspace. Azure Policies is set to automatically fix non-compliant resources as they are created, even if they come from Infrastructure-as-Code templates.
-
-To simplify management, policies are organized based on compliance objectives
+Azure Policy is a service for enforcing compliance standards within a cloud environment. It ensures resources are configured to meet specific requirements, such as disabling public network access or centralizing audit logs in a Log Analytics workspace. Azure Policies is set to automatically fix non-compliant resources as they are created, even if they come from Infrastructure-as-Code templates. Policies are organized based on security baseline
 
 - **Disabling public network access**: prevents exposure of resources to the public internet.
 - **Disabling local authentication methods**: Ensures stronger security by requiring modern or centralized authentication methods.
