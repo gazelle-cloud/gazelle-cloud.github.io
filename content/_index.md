@@ -33,5 +33,4 @@ Gazelle reflects the essence of lightweight Azure landing zone management throug
 Ready to build your own lightweight Azure platform?
 
 - **Explore the Code**: The entire Gazelle codebase and configurations are open source and available on GitHub.
-- **Follow the Guide**: Use the [Quick Start Guide](/getting-started) to deploy Gazelle in your Azure tenant.
 - **Share Your Story**: Join GitHub Discussions to share what you’ve built. We’d love to hear your ideas and insights!
