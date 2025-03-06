@@ -14,9 +14,61 @@ toc: true
  Zero Bottlenecks
 {{< /hextra/hero-headline >}}
 
-Gazelle is a suite  of Azure and GitHub services designed to build lightweight, flexible Azure Landing zones. It offers clear cost visibility and full control over Azure resource configuration, all while enabling application teams to adopt Azure at their own speed.
 
-## Lightweight Azure Landing Zone
+Gazelle is a suite of Azure and GitHub services to realize my thoughts and ideas on how Azure landing zones could be managed. The space is designed to be as close as possible to a real world implementations, however it's used for educational purposes. It provides fully automated deployments, strict access control, network isolation, low cost and self-services capabilities to manage landing zones.   
+
+![Azure-platform-modular-Deployments](/2.png)
+
+
+## key features
+- **Big Bang** 
+- **Self Service**
+- **Test Environment**
+- **Streamlined Deployments**
+
+## design principles
+
+- **Security**
+  - Defender For Cloud is configured to notify landing zone engineers on new security alerts
+  - Azure Policies enforced to meet security baseline
+    - Deny direct public network access
+    - Disable local authentication methods
+    - Ensure that data is encrypted at rest and in traffic
+
+- **Cost**
+  - Pay-As-You-Go versus fixed price to ensure that cost reflects actual platform consumptions
+  - `Invoice-section` is created per application, enabling a full cost transparency and granulated cost control
+
+- **Monitor**
+  - Azure policies enforced to collect diagnostic settings to landing zone specific Log Analytics workspace 
+  - Alerts configured to notify landing zone engineers on cost anomalies, budget alerts and Azure health status changes
+
+- **Deployment**
+  - All platform resources deployed via GitHub Actions, no direct human interaction is allowed for deployment and configuration
+  - Deployments are managed by Azure Deployment Stacks, to ensure that resources effectively deleted when no longer defined in codebase
+  - Following End-To-End deployment logic, meaning that a specific platform capability is deployed and configured using a dedicated GitHub Action that is designed for singular purpose. 
+  - Bicep templates authored for a task-
+
+- **Network**
+  - Each landing zone has a dedicated virtual network, that is completely isolated by default
+  - virtual network peering can be configured in case of communication between landing zones
+  - A default CIDR range for landing zones is `/24`
+  - IPAM finds new, unused address space in environment, enabling Vnet peering if needed 
+  
+- **Identity**
+  - Azure policies configured to `Deny` local authentication methods, allowing Entra Id and RBAC roles as a single option to authenticate and authorize to Azure resources
+  - Each landing zone has a dedicated User-Assigned-Managed-Identity with `Owner`
+  - Landing zone identity is used as a service connection for GitHub Actions. Federated Authentication is configured to match respository/environment
+  - If a platform capability (such as Azure Policy) requires and identity, a dedicated User-Assigned Managed Identity is created. 
+
+- **Automation**
+  - Container App Jobs configured to run powershell scripts on a schedule basis
+  - Automation
+
+- **Resource Organization**
+  - 
+
+
 
 Gazelle reflects the essence of lightweight Azure landing zone management through automation, modern software engineering principles, and frictionless End-To-End flow.
 
