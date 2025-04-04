@@ -4,68 +4,50 @@ cascade:
   type: docs  
 toc: true
 ---
-
+<!-- 
 {{< hextra/hero-headline >}}
-  Zero Waste
+  Your platform
+{{< /hextra/hero-headline >}}
+{{< hextra/hero-headline >}}
+  Their innovation
 {{< /hextra/hero-headline >}}
 {{< hextra/hero-headline >}}
  Zero Bottlenecks
-{{< /hextra/hero-headline >}}
+{{< /hextra/hero-headline >}} -->
+
+# What is Gazelle?
+
+Gazelle is my Azure development tenant, designed to explore the nuances of managing Azure landing zones. It offers a cost-effective and scalable platform for provisioning, updating, and tearing down landing zones on demand through self-service.
+
+## Platform Design Principles
+
+- **End-to-End Flow** : Platform services deployed independently, enabling continuous improvements without disrupting the broader system.
+
+- **Big Bang**: The platform can be rebuilt from scratch at any time—supporting disaster recovery and environment resets
+
+- **Cost Friendly**: Pay for what you use—no more, no less. A platform that processes thousands of operations should scale accordingly. But when it sits idle, it should cost close to nothing.
+
+- **Fail Safely**: A dedicated test environment mirrors production, allowing teams to experiment freely and deploy to production with confidence.
+
+- **Minimal Shared Services**: Keep platform-wide services to a bare minimum—reducing cost, complexity and bottlenecks.
 
 
-## What do you?
+## A Landing Zone
 
-first of all, you get an Azure subscription. The idea is that you get an Azure subscription with predefined guardrails and core Azure infrastructure that is ready to build your application using Microsoft Azure services.
+A Landing Zone is a foundational blueprint for a new Azure subscription, defining governance, and operational standards for cloud applications. By providing ready-to-use infrastructure, deployment pipelines, and compliance controls, Landing Zones streamline cloud adoption—allowing teams to focus on innovation rather than platform setup and governance.
 
-## Cost
+- **Cost Management**: Fine-grained cost tracking at the application and environment level ensures financial accountability. Budgets and alerts provide proactive cost control, preventing unexpected expenses.
+ 
+- **Self Service**: Fully automated flow enables teams to create, update, or delete landing zones independently—eliminating reliance on central support.
 
-you get a full control of cost of your application
+- **Security baseline**:  Azure Policies enforce a security baseline, ensuring compliance with organizational standards. Policy exemptions can be granted where flexibility is required.
 
-## identity
+- **Networking**: Each landing zone operates in an isolated network environment, with PaaS-native firewalls restricting access to approved traffic.
 
-there is a User-Assigned identity that has owner permissions at the subscription scope with configured authentication to your GitHub repository. 
+- **Identity**: Every landing zone includes a dedicated identity with `Owner` permissions and pre-configured GitHub Actions for Azure service deployments.
 
-
-## What is Gazelle?
-
-Gazelle is my personal Azure tenant, where I realizing my thoughts and ideas on how to keep low cost and security in place while enabling application teams to innovate in azure at their own pace.  
-
-![Azure-platform-modular-Deployments](/2.png)
+- **Deployment pipeline**: Getting started deployment pipeline aligned with platform capabilities and recommendations.
 
 
-- **cost** Pay for what you use—no more, no less. A platform that processes thousands of operations should scale accordingly. But when it sits idle, it should cost close to nothing. Efficiency isn’t just about handling peak load; it’s about optimizing for all states.
-- **security**
-- **self service** it provides predefined github Actions that contains identity, inputs/outputs management, deployment logic and resource life cycle management in Azure. However the engineers task is to author bicep modules to solve the business problems
+Gazelle is a continuously evolving platform, designed to meet the dynamic challenges of Azure landing zone management. The platform’s entire codebase and configurations are open-source and available on GitHub, enabling users to explore, adapt, and integrate its features into their own setups. 
 
-
-## functional view
-
-- **inexpensive adaptability**: Change is inevitable. The real question is: How much does it cost? A well-designed system ensures that the cost of change is proportional to its impact. A small tweak should require minimal effort; a major redesign will naturally demand more. The system should embrace change, not resist it.
-
-- **Cost friendly**: Pay for what you use—no more, no less. A platform that processes thousands of operations should scale accordingly. But when it sits idle, it should cost close to nothing. Efficiency isn’t just about handling peak load; it’s about optimizing for all states.
-
-- **enable engineers**: engineers should have the autonomy to deploy and manage Azure resources while operating within guardrails that enforce security and cost efficiency. A well-structured platform provides self-service capabilities for managing application landing zones, ensuring agility without compromising control.
-
-## guardrails
-
-- **cost** the philosophy that each application has a full control over their budget. 
-  - cost and billing center
-  - budget alerts
-- **security baseline**  secure at any point at any time
-  - Policy: policies are enforced to prevent  unwanted misconfiguration, policy exemptions can be created by editing landing zone parameter file. 
-  - security center: a free version of defender for cloud with exempted security recommendations that conflicts with Gazelle security baseline to reduce noise in high standard security reports. 
-- **isolation**: 
-  - virtual network: 
-  - environment: 
-
-## enabling
-
-- **self service**
-- **deployment pipeline**
-- **lifecycle management**
-
-## operational
-
-- **asdf**
-- **asdf**
-- **asdf**
