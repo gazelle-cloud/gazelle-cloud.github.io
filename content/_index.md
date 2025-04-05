@@ -4,22 +4,12 @@ cascade:
   type: docs  
 toc: false
 ---
-<!-- 
-{{< hextra/hero-headline >}}
-  Your platform
-{{< /hextra/hero-headline >}}
-{{< hextra/hero-headline >}}
-  Their innovation
-{{< /hextra/hero-headline >}}
-{{< hextra/hero-headline >}}
- Zero Bottlenecks
-{{< /hextra/hero-headline >}} -->
 
 # What is Gazelle?
 
 This is a personal initiative to explore the Azure Landing Zone concept within a fully automated environment. The goal is to deliver a functional, development, and operational ready platform that "just works"—reliably and efficiently. The entire codebase is available on GitHub, providing transparency and a foundation for others to adapt components into their own architecture. The platform is guided by a principles:
 
-- **Cost**: Pay for what you use—nothing more, nothing less. If a platform is handling thousands of operations, it should reflect in the cost. But when it's sitting idle, it should cost nothing. Simple as that. 
+- **Cost efficiency**: Pay for what you use—nothing more, nothing less. If a platform is handling thousands of operations, it should reflect in the cost. But when it's sitting idle, it should cost nothing. Simple as that. 
 
 - **Frictionless flow**: Engineers should be able to manage their own landing zones without any bottlenecks. From spinning landing zone to tearing them down, the whole process should be smooth and self-managed. By cutting back on shared services and leaning into a self-service model, I’m creating a platform where things just work without any bottlenecks.
 
