@@ -7,7 +7,7 @@ toc: false
 
 # What is Gazelle?
 
-This is a personal initiative to explore the Azure Landing Zone concept within a fully automated environment. The goal is to deliver a functional, development, and operational ready platform that "just works"—reliably and efficiently. The entire codebase is available on GitHub, providing transparency and a foundation for others to adapt components into their own architecture. The platform is guided by a principles:
+This is a personal initiative to explore the Azure Landing Zone concept within a fully automated environment. The goal is to deliver a cohesive platform where the whole is greater than the sum of its individual components. The entire codebase is available on GitHub, providing transparency and a foundation for others to adapt ideas into their own systems. The platform is guided by a set of principles:
 
 - **Cost efficiency**: Pay for what you use—nothing more, nothing less. If a platform is handling thousands of operations, it should reflect in the cost. But when it's sitting idle, it should cost nothing. Simple as that. 
 
