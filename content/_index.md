@@ -15,10 +15,8 @@ Pay for what you use. If a platform is handling thousands of operations, it shou
 
 ## Self Service
 
-Engineers should be able to spin up and tear down their own landing zones without any bottlenecks. This is achieved by minimizing platform-wise shared services and enabling a smooth self-service experience. The platform is designed so landing zone engineers have full autonomy to create and manage their environments, including adjusting budgets, excluding resources from security baselines, and many more.
+Engineers should be able to spin up and tear down their own landing zones without any bottlenecks. This is achieved by minimizing platform-wise shared services and enabling a smooth self-service experience. Landing zone engineers have full autonomy to create and manage their environments, including adjusting budgets, excluding resources from security baselines, and many more.
 
 ## Embrace Change
 
-Change should always be easy to apply, and a quick tweak should never turn into a project. Gazelle embraces change through its modular design, breaking down the platform into small, task-focused components that can be easily modified. This allows features to be deployed as independent units, ensuring that changes in one area don’t disrupt others. Additionally, a dedicated test environment mirrors production, allowing for safe experimentation and ensuring changes in production behave as expected.
-
-All the code is available on GitHub — explore it and feel free to adapt the ideas to fit your own environment.
+Change should always be easy to apply, and a quick tweak should never turn into a project. Gazelle embraces change through its modular design, breaking down the platform into small, task-focused components that can be easily modified. These modules are grouped by functionality and deployed together, ensuring that changes in one area don’t unintentionally impact others. Additionally, a dedicated test environment mirrors production, enabling safe experimentation and validating that changes behave as expected before rollout.
