@@ -23,39 +23,49 @@ A landing zone in our tenant isn’t just a plain Azure subscription—it’s a 
 
 ## How It Works
 
-### 1. **Getting Started Fast**
+###  Getting Started
 
-- **Self-Service on Demand**: Application teams can spin up or tear down their landing zones without delays. A simple issue template and basic parameters are all it takes to get your zone running.
-- **Autonomous Yet Governed**: While you have full control over your landing zone, the centrally applied blueprint makes sure the critical parts remain in line with best practices.
+- **Request**: 
+- **Billing**: application
+- **Repo**:
+- **Self-Service**: Application teams can spin up or tear down their landing zones without delays. A simple issue template and basic parameters are all it takes to get your zone running.
+- **Autonomy**:
 
-### 2. **Identity and Access Management**
+### Identity and Access Management
 
 - **Clean by Design**: Every landing zone starts with its own managed identity. This identity has Owner access at the subscription level and uses federated credentials via Entra ID—no secrets or certificates needed.
 - **Locking Down Local Auth**: All local authentication methods are blocked by Azure Policies. This means your access is safe and managed solely through Entra ID, keeping everything tight and secure.
 - **Custom Roles When Needed**: If a specific task calls for a human touch, you can create custom roles that extend the built-in Reader role to grant just enough permissions. It’s secure and pragmatic.
 
-### 3. **Networking Made Simple**
+### Networking 
 
-- **Isolated Networks by Default**: Each landing zone includes its own virtual network, typically configured with a /24 address space for up to 255 IPs. This ensures your environment is isolated from others.
-- **Controlled Exposure**: Public network access is disabled by policy. When you need to reach external resources, our local firewall rules ensure that any access is carefully managed.
-- **Secure Traffic Only**: Azure policies automatically block unencrypted traffic and outdated protocols, so you only work with secure, modern network communications.
+- **/24**: the default /24 address space for up to 255 IPs. Address space can be adjusted during landing zone request form. 
+- **Isolated by Default**: Each landing zone includes its own Azure Virtual Network. There is no network connection between other landing zones nor connectivity to on-premises networks. Landing zones are fully isolates by default.
+- **No Public Access**: Public network access is disabled by Azure policy. Use Azure resources local firewall to restrict network access. Policy exemption can be created by editing landing zone parameters file.  
+- **Secure Traffic Only**: All the network traffic should be encrypted, HTTP traffic configuration is not allowed by Azure policy. You work only with secure network communications.
 
-### 4. **Cost and Resource Management**
+### Cost 
 
-- **Only Pay for What You Use**: Our model leverages Azure’s pay-as-you-go services—costs reflect actual resource use, not fixed prices.
-- **Real-Time Alerts**: Customized alerts notify you when spending approaches your predefined limits, and anomaly alerts help you spot unusual cost patterns immediately.
-- **Organized and Accountable**: Resources within your landing zone are neatly grouped (e.g., using a dedicated resource group for landing zone resources), ensuring clarity and ease of management.
+- **Cost anomaly**: anomaly alerts configured to help you spot unusual cost patterns immediately.
+- **Budget alerts**: azure budget alerts configured to notify application engineers when the consumption reaches 100%. 
+- **subscription level**: cost alerts and budgets are configured at the subscription level scope to keep the track of the cost per application per environment. 
 
-### 5. **Robust Security in Every Step**
+### Resource Organization
+- **Single region deployments**: this abstraction layer eliminates to think about deployment region, Deployment pipelines configured to fetch the default region for you.  
+- **One App - One Environment - One Landing Zone**: To keep applications and their environments isolated from network, identity, deployment and operational perspectives a landing zone can host a single application and one environment only.
+- **Landing Zone Resources** a resource group called `Landing-zone-resources` is created for centrally managed resources. Resources are protected by `Deployment Stack` from unwanted changes. 
 
-- **Built-In Security Policies**: Every landing zone enforces strict Azure Policies using a `Deny` effect. This means if a configuration doesn’t meet security standards, the deployment won’t go through.
-- **Cloud Defender at the Ready**: A free version of Defender for Cloud is used by default to monitor security health. Non-critical recommendations are filtered out to reduce noise—so you can focus on what matters.
-- **Flexibility with Oversight**: If your application needs a little extra flexibility, you can request a policy exemption. Just be sure you understand the risks and take responsibility for the change.
+### Security
 
+- **Defender for Cloud**: A free version of Defender for Cloud is used by default to monitor security health. Non-applicable recommendations are filtered out to reduce noise, so you can focus on what matters.
+- **Alerts**: security alerts configured to send to application engineers to take an action. 
+
+### Azure Policy
+
+- **Exemption**: If your application needs an extra flexibility, you can request a policy exemption. Just be sure you understand the risks and take responsibility for the change.
+- **Deny**: Every landing zone enforces Azure Policies using a `Deny` effect. This means if a configuration doesn’t meet security standards, the deployment won’t go through.
+- **COnfig**: for landing zone function correctly, Azure Policy applies additional properties to Azure resources, like tags or diagnostic configuration. 
+- **Allowed Resources**: following a whitelisting approach to ensure that all configuration meet security and operational baseline. 
 ---
 
-## In a Nutshell
-
 In the Gazelle tenant, a landing zone is your streamlined, secure, and cost-effective Azure subscription. It’s designed to give you the autonomy to innovate while keeping foundational aspects—like identity, networking, and security—robustly managed in the background. Whether you’re just getting started or scaling your operations, our landing zones are built to grow with you, offering a clear, logical, and efficient path to success.
-
-Ready to get started? Your new landing zone is just a few clicks away.
