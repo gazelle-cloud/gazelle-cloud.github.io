@@ -4,52 +4,58 @@ cascade:
   type: docs  
 toc: true
 ---
-A landing zone is a fresh Azure subscription, provisioned with a Gazelle blueprint. The blueprint is centrally managed and applied to application landing zones to provide initial infrastructure, security baseline configuration, cost control, getting started deployment pipelines and autonomy to manage your application landing zones. Each application team operates independently, owning their subscription lifecycle. Teams has authority to override centrally applied guardrails when needed. provided they understand the risk and take responsibility. This model respects the reality of diverse workloads while keeping the core intact.
+# Landing Zone in the Gazelle Tenant
 
+Welcome to the landing zone—your personal, self-service Azure subscription tailored for your applications. In the Gazelle tenant, we believe in a simple, transparent approach. Here’s how our landing zones operate, explained in a friendly yet professional way.
 
-## Identity
+---
 
-Identity is foundational—and Gazelle treats it that way. Each landing zone is born with a clean, isolated identity model designed to maximize security and reduce operational overhead.
+## What’s a Landing Zone?
 
-- **Landing Zone Identity**: Each new landing zone comes with a dedicated managed identity, which holds Owner access at the subscription level. This identity is configured to deploy Azure services from the Getting Started repository using federated credentials. That means no secrets, no certificates—just secure, seamless authentication through Entra ID.
+A landing zone in our tenant isn’t just a plain Azure subscription—it’s a ready-to-go environment built with a centrally managed blueprint. This blueprint ensures that every landing zone comes with the tools you need right from the start:
 
-- **No Local Auth**: Azure Policies are enforced to block all local authentication methods—access keys, connection strings, certificates. Entra ID becomes the single source of truth for access management. This enables fine-grained RBAC for users, groups, and applications, and aligns with zero-trust principles by default.
+- **Essential Infrastructure**: Preconfigured resources make it easy to deploy your application quickly.
+- **Security Baselines**: Built-in policies protect your environment from day one.
+- **Cost Controls**: Keep spending in check with real-time alerts and budget configurations.
+- **Deployment Pipelines**: Get started with prearranged pipelines that connect with GitHub for a smooth deployment process.
 
-- **Custom Roles for Just Enough Access**: Occasionally, a manual task will come up—something small that doesn’t break Infrastructure-as-Code, but still needs a human touch. In these cases, teams can create custom role definitions by extending the Reader role with specific actions. It’s a pragmatic compromise that keeps control without resorting to blanket permissions
+---
 
-## Network
+## How It Works
 
-blah blahc blach
+### 1. **Getting Started Fast**
 
-- **isolated by default**: each landing zone comes with a virtual network that is isolated by default. 
-- **public network access is not allowed**: direct public network access is disabled by Azure policy. To access resources in Azure, use PaaS resource local firewall to restricted public network access.
-- **secure traffic**: azure policies configures to disable unsecure network communications, like unencrypted http traffic or legacy TLS configuration. 
-- **/24** the default address space for a landing zone virtual network is /24, meaning that you have 255 unique IP address allocated to your landing zone. If it's not enough, the value can be edited during the create landing zone process
+- **Self-Service on Demand**: Application teams can spin up or tear down their landing zones without delays. A simple issue template and basic parameters are all it takes to get your zone running.
+- **Autonomous Yet Governed**: While you have full control over your landing zone, the centrally applied blueprint makes sure the critical parts remain in line with best practices.
 
-## Cost
+### 2. **Identity and Access Management**
 
-- **lz**: cost assosiated per landing zone
-- **alerts**: alerts configured to notify application engineers when the costs approach the budget limits.
-- **anomaly alerts** cost anomaly alerts configured to notify landing zone engineers
+- **Clean by Design**: Every landing zone starts with its own managed identity. This identity has Owner access at the subscription level and uses federated credentials via Entra ID—no secrets or certificates needed.
+- **Locking Down Local Auth**: All local authentication methods are blocked by Azure Policies. This means your access is safe and managed solely through Entra ID, keeping everything tight and secure.
+- **Custom Roles When Needed**: If a specific task calls for a human touch, you can create custom roles that extend the built-in Reader role to grant just enough permissions. It’s secure and pragmatic.
 
+### 3. **Networking Made Simple**
 
-## Security
+- **Isolated Networks by Default**: Each landing zone includes its own virtual network, typically configured with a /24 address space for up to 255 IPs. This ensures your environment is isolated from others.
+- **Controlled Exposure**: Public network access is disabled by policy. When you need to reach external resources, our local firewall rules ensure that any access is carefully managed.
+- **Secure Traffic Only**: Azure policies automatically block unencrypted traffic and outdated protocols, so you only work with secure, modern network communications.
 
-- **Azure Policy**: policies are enforced using a `Deny` policy effect. Meaning, that the policy mechanism will deny deployment, if something is not configured to meet a security baseline. The error message provides a full details, so engineers can take an actions. Policies are grouped by the security requirement, like 'disable local authentication' or 'disable direct network access'. Application engineers can request a policy exemption, in case application requires extra flexibility.
-- **Defender for Cloud**: a free version of defender for cloud is used by default with preconfigured alerts to notify application engineers in case of security alert. Non-applicable security recommendation in this tenant are centrally supressed from defender for cloud recommendations, to reduce the noise and focus on a real misconfiguration
+### 4. **Cost and Resource Management**
 
-## Monitoring
+- **Only Pay for What You Use**: Our model leverages Azure’s pay-as-you-go services—costs reflect actual resource use, not fixed prices.
+- **Real-Time Alerts**: Customized alerts notify you when spending approaches your predefined limits, and anomaly alerts help you spot unusual cost patterns immediately.
+- **Organized and Accountable**: Resources within your landing zone are neatly grouped (e.g., using a dedicated resource group for landing zone resources), ensuring clarity and ease of management.
 
-- **booh**: diagnostic settings is enforced via Azure Policy to storage diagnostics data to a landing zone central Log Analytics workspace. Data is stored for 90 days.  This enables for engineers to have all the access to necessary data for troubleshooting. The diagnostic costs is associated directly with a landing zone. 
+### 5. **Robust Security in Every Step**
 
-## Resource Organization
+- **Built-In Security Policies**: Every landing zone enforces strict Azure Policies using a `Deny` effect. This means if a configuration doesn’t meet security standards, the deployment won’t go through.
+- **Cloud Defender at the Ready**: A free version of Defender for Cloud is used by default to monitor security health. Non-critical recommendations are filtered out to reduce noise—so you can focus on what matters.
+- **Flexibility with Oversight**: If your application needs a little extra flexibility, you can request a policy exemption. Just be sure you understand the risks and take responsibility for the change.
 
-- **landing zone resources**: a resource group `landing zone resources` is created for centrally managed landing zones resources
-- **one application - one environment - one landingzone**
+---
 
-## Self Service
+## In a Nutshell
 
-- **GitHub**: GitHub is tightly integrated to Gazelle tenant management and 'self-service' capability is one of the integrated service. It provides a friendly user experience and tools to automated deployments.   
-- **create landing zone**: create a new landing zone by following a issue template. Provide a basic parameters, and that is it. After few minutes you will get a landing zone ready develop your solution in a fresh baked landing zone. You will receive en email from a newly created alerts. The email indirectly notifies that the landing zone is ready to develop your own product. 
+In the Gazelle tenant, a landing zone is your streamlined, secure, and cost-effective Azure subscription. It’s designed to give you the autonomy to innovate while keeping foundational aspects—like identity, networking, and security—robustly managed in the background. Whether you’re just getting started or scaling your operations, our landing zones are built to grow with you, offering a clear, logical, and efficient path to success.
 
-- **Edit**: There is an assosiated parameter file that contains landing zone parameters, like budget configuration or policy exemption. Edit values to your application needs, create a Pull Request and the job is done, GitHub Actions applies new values. It is not possible to edit virtual network address space range, and application name.  
+Ready to get started? Your new landing zone is just a few clicks away.
