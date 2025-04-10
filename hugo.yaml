@@ -15,14 +15,9 @@ menu:
       url: "https://github.com/"
       params:
         icon: github
-    # - name: BlueSky
-    #   weight: 3
-    #   url: "https://github.com/gazelle-cloud/"
-    #   params:
-    #     icon: bluesky
     - name: Linkedin
-      pageRef: /design-areas
-      weight: 4
+      url: "https://www.linkedin.com/in/mantas-karciauskas/"
+      weight: 3
       params:
         icon: linkedin
 
@@ -38,7 +33,7 @@ params:
       height: 20
   theme:
     default: light
-    displayToggle: true
+    displayToggle: false
 
   footer:
     enable: false
