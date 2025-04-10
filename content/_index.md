@@ -3,6 +3,7 @@ breadcrumbs: false
 cascade:
   type: docs  
 toc: true
+description: "building a custom Azure landing zone to explore nuances of Azure management. Using Azure native services, Bicep, and GitHub Actions."
 ---
 
 # What is Gazelle?
