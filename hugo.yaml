@@ -22,10 +22,10 @@ menu:
         icon: linkedin
 
 params:
-  description: Developing Azure landing zone using Bicep and GitHub Actions
+  description: Building a cost-efficient, policy-driven platform for Azure landing zones—offering self-service and streamlined Bicep & GitHub deployment pipelines. 
   navbar:
     displayTitle: true
-    displayLogo: false
+    displayLogo: true
     logo:
       path: images/logo.svg
       dark: images/logo-dark.svg
