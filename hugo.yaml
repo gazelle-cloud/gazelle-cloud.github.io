@@ -1,4 +1,4 @@
-title: Gazelle
+title: Designing Azure Landing Zones
 
 module:
   imports:
@@ -25,7 +25,7 @@ params:
   description: Building a cost-efficient, policy-driven platform for Azure landing zones—offering self-service and streamlined Bicep & GitHub deployment pipelines. 
   navbar:
     displayTitle: true
-    displayLogo: true
+    displayLogo: false
     logo:
       path: images/logo.svg
       dark: images/logo-dark.svg
