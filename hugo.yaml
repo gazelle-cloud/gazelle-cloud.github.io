@@ -22,7 +22,7 @@ menu:
         icon: linkedin
 
 params:
-  description: Exploring Azure landing zone using Bicep and GitHub Actions
+  description: Developing Azure landing zone using Bicep and GitHub Actions
   navbar:
     displayTitle: true
     displayLogo: false
