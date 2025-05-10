@@ -1,0 +1,36 @@
+title: Azure Landing Zones
+
+module:
+  imports:
+    - path: github.com/imfing/hextra
+
+menu:
+  main:
+    - name: GitHub
+      weight: 2
+      url: "https://github.com/"
+      params:
+        icon: github
+    - name: Linkedin
+      url: "https://www.linkedin.com/in/mantas-karciauskas/"
+      weight: 3
+      params:
+        icon: linkedin
+
+params:
+  description: Dive into fully automated Azure landing zones in a practical, experiment-driven environment for learning, testing, and innovating in the cloud.
+  navbar:
+    displayTitle: true
+    displayLogo: false
+    logo:
+      path: images/logo.svg
+      dark: images/logo-dark.svg
+      link: /
+      width: 40
+      height: 20
+  theme:
+    default: light
+    displayToggle: false
+
+  footer:
+    enable: false
