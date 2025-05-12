@@ -8,7 +8,7 @@ menu:
   main:
     - name: GitHub
       weight: 2
-      url: "https://github.com/"
+      url: "https://github.com/gazelle-cloud/Azure-landing-zones"
       params:
         icon: github
     - name: Linkedin

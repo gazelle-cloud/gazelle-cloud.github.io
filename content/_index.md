@@ -7,7 +7,7 @@ toc: true
 # Azure landing zones
 
 This is a hands-on project called Gazelle, designed to explore Azure, modern software engineering practices, and platform engineering principles. The main goal of Gazelle is to deepen understanding of [Azure landing zones](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/) by building a lightweight, production-like environment that shows how teams can move fast in the cloud—without getting stuck in centralized processes.  
-All the code is publicly available in a GitHub repository—adapt what works for your team.
+All the code is publicly available in a [GitHub repository](https://github.com/gazelle-cloud/Azure-landing-zones)—adapt what works for your team.
 
 ## High-Level Overview
 
