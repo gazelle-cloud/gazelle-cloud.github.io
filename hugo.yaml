@@ -6,6 +6,9 @@ module:
 
 menu:
   main:
+    - name: Documentation
+      weight: 1
+      url: "/docs"
     - name: GitHub
       weight: 2
       url: "https://github.com/gazelle-cloud/Azure-landing-zones"
@@ -34,3 +37,9 @@ params:
 
   footer:
     enable: false
+
+  page:
+  # full (100%), wide (90rem), normal (80rem)
+  width: normal
+  # tabs:
+  #   sync: true
