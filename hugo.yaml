@@ -20,6 +20,19 @@ menu:
       params:
         icon: linkedin
 
+markup:
+  highlight:
+    noClasses: false
+  goldmark:
+    renderer:
+      unsafe: true
+    extensions:
+      passthrough:
+        delimiters:
+          block: [['\[', '\]'], ['$$', '$$']]
+          inline: [['\(', '\)']]
+        enable: true
+
 params:
   description: Dive into fully automated Azure landing zones in a practical, experiment-driven environment for learning, testing, and innovating in the cloud.
   navbar:
