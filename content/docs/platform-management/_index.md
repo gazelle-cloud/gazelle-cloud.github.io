@@ -5,18 +5,19 @@ toc: true
 sidebar:
   open: true
 ---
+
 Platform management is fully automated. Every update—whether a new capability, policy tweak, or fix—flows through GitHub. No manual changes. No direct access to Azure. Code is the source of truth.
 
 ![platform management as code](/platform-mgmt-as-code.png)
 
 Gazelle defines a structured approach to managing Azure landing zones using Bicep, Azure Deployment Stacks, and GitHub Actions. The management process is standardized to ensure that every platform capability follows a consistent pattern, reducing variability and simplifying maintenance.
 
-
 - **End-to-End Flow**: Every platform capability ships through its own pipeline—handling everything it needs to run, from provisioning to teardown.  
 - **Small, Task-Oriented Modules**: The platform codebase is made of small, focused modules—each solving one problem, and solving it well.
 - **Test Environment**: The test environment runs the same pipelines and services as production, just in a safe space to validate updates.  
 - **Standardized Deployments**: Every deployment follows the same pattern. Once you’ve seen one, you’ll know how the rest work.  
 - **BigBang**: The entire platform can be teardown and rebuilt at any time—automatically, reliably, without surprises.
+- **Operational Flow**: Platform changes follow a code-driven process—from GitHub Issue to production deployment—with manual validation in test environment.
 
 ## End-to-End Flow
 
@@ -82,7 +83,33 @@ Supported output targets:
 - **Actions Variables**: ``GitHubActionsVariables``
 
 ## BigBang
+
 The entire platform must always remain in a reproducible state, capable of being deployed from scratch in a single flow. Every change to the platform—whether adding, updating, or removing functionality—must support this principle. To validate it, the following GitHub Actions workflows are provided:
 
 - **Destroy The Platform**: Deletes the entire Azure platform setup, useful for resetting test environments or verifying that the platform can be fully re-provisioned without drift. 
 - **Big Bang Deployment**: Deploys the entire platform from scratch using a collection GitHub workflows, ensuring that a clean, fully functional environment can always be recreated.
+
+## Operational Flow
+
+Platform changes—whether access control updates, policy tweaks, or new capabilities—follow a standardized, GitHub-based process. Everything is handled as code. No manual changes.
+
+### Change Flow
+
+- **GitHub Issue**: Open a GitHub Issue describing the intended change.
+- **New Branch**: Create a new branch in GitHub and check it out locally.
+- **Edit Parameters**: Modify the relevant Bicep parameter file.
+- **Push**: Push your branch. This triggers a GitHub Actions workflow that deploys the change to the test environment.
+- **Verify**: Use the Azure Portal to confirm the platform matches updates.
+- **Pull Request**: Open a PR against the main branch. On merge, GitHub Actions will deploy to production automatically.
+
+### What to Expect
+
+- **Auto Triggers**: GitHub Actions deploy changes automatically—once on push (to test), again on merge (to production).
+- **Fast Deployments**: Most changes deploy in just a few minutes.
+- **Delete Resources**: If a resource is removed from the parameter file, it will be deleted from Azure as well. This may take several minutes to complete.
+- **Manual Testing**: All updates go through a test environment that mirrors production. Manual validation is expected before merging.
+
+### Known Issues
+
+- **PowerShell Login Delay**: GitHub Actions may take a few minutes to authenticate with Azure using PowerShell. This is a known, [tracked issue.](https://github.com/Azure/login/issues/456)
+- **Parallel Changes**: Simultaneous updates to the same deployment stack may cause overwrites. Deployment stacks remove anything not defined in the templates. Coordinate changes or merge branches before pushing.

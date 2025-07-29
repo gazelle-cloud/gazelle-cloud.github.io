@@ -67,3 +67,47 @@ Identity is built around Entra ID as the single source of truth. Local authentic
 Azure resources are not allowed to expose public endpoints by default. This policy enforces private connectivity by requiring traffic to PaaS services to flow through service endpoints, blocking unrestricted internet access.
 
 The goal is to protect workloads from unintended exposure, reduce the attack surface, and ensure that all network traffic stays within trusted boundaries.
+
+## How to Whitelist a New Resource
+
+Whitelisting a new Azure resource type means allowing it across all landing zones at the management group level (e.g., `online` or `platform`). To be eligible, the resource must comply with platform security baselines and observability guardrails.
+
+### Evaluate the Resource
+
+Before editing any files, engineers should assess the new resource type against key platform requirements:
+
+- **Does it support local authentication methods?**  
+  Local methods—such as SAS keys, access tokens, or connection strings—must be disabled using Azure Policy if supported.
+
+- **Is it accessible over the public internet?**  
+  Resources should not expose public endpoints. Private access must be enforced via service endpoints or resource local firewall.
+
+- **Does it support diagnostic settings?**  
+  If the resource emits logs, it must send them to Log Analytics for observability.
+
+These answers guide which policies to apply, and whether new custom definitions are required.
+
+### Edit Policy Parameter Files
+
+Once the resource type has been validated, follow the [Operational Flow](../#operational-flow) to begin your change. You'll need to update up to four policy parameter files:
+
+- `policy/parameters/online/denyLocalAuthentication.json`
+- `policy/parameters/online/denyPublicNetworkAccess.json`
+- `policy/parameters/online/allowedResources.json`
+- `policy/parameters/diagnosticSettings.bicepparam`
+
+Each file accepts inputs defined by its parameter schema. In most cases, you'll provide:
+
+- **`policyDefinitionId`**: The ID of the custom or built-in policy definition being referenced.
+- **`policyDefinitionReferenceId`**: A short, human-readable identifier used for troubleshooting and for creating Azure Policy exemptions.
+- **`effect`**: Typically set to `Deny`, `Modify`, or `DeployIfNotExists` depending on the policy's intended behavior.
+
+### Validate and Submit
+
+After editing the parameter files:
+
+- Push your branch to trigger deployment in the test environment via GitHub Actions.
+- Use the Azure Portal to validate the change—e.g., by attempting to deploy the resource and confirming expected policy behavior.
+- Once verified, open a Pull Request to merge into `main`, triggering the production deployment.
+
+
