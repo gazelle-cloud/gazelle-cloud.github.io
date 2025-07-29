@@ -9,16 +9,16 @@ menu:
     - name: Documentation
       weight: 1
       url: "/docs"
-    - name: GitHub
-      weight: 2
-      url: "https://github.com/gazelle-cloud/Azure-landing-zones"
-      params:
-        icon: github
-    - name: Linkedin
-      url: "https://www.linkedin.com/in/mantas-karciauskas/"
-      weight: 3
-      params:
-        icon: linkedin
+    # - name: GitHub
+    #   weight: 2
+    #   url: "https://github.com/gazelle-cloud/Azure-landing-zones"
+    #   params:
+    #     icon: github
+    # - name: Linkedin
+    #   url: "https://www.linkedin.com/in/mantas-karciauskas/"
+    #   weight: 3
+    #   params:
+    #     icon: linkedin
 
 markup:
   highlight:
@@ -34,7 +34,8 @@ markup:
         enable: true
 
 params:
-  description: Dive into fully automated Azure landing zones in a practical, experiment-driven environment for learning, testing, and innovating in the cloud.
+  description: An open source toolkit for deploying Azure landing zones with GitHub Actions and Bicep.
+
   navbar:
     displayTitle: true
     displayLogo: false

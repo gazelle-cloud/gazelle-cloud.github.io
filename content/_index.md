@@ -35,33 +35,32 @@ layout: hextra-home
   {{< hextra/feature-card
     title="Cost Efficiency"
     subtitle="You only pay for what you use. When the platform is running full speed, the cost scales with usage. When it’s idle, it should cost nothing. Services with flat fees—such as Virtual WAN—are intentionally avoided, as they incur cost even when idle. Instead, the platform uses Azure’s consumption-based services, which scale with usage and help maintain predictable, efficient costs."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(142,53,74,0.15),hsla(0,0%,100%,0));"
+    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
     title="Self-Service"
-    subtitle="Teams shouldn’t have to wait on others to get things done. This platform lets app teams spin up and manage their own landing zones through GitHub Issues. They can tweak budgets, exclude certain resources from security baselines, and handle other environment-specific needs—all without relying on a centralized team"
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(194,97,254,0.15),hsla(0,0%,100%,0));"
-
+    subtitle="Teams shouldn’t have to wait on others to get things done. This platform lets app teams spin up and manage their own landing zones through GitHub Issues. They can tweak budgets, exclude certain resources from security baselines, and handle other environment-specific needs—all without relying on a centralized team."
+    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
     title="Decentralized By Design"
     subtitle="This platform keeps shared services to a minimum to avoid overhead and unnecessary friction. Instead of using centrally managed components, each landing zone includes the core services it needs—so teams can configure things based on what works best for them. This design trades cost for speed and autonomy."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla(0,0%,100%,0));"
+    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
     title="Speed"
-    subtitle="fast deployment deployments."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla(0,0%,100%,0));"
+    subtitle="Speed isn't just about how fast things are delivered—it's also about how quickly you can try out new ideas. This platform lets you deploy to the cloud in minutes, so whether you're building on something existing or testing a new concept, GitHub Actions takes care of everything from setup to updates and cleanup. This quick process means you get feedback faster and can learn and improve without delays."
+    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
-    title="Build With Purpose"
-    subtitle="Designed for a single tenant—not for everyone. This focus lets you shape the platform around what truly matters. Templates scale wide—like adding new policies—and deep, enabling you to extend landing zones with precision."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla(0,0%,100%,0));"
+    title="Purpose-Built Modules"
+    subtitle="Infrastructure-as-Code modules are designed to solve specific challenges, hardcode management logic, and enable parameter-driven workflows. Rather than aiming for one-size-fits-all solutions, each module is purpose-built to perform a clear task—such as assigning access control, adding an Azure policy, or provisioning a landing zone. Configuration is minimal, keeping the focus on the flow."
+    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
     title="Everything-as-Code"
-    subtitle="I need one more principal for lightweight, what it could be?."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla(0,0%,100%,0));"
+    subtitle="Every platform capability—identity, policy, monitoring, automation—is defined, deployed, and managed as code. There are no manual steps, no hidden state. GitHub is the single source of truth, and all changes flow through Issues and Pull Requests—just like any other codebase. If something can't be expressed as code, it doesn't belong in the platform."
+    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   
 {{< /hextra/feature-grid >}}

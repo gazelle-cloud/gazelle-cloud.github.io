@@ -9,7 +9,7 @@ sidebar:
 
 The Policy functional unit defines and enforces platform-wide security and operational standards using Azure Policy. Policies are deployed and configured in a modular way, with each policy designed to address a single compliance requirement—such as denying public network access or configuring diagnostic settings. This approach allows for precise control and keeps the codebase easy to read. 
 
-![Policy deployment overview](/policy.png)
+![Policy deployment overview](/platform-policy-deployment-flow.png)
 
 ## Design Overview
 - **Policy Driven**: Landing zone management follows a policy driven approach, ensuring that security and operational standards are met out of the box. No manual work required from the platform team.
@@ -34,11 +34,36 @@ The Policy functional unit defines and enforces platform-wide security and opera
 
 ## Applied Policies
 
+The following policies are applied to `online` landing zones to enforce platform standards across all applications. Each policy targets a specific risk area or configuration requirement—ensuring consistency, security, and operational readiness by default.
+
+### Allowed Locations
+
+- **Single Region Deployments**: The platform is intentionally limited to single-region deployments to reduce the complexity and cost associated with cross-region communication. This constraint simplifies architecture and keeps operational overhead low.
+
+- **Centrally managed**: The target region is centrally managed as an environment variable in GitHub. All deployment pipelines automatically pull this value—so application teams don’t need to configure or manage regional settings themselves. This ensures consistency across environments.
+
+### Allowed Resources
+
+Only approved Azure services are allowed. This whitelisting model aligns with both security and operational goals.
+
+By limiting which Azure resources can be deployed, the platform avoids unexpected configurations that could compromise security or disrupt operational tasks. It ensures that every service used in the platform has been reviewed and is fully compatible with platform standards—including identity integration, network configuration, diagnostic coverage, and support for the platform’s “getting started” deployment module.
+
+### Config Diagnostic Settings
+
+![Diagnostic Settings](/platform-policy-Diagnostic-settings-flow.png)
+
+Every landing zone includes its own Log Analytics workspace, used to collect diagnostic data from Azure PaaS services. Diagnostic settings send data to this workspace by default—ensuring full visibility from day one.  
+
+The Policy Definition is created at the management group level and defines what diagnostics should be collected. However, the Policy Assignment is scoped to the individual landing zone subscription. This pattern enables the enforcement of diagnostic standards at scale, while associating monitoring data—and its cost—directly with each landing zone.
+
+It keeps configuration centralized but impact localized—supporting clear accountability, cost tracking, and full observability.
+
 ### Deny Local Authentication Methods
 
-Identity is built around Entra ID as the single source of truth. Local authentication methods like connection strings and access keys are disabled by Azure Policy. All authentication is handled through Entra ID and authorized via Role-Based Access Control, following modern identity and access management patterns.
+Identity is built around Entra ID as the single source of truth. Local authentication methods—such as connection strings and access keys—are explicitly denied through Azure Policy. All authentication is handled using Entra ID and enforced via Role-Based Access Control (RBAC). This ensures that access is centrally managed, auditable, and eliminates the risks associated with hardcoded, static credentials.
 
-### Diagnostic Settings
-![Diagnostic Settings](/diagnostic-settings.png)
+### Deny Public Network Access
 
-A centrally managed policy Set Definition governs the collection of diagnostic settings from Azure resources. While the definition is shared, the assignment is applied at the landing zone level — ensuring that logs flow into each zone’s local Log Analytics workspace. This enables centralized consistency while giving app teams control over log data and associated costs.
+Azure resources are not allowed to expose public endpoints by default. This policy enforces private connectivity by requiring traffic to PaaS services to flow through service endpoints, blocking unrestricted internet access.
+
+The goal is to protect workloads from unintended exposure, reduce the attack surface, and ensure that all network traffic stays within trusted boundaries.

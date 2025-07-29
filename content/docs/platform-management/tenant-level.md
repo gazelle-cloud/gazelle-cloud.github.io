@@ -7,7 +7,7 @@ sidebar:
   open: true
 ---
 
-The Tenant Level deployment establishes foundational configurations across the Azure tenant, ensuring consistent governance from day one.
+The Tenant Level deployment sets up the management group hierarchy and billing configuration across the Azure tenant—ensuring consistent governance from day one.
 
 ## Management Groups Hierarchy
 
@@ -16,13 +16,13 @@ Gazelle adopts a flat, one-level-deep management group hierarchy: a single top-l
 ### Top-Level Management Group
 
 - **Custom Policy Definitions**: Locally developed Azure Policies are deployed at this level, making them reusable in the same way as built-in Azure Policy definitions.
-- **Core Platform Services**: Azure Deployment Stacks for Gazelle’s foundational capabilities are deployed here, keeping core functionality separate from functional-specific deployments.
+- **Essential Platform Services**: Azure Deployment Stacks for core platform capabilities are deployed at this level, keeping foundational functionality separate from feature-specific deployments.
 - **Access Control**: Role assignments applied at this level grant permissions across all subscriptions—ideal for platform-wide operations.
 
 ### Child Management Groups
 
 - **Policy Assignments**: Policies are assigned at the child management group level to enable compliance requirements specific to each group of landing zones.
-- **Landing Zone Setup**: New landing zones are provisioned under child management groups. This structure enables central protection of shared resources, even if app teams have `Owner` permissions at the subscription level. Resource protection is enforced using [Deployment Stacks](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-stacks?tabs=azure-powershell#protect-managed-resources).
+- **Landing Zone Setup**: New landing zones are provisioned under child management groups. This structure allows centrally managed landing zone services to be protected from unintended changes—even when users have `Owner` access at the subscription level. Resource protection is enforced using [Deployment Stacks](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-stacks?tabs=azure-powershell#protect-managed-resources).
 - **Scoped RBAC**: Access control can be assigned at the child management group level, allowing teams to perform operational tasks scoped to specific landing zones.
 
 
