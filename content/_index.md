@@ -74,9 +74,9 @@ layout: hextra-home
 </div>
 
 {{< cards >}}
-  {{< card link="/docs" title="Gazelle overview" image="/platform-overview.png" subtitle="Unsplash Landscape" >}}
-  {{< card link="/docs/platform-management" title="Azure platform" image="/platform-mgmt-standardized-deployments.png" subtitle="Raw image under static directory." >}}
-  {{< card link="/" title="Landing zone" image="/platform-policy-deployment-flow.png" subtitle="Image under assets directory, processed by Hugo." >}}
+  {{< card link="/docs/platform-design" title="High level overview" image="/platform-overview.png" subtitle="work in progress" >}}
+  {{< card link="/docs/platform-management" title="Platform management" image="/platform-mgmt-standardized-deployments.png" subtitle="Work in progress" >}}
+  {{< card link="/" title="Landing zone" image="/platform-policy-deployment-flow.png" subtitle="work in progress..." >}}
 {{< /cards >}}
 
 
