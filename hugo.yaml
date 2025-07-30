@@ -1,4 +1,4 @@
-title: Azure Landing Zones
+title: Lightweight Landing Zones
 
 module:
   imports:
@@ -8,7 +8,7 @@ menu:
   main:
     - name: Documentation
       weight: 1
-      url: "/docs/platform-management/"
+      url: "/docs"
     # - name: GitHub
     #   weight: 2
     #   url: "https://github.com/gazelle-cloud/Azure-landing-zones"

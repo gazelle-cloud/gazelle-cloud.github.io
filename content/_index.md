@@ -19,7 +19,6 @@ layout: hextra-home
 
   <div style="height: 3rem;"></div>
 
-
 <div class="hx:mb-12">
 {{< hextra/hero-subtitle >}}
   Lean, Clean and build for Autonomy&nbsp;<br class="hx:sm:block hx:hidden" />Let’s break down what  <strong>lightweight</strong> means in practice:
@@ -62,5 +61,22 @@ layout: hextra-home
     subtitle="Every platform capability—identity, policy, monitoring, automation—is defined, deployed, and managed as code. There are no manual steps, no hidden state. GitHub is the single source of truth, and all changes flow through Issues and Pull Requests—just like any other codebase. If something can't be expressed as code, it doesn't belong in the platform."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
-  
 {{< /hextra/feature-grid >}}
+
+<div style="margin: auto; text-align: center;">
+<div class="hx:mb-12">
+  <div style="height: 5rem;"></div>
+
+{{< hextra/hero-subtitle >}}
+  Getting technical
+{{< /hextra/hero-subtitle >}}
+</div>
+</div>
+
+{{< cards >}}
+  {{< card link="/docs" title="Gazelle overview" image="/platform-overview.png" subtitle="Unsplash Landscape" >}}
+  {{< card link="/docs/platform-management" title="Azure platform" image="/platform-mgmt-standardized-deployments.png" subtitle="Raw image under static directory." >}}
+  {{< card link="/" title="Landing zone" image="/platform-policy-deployment-flow.png" subtitle="Image under assets directory, processed by Hugo." >}}
+{{< /cards >}}
+
+

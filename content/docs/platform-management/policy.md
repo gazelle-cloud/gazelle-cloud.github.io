@@ -7,8 +7,7 @@ sidebar:
   open: true
 ---
 
-The Policy functional unit defines and enforces platform-wide security and operational standards using Azure Policy. Policies are deployed and configured in a modular way, with each policy designed to address a single compliance requirement—such as denying public network access or configuring diagnostic settings. This approach allows for precise control and keeps the codebase easy to read. 
-
+The Policy functional unit defines and enforces platform-wide security and operational standards using Azure Policy. Policies are deployed and configured in a modular way, with each policy designed to address a single compliance requirement—such as denying public network access or configuring diagnostic settings. This makes it easier to apply policies correctly and consistently across environments.
 ![Policy deployment overview](/platform-policy-deployment-flow.png)
 
 ## Design Overview
