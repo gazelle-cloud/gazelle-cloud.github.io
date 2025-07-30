@@ -34,7 +34,7 @@ Gazelle adopts a flat, one-level-deep management group hierarchy: a single top-l
 
 ## Invoice Sections
 
-Billing is configured under a single Microsoft Customer Agreement, with all landing zones created under the same billing account and billing profile. To enable cost visibility and accountability at the application level, each application is assigned its own dedicated invoice section.
+Billing is configured under a single [Microsoft Customer Agreement](https://learn.microsoft.com/en-us/azure/cost-management-billing/understand/mca-overview), with all landing zones created under the same billing account and billing profile. To enable cost visibility and accountability at the application level, each application is assigned its own dedicated [invoice section](https://learn.microsoft.com/en-us/azure/cost-management-billing/understand/mca-overview#invoice-sections).
 
 - **Application-Level Cost Tracking**: Each invoice section corresponds to a single application, allowing teams to consolidate billing across all environments (e.g., dev, test, prod).
 - **Full Ownership**: Application owners are responsible for monitoring costs within their invoice section. This encourages financial accountability and enables proactive budget management.
