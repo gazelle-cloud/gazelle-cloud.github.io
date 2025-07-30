@@ -5,17 +5,10 @@ toc: true
 
 # Welcome to Gazelle
 
-Gazelle is a lightweight platform for managing Azure landing zones as code, built on GitHub and aligned with the Cloud Adoption Framework and Platform Engineering principles. It empowers application teams with a fast, secure, and autonomous path to the cloud.
+Gazelle is a lightweight platform for managing Azure landing zones as code—built on GitHub and Azure, and grounded in Cloud Adoption Framework and Platform Engineering principles. It gives application teams a fast, secure, and autonomous path to the cloud.
 
-Gazelle is ideal for teams deploying cloud-native workloads to Azure who want a lean, self-service platform with built-in security, and cost tracking—without the overhead of centralized gate keeping.
+Designed for cloud-native workloads on Azure, Gazelle offers a lean, self-service experience with built-in security, cost tracking, and minimized reliance on centralized gate keeping.
 
-## Why Gazelle?
-
-Managing Azure at scale often means juggling inconsistent environments, manual changes, and fragmented access controls. Gazelle replaces that chaos with structure:
-
-- **Everything-as-code**: Identity, policy, budget, and infra are all GitHub-managed.
-- **Self-service by design**: Teams deploy and manage their own landing zones through GitHub Issues.
-- **Safe-by-default**: Azure Policies prevent prevent security misconfigurations by default.
 
 ## Platform Design
 
@@ -25,32 +18,32 @@ Managing Azure at scale often means juggling inconsistent environments, manual c
 ### GitHub – The Operational Backbone
 
 - Platform logic and templates live in GitHub repositories.
-- Teams interact via **Issues** and **Pull Requests**—no Azure Portal access required.
-- All deployments handled through **GitHub Actions**, using standardized workflows.
+- Teams interact via Issues and Pull Requests—no Azure Portal access required.
+- All deployments handled through GitHub Actions, using standardized workflows.
 - Teams manage their own landing zones—budgets, policy exemptions, and more—directly from GitHub.
 
 ### Azure – Where Cloud Resources Live
 
 - Hosts core services like Azure Policy, Management Groups, Deployment Stacks, and Container Apps.
 - Each landing zone contains resources like Log Analytics, Managed Identities, Alerts, and Networks.
-- Application workloads run in isolated environments.
+- Application teams deploy and run workloads in Azure using their landing zones.
+
 
 ### Platform Layer – The Glue
 
 - Offers GitHub-based self-service: teams request and manage environments via Issues.
-- Enforces **policy-driven guardrails** for network, identity, monitoring, and diagnostics.
-- Structures all logic into modular, independently managed units.
-- Manages cost ownership using budget alerts and invoice sections.
-
+- Enforces policy-driven guardrails for security and operational baseline.
+- Structures management logic into modular, independently managed units.
+- Manages cost ownership per application level.
 
 ### Landing Zones – Application Environments
 
 - Each landing zone is isolated and self-contained.
-- Includes default guardrails for security and observability.
-- Teams can **relax guardrails** where needed using Azure policy exemptions.
+- Includes default guardrails for security and operations.
+- Where flexibility is needed, teams can exclude specific requirements using Azure Policy exemptions.
 - Comes with a prebuilt “Getting Started” pipeline aligned with Gazelle standards.
 
-## Key Benefits at a Glance
+## Key Benefits
 
 | Feature             | What It Means                                                                 |
 |---------------------|-------------------------------------------------------------------------------|
