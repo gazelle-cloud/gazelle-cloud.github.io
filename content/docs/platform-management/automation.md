@@ -8,6 +8,8 @@ sidebar:
 ---
 Platform automation is powered by Azure Container App Jobs. The service is optimized for running scheduled automation flows with minimal infrastructure overhead and offers free 180,000 vCPU-seconds. 
 
+![automation](/automation.png)
+
 ## Automation identity
 
 All automation jobs use the same user-assigned managed identity. To follow the principle of least privilege, a custom Azure role named `platform-automation` is created. This role includes only the permissions needed for the jobs to run and is assigned at the top-level management group. The identity also has Microsoft Graph API `Directory.Read.All` permissions in Entra ID. Every job uses this identity to authenticate.
