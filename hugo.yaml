@@ -50,7 +50,9 @@ params:
     displayToggle: false
 
   footer:
-    enable: false
+    enable: true
+    displayCopyright: true
+    displayPoweredBy: false
 
   page:
   # full (100%), wide (90rem), normal (80rem)
