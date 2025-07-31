@@ -50,7 +50,7 @@ params:
     displayToggle: false
 
   footer:
-    enable: true
+    enable: false
     displayCopyright: true
     displayPoweredBy: false
 
