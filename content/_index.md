@@ -74,9 +74,9 @@ layout: hextra-home
 </div>
 
 {{< cards >}}
-  {{< card link="/docs/platform-design" title="High level overview" image="/platform-overview.png" subtitle="work in progress" >}}
-  {{< card link="/docs/platform-management" title="Platform management" image="/platform-mgmt-standardized-deployments.png" subtitle="Work in progress" >}}
-  {{< card link="/" title="Landing zone" image="/platform-policy-deployment-flow.png" subtitle="work in progress..." >}}
+  {{< card link="/docs/platform-design" title="High level overview" image="/platform-overview.png" subtitle="A lightweight, modular Azure platform built for autonomy, speed, and cost friendly." >}}
+  {{< card link="/docs/platform-management" title="Platform management" image="/platform-policy-deployment-flow.png" subtitle="Standardized, automated deployments—every platform change flows through GitHub and lands in Azure as code." >}}
+  {{< card link="/docs/landing-zone" title="Landing zone" image="/platform-policy-deployment-flow.png" subtitle="Self-contained application environments with baked-in guardrails and self-service onboarding from GitHub." >}}
 {{< /cards >}}
 
 

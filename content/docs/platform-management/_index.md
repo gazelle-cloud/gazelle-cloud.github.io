@@ -2,11 +2,12 @@
 title: Platform Management
 breadcrumbs: true
 toc: true
+weight: 30
 sidebar:
   open: true
 ---
 
-Platform management is fully automated. Every update—whether a new capability, policy tweak, or fix—flows through GitHub. No manual changes. No direct access to Azure. Code is the source of truth.
+Platform management is 100% automated. No manual changes. No Azure access. Everything flows through GitHub—code is the source of truth.
 
 ![platform management as code](/platform-mgmt-as-code.png)
 
@@ -38,7 +39,7 @@ Dependencies between functional units are handled using GitHub Variables. Values
 
 ## Small, Task-Oriented Modules  
 
-Each functional unit is composed of task-oriented Bicep modules, each designed with a clear and specific purpose. The focus is on solving a single problem within the functional unit, rather than on broad reusability across different contexts. This means that a module is tailored to perform one task effectively—for example, deploying monitoring configurations or setting access control permissions—without attempting to generalize beyond that scope.
+Each functional unit consists of focused Bicep modules, each built for a single task. The focus is on solving a single problem within the functional unit, rather than on broad reusability across different contexts. This means that a module is tailored to perform one task effectively—for example, deploying monitoring configurations or setting access control permissions—without attempting to generalize beyond that scope.
 
 This approach follows the single-responsibility principle within the boundaries of each functional unit. As a result, the modules remain easier to understand, maintain, and evolve. When changes are required—such as modifying a policy assignment or updating monitoring settings—engineers can work directly with the relevant module, confident that updates will not affect unrelated parts of the platform.
 
@@ -58,7 +59,7 @@ All platform deployments follow a standardized deployment pattern. Once you’ve
 - **Streamlined Workflows**: Standardized GitHub Actions workflows manage deployment triggers and environment setup, ensuring each deployment starts with the correct context and configuration.  
 - **Authentication and Access**: GitHub Actions authenticate to Azure and Entra ID using federated credentials. The workflow identity is granted the necessary Azure RBAC permissions, access to Entra ID Graph API, and permission to read and update GitHub repository variables.  
 - **Input Handling**: Deployment inputs are provided through Bicep parameter files. Platform-wide parameters—such as region or environment settings—can be fetched dynamically from GitHub variables.
-- **Output Management**: Outputs from the main deployable Bicep file can be passed to GitHub Variables, allowing other pipelines to read data between deployments. This enables functional units to stay decoupled while still sharing resource IDs or configuration value.
+- **Output Management**: Bicep outputs are passed to GitHub Variables to share data across pipelines. This enables functional units to stay decoupled while still sharing resource IDs or configuration value.
 
 ### Deployment Stacks
 - **Stacks Over Classic Deployments**: Deployment stacks are the preferred deployment option because they provide built-in lifecycle management capabilities. However, classic deployments are also supported for scenarios where different lifecycle management is required.
