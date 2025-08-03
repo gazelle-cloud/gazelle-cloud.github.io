@@ -5,45 +5,33 @@ cascade:
 toc: false
 ---
 
+
 # Gazelle  
-**Self-service Azure landing zones as code — fully automated via GitHub.**  
+**Azure landing zones as code — self-service, policy-driven, and fully automated via GitHub**
 
-Gazelle is a set of tools and services for managing Azure landing zones entirely as code, using GitHub Issues and Actions.  
-It’s a self-service capability where application teams can create, update, and tear down landing zones without bottlenecks — all while staying compliant with platform policies.
+Gazelle lets teams provision Azure environments in minutes—without requiring Azure access or manual approvals. Everything runs through GitHub. Every environment is isolated. Every operation is code-driven.
 
-## How It Works
+Built for autonomy with guardrails, Gazelle eliminates the traditional bottlenecks of cloud provisioning while maintaining control over cost, and safe configuration.
 
-1. **Request a Landing Zone**  
-   Open a GitHub Issue template with the required details.  
-   Within **5 minutes**, GitHub Actions provision a ready-to-use Azure landing zone.
+---
 
-2. **Update via Pull Request**  
-   Need to adjust budgets or create a policy exemption?  
-   Edit the landing zone’s parameter file and submit a PR. Automation handles the rest.
+## What Gazelle Does
 
-3. **Burn Down When Done**  
-   When an environment is no longer needed, trigger another GitHub Action to tear it down — clean, fast, and automated.
+- **Self Service**: Provision, update, and tear down landing zones using GitHub Issues and Actions. No portals.
+- **Provides Autonomy**: Application teams build and operate independently, within platform guardrails. You build it-you run it.
+- **Safe Configuration by Default**: Every environment inherits a secure baseline—via Azure Policy, access controls, network isolation, and logging. This helps teams meet organizational requirements without needing deep cloud expertise.
+- **Per-App Cost Visibility**: Each application gets its own invoice section, with budgets and alerts configured.
 
-All operations — from setup to teardown — are managed **as code** in GitHub.
+## Built-In Constraints
 
-## Platform Capabilities
+- **Single Region**: All resources deploy to a single region. The region is centrally defined in GitHub variables to standardize deployment.
+- **Whitelisted Azure Resources**: Only approved services are deployable. Others are blocked by policy.
+- **Network Isolation**: By default, landing zones have no network connectivity to each other or to on-premises systems.
+- **No Shared Services**: Each landing zone is fully independent. There are no shared components across teams or environments.
 
-- **Cost per Application**: Each app gets its own invoice section for complete visibility.  
-- **Policy-Driven Compliance** – Security & operational standards enforced automatically via Azure Policy.  
-- **Fully Automated** – Zero manual Azure access; everything runs through GitHub pipelines.  
-- **Test Environment** – Mirror test environment for validating changes before production.  
-- **Cost-Friendly** – Pay only for what you use; no flat fees.
+## How Gazelle Is Built	
 
-
-## Limitations
-
-- **Single Region** – All resources deploy in one Azure region, defined in GitHub variables.  
-- **Whitelisted Resources** – Only approved Azure services can be deployed.  
-- **Subscription Isolation** – Each landing zone runs in its own Azure subscription.
-
-
-## Design Principles
-
-- **Everything-as-Code** – No manual changes; GitHub is the single source of truth.  
-- **Decentralized by Design** – No shared components; each environment is fully independent.  
-- **Autonomy with Guardrails** – Teams operate independently within enforced platform rules.
+- **Everything-as-Code**: Infrastructure, policy, access, and budgets are managed as code in GitHub. Nothing is configured by hand.
+- **Composable Architecture**: The platform is built from modular building blocks—each independently defined and deployed through its own pipeline.
+- **Reproducible by Design**: A full `Big Bang` workflow can destroy and rebuild the entire platform from scratch at any time.
+- **Test Environment**: Platform changes deploy first to a mirrored test environment. All updates are validated before reaching production.
