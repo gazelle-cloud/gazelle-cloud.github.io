@@ -5,10 +5,10 @@ module:
     - path: github.com/imfing/hextra
 
 menu:
-  # main:
-  #   - name: Documentation
-  #     weight: 1
-  #     url: "/docs/platform-design/"
+  main:
+    - name: Documentation
+      weight: 1
+      url: "/docs/platform-design/"
     # - name: GitHub
     #   weight: 2
     #   url: "https://github.com/gazelle-cloud/Azure-landing-zones"
