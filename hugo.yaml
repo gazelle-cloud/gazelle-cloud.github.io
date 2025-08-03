@@ -6,9 +6,9 @@ module:
 
 menu:
   main:
-    # - name: Documentation
-    #   weight: 1
-    #   url: "/docs/platform-design/"
+    - name: 
+      weight: 1
+      url: "/"
     # - name: GitHub
     #   weight: 2
     #   url: "https://github.com/gazelle-cloud/Azure-landing-zones"
