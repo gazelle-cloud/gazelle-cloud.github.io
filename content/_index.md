@@ -2,26 +2,39 @@
 breadcrumbs: false
 cascade:
   type: docs  
-toc: false
+toc: true
 ---
 <div style="margin: auto; text-align: center;">
 <div class="hx:mt-6 hx:mb-6">
 {{< hextra/hero-headline >}}
-  Run Azure landing zones&nbsp;<br class="hx:sm:block hx:hidden" />with GitHub Actions
+ Run Azure Landing Zones&nbsp;<br class="hx:sm:block hx:hidden" />on GitHub Actions 
 {{< /hextra/hero-headline >}}
 </div>
 
-  <div style="height: 3rem;"></div>
+  <div style="height: 2rem;"></div>
+<div class="hx:mb-12">
+{{< hextra/hero-subtitle >}}
+  Lean, Clean and build for Autonomy&nbsp;<br class="hx:sm:block hx:hidden" />With GitHub as management portal
+{{< /hextra/hero-subtitle >}}
+</div>
+  <div style="height: 2 rem;"></div>
 
 </div>
 
-## Meet Gazelle
 
-Gazelle is a collection of tools and services for managing Azure landing zones entirely as code—no manual steps, no portal clicks. Every environment is provisioned, updated, and destroyed through GitHub Issues and Actions.
+## Zero Cost
+The platform bill is zero. Gazelle uses only free Azure management services and provisions essentials directly into each landing zone, shifting all runtime costs to the application’s own environment.
 
-There’s no central ops team pushing buttons. Just application teams managing their own environments, safely and independently, within clearly defined platform guardrails.
+## Everything-as-Code
+From landing zones to management groups, every part of the platform lives in GitHub as code. Teams request, update, and remove environments through Issues and Actions doing the rest.
+ 
+## Isolation-By-Default
+Every landing zone is a self-contained environment — nothing shared. Full runtime isolation lets application teams move autonomously in a true `you build it, you run it` model.
 
-Everything runs through automation. Everything is visible in GitHub.
+
+
+
+<!-- 
 
 ## What Gazelle Does
 
@@ -42,4 +55,4 @@ Everything runs through automation. Everything is visible in GitHub.
 - **Single Region**: All resources deploy to a single region. The region is centrally defined in GitHub variables to standardize deployment.
 - **Whitelisted Azure Resources**: Only approved services are deployable. Others are blocked by policy.
 - **Network Isolation**: By default, landing zones have no network connectivity to each other or to on-premises systems.
-- **No Shared Services**: Each landing zone is fully independent. There are no shared components across teams or environments.
+- **No Shared Services**: Each landing zone is fully independent. There are no shared components across teams or environments. -->
