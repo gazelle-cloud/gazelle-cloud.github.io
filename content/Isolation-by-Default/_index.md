@@ -6,7 +6,7 @@ cascade:
   type: docs  
 toc: true
 sidebar:
-  open: false
+  open: true
 ---
 
 From day one, my goal was simple: enable application teams to move fast, without any bottlenecks. That meant designing for isolation at every layer — network, identity, cost, operations, development, shared services, and even Azure region.  
@@ -63,6 +63,10 @@ To keep things simple and predictable, all deployments happen in a single Azure 
 
 That region is centrally defined — set once at the GitHub org level and pulled into every deployment pipeline. This avoids the complexity (and cost) of cross-region deployments — unless a different setup actually makes sense.
 
+## Whitelisting Approach
+
+In Gazelle, nothing runs unless it’s explicitly approved. Every landing zone starts with a tight allow-list of Azure resource types — think storage accounts, virtual networks — and anything outside that list is denied by policy. This keeps the platform intentional: no surprise services, no chasing misconfigurations after the fact. When a new Azure service is needed, it can be whitelisted once — and instantly available to everyone in the tenant.
+
 ## TL;DR
 
 - Every workload runs in its own isolated, pre-built landing zone — no shared infra, no accidental dependencies
@@ -72,3 +76,4 @@ That region is centrally defined — set once at the GitHub org level and pulled
 - App teams fully own their costs and budgets per application
 - No shared services — if a team needs it, they build it
 - Everything deploys in a single Azure region for simplicity and predictability
+- Only approved resource types are allowed

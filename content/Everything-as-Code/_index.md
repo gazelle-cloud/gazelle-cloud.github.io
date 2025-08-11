@@ -6,7 +6,7 @@ cascade:
   type: docs  
 toc: true
 sidebar:
-  open: false
+  open: true
 ---
 
 I wanted every piece to be self-contained, and easier to evolve. Just clear, independent blocks you can assemble, update, or remove without breaking a sweat. The goal: deliver every capability as a standalone building block, managed entirely in code. 

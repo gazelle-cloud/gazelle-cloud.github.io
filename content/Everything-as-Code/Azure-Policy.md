@@ -1,7 +1,7 @@
 ---
 linkTitle: Azure Policy
 breadcrumbs: true
-weight: 2
+weight: 10
 cascade:
   type: docs
 toc: true
