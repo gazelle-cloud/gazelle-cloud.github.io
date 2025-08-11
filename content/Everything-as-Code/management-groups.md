@@ -1,8 +1,8 @@
 ---
 linkTitle: Management Groups
-description: ""
+description: "Flat hierarchy management groups — how top and child scopes work together"
 breadcrumbs: true
-weight: 99
+weight: 20
 cascade:
   type: docs
 toc: true
