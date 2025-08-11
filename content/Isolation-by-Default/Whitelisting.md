@@ -1,6 +1,6 @@
 ---
 linkTitle: Whitelisting
-description: "Azure Policy ensures resources meet configuration requirements before they ever reach the cloud"
+description: "Azure Policy as the Whitelist Engine — the single way to ensure resources meet configuration requirements before they reach the cloud."
 breadcrumbs: true
 weight: 10
 cascade:
