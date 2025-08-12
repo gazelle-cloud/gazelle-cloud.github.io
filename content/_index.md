@@ -1,4 +1,5 @@
 ---
+description: "Run Azure landing zones with isolation by default, everything as code, and zero platform cost. Free, open source, and built for real team autonomy."
 breadcrumbs: false
 cascade:
   type: docs  
