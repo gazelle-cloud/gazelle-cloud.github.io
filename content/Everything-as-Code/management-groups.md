@@ -18,7 +18,7 @@ Why? Because every extra layer you nest is another place for a misconfiguration 
 //management-groups/parameters/managementGroups.bicepparam  
 param childManagementGroupNames = [
   'platform'
-  'online'
+  'isolation'
 ]
 ```
 That’s it. The new management group appears, ready for its own policies, access control, and landing zones.
