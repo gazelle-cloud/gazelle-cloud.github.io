@@ -1,5 +1,6 @@
 ---
 linkTitle: Everything-as-Code
+description: "How I apply infrastructure-as-code principles to build Azure landing zones with Bicep and GitHub"
 breadcrumbs: false
 weight: 20
 cascade:
@@ -73,6 +74,18 @@ Azure Deployment Stacks handle both create and destroy, with DeleteAll set by de
 
 All core capabilities—identity, policy, RBAC—deploy via Deployment Stacks at the top-level management group. Stacks are named after the capability they deliver, so it’s always clear what’s running.  
 Resources land in a dedicated management subscription, grouped by function for clarity and governance.
+
+## Big Bang
+
+The platform must always remain in a reproducible state — capable of being deployed and configured from scratch, end-to-end, using a single GitHub workflow. Every change to the platform, whether introducing a new capability or updating an existing one, is held to that principle. If you can’t destroy and rebuild cleanly, the change isn’t ready.
+
+To validate this, two workflows are provided:
+
+- **Destroy** — wipes the entire Azure platform setup. The workflow deletes all deployment stacks with `deleteAll` set by default, clearing the platform management subscription, management group configuration, deployment history, and child management groups. What remains is only the initial tenant configuration described in the *Getting Started* page.
+
+- **Big Bang** — a GitHub workflow that chains together every platform building block. It deploys the entire platform from scratch — management groups, policies, automation, monitoring, access control, everything. The result is a clean, fully functioning environment that can be recreated at any time, predictable and identical to the baseline defined in code.
+
+Together, `Destroy` and `Big Bang` guarantee that the platform can always be reset, rebuilt, and trusted. The ability to redeploy from nothing is the final check of truth.
 
 ## TL;DR
 

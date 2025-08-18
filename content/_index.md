@@ -1,5 +1,5 @@
 ---
-description: "Run Azure landing zones with isolation by default, everything as code, and zero platform cost. Free, open source, and built for real team autonomy."
+description: "Run Azure landing zones with Bicep and GitHub. Free, open source and designed for team autonomy"
 breadcrumbs: false
 cascade:
   type: docs  

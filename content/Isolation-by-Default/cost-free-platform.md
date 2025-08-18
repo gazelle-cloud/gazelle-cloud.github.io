@@ -1,5 +1,5 @@
 ---
-linkTitle: Bill Isolation
+linkTitle: Cost Free Platform
 description: "How the platform eliminates its own cloud costs by design, using Azure’s free governance services, and shifting all usage costs directly to application teams from day one"
 breadcrumbs: true
 weight: 20
@@ -57,6 +57,9 @@ Network isolation is the default — nothing talks unless you say so. When two l
 
 ### Defender for Cloud
 Platform’s secure configuration baseline is enforced via Azure Policy, so most known misconfigurations never make it through the door. Paid Defender for Cloud tiers are excluded of recommendations on purpose — the security baseline decision is already implemented. If you want the advanced capabilities, they’re right there for you to turn on — and to own the cost.
+
+### Advisory Alerts
+Activity log alerts and log search alerts aren’t free — they bill per action and add up fast. To keep the platform cost-free, I rely on Advisory alerts, which come at no charge. They don’t offer the same depth or granularity as paid alerts, but they’re still useful for surfacing signals about platform health and catching issues early. For anything beyond that, application teams use their own monitoring in landing zones — and they own both the data and the bill.
 
 ## Scope and Cost Boundaries
 

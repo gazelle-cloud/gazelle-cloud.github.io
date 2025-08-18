@@ -1,5 +1,6 @@
 ---
 linkTitle: Isolation by Default
+description: "How I design Azure landing zones — covering cost, network, identity, and monitoring for autonomous teams at zero platform cost"
 breadcrumbs: false
 weight: 10
 cascade:
