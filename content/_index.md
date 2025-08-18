@@ -25,5 +25,5 @@ toc: true
 ## Isolation by Default → Landing Zone Autonomy
 Each workload starts in its own secure space (landing zone) — no shared networks, no public endpoints, no accidental dependencies. That isolation is what makes real autonomy possible: teams own their environments, move at their own pace, and live the you build it, you run it model without central bottlenecks.
 
-## Everything as Code → Platform Consistency
-The platform itself — guardrails, access control, landing zone management — is entirely defined in code. Code shines when the rules are clear, so I hardcoded the platform’s opinions into it. That keeps the baseline the same everywhere, and gives teams the space to work their own way — real autonomy.
+## Platform as Code → Platform Consistency
+The platform itself — guardrails, access control, landing zone management — is entirely defined in code. Code shines when the rules are clear, so I hardcoded the platform’s opinions into it. That keeps the baseline the same everywhere, and gives teams the space to work their own way.

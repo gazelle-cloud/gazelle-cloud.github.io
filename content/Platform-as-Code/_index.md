@@ -1,5 +1,5 @@
 ---
-linkTitle: Everything-as-Code
+linkTitle: Platform-as-Code
 description: "How I apply infrastructure-as-code principles to build Azure landing zones with Bicep and GitHub"
 breadcrumbs: false
 weight: 20
