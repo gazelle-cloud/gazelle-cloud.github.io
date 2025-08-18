@@ -81,11 +81,11 @@ The platform must always remain in a reproducible state — capable of being dep
 
 To validate this, two workflows are provided:
 
-- **Destroy** — wipes the entire Azure platform setup. The workflow deletes all deployment stacks with `deleteAll` set by default, clearing the platform management subscription, management group configuration, deployment history, and child management groups. What remains is only the initial tenant configuration described in the *Getting Started* page.
+- **Destroy** — wipes the entire Azure platform setup. The workflow deletes all deployment stacks with `deleteAll` set by default, clearing the platform management subscription, management group configuration, deployment history, and child management groups. What remains is only the initial tenant configuration described in the *Getting Started* page. It also purges GitHub environment variables tied to the test/prod mirrors so the next run starts with a clean slate end‑to‑end. Repository‑level variables remain untouched — they hold global, tenant‑wide values that production relies on (for example, region). What remains is only the initial tenant configuration described in the Getting Started page.
 
 - **Big Bang** — a GitHub workflow that chains together every platform building block. It deploys the entire platform from scratch — management groups, policies, automation, monitoring, access control, everything. The result is a clean, fully functioning environment that can be recreated at any time, predictable and identical to the baseline defined in code.
 
-Together, `Destroy` and `Big Bang` guarantee that the platform can always be reset, rebuilt, and trusted. The ability to redeploy from nothing is the final check of truth.
+Together, `Destroy` and `Big Bang` guarantee that the platform can always be reset, rebuilt, and trusted. The ability to deploy from nothing is the final check of truth.
 
 ## TL;DR
 
