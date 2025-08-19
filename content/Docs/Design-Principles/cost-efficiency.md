@@ -10,7 +10,7 @@ toc: true
 # Platform Cost Efficiency
 
 From the moment the platform spins up, its own cost is kept out of the bill — completely.  
-Not reduced, not offset — just gone.
+Not reduced — just gone.
 
 The trick is simple: the platform’s own services are stateless and avoid powerful compute. They don’t store customer data, they don’t process high-volume workloads, and they don’t rely on billable shared infrastructure. No state means no storage, no CPU, no ongoing bill. Everything runs on Azure’s free tier — management groups, policy, deployment stacks, subscription creation, and a few others. The moment you introduce a billable service like Virtual WAN or premium PaaS, you’ve broken the model. So I don’t.
 
@@ -22,7 +22,7 @@ The goal is to give application teams full autonomy. They choose the infrastruct
 
 The platform doesn’t run your web apps or databases — you do. It doesn’t manage your network traffic. That’s your call. Gazelle’s job is to hand you a safe, isolated landing zone with the right guardrails, and then get out of your way.
 
-There’s no showback or chargeback model — the cost never touches the platform. It stays with the app team from day one, directly tied to their Azure subscription and invoice section. No reallocation spreadsheets, no accounting gymnastics.
+There’s no showback or chargeback model — the cost never touches the platform. It stays with the app team from day one, directly tied to their Azure subscription and invoice section.
 
 Autonomy here isn’t “you’re on your own” — it’s “you’re in control.” You can deploy however you like (Bicep, Terraform, ClickOps) and integrate whatever cloud services make sense for your workload. The platform won’t block you from moving.
 
@@ -36,15 +36,13 @@ That consistency doesn’t limit flexibility. Want to peer your VNet to another 
 
 ## Engine for Landing Zones
 
-The platform is essentially an engine for creating landing zones. Each one is isolated by default — no shared networks, no accidental dependencies, no public endpoints unless you explicitly open them.
-
-The platform builds these environments entirely with Azure’s free governance services:
+The platform is essentially an engine for creating landing zones. It builds these environments entirely with Azure’s free services:
 - Management Groups for hierarchy
 - Azure Policy for guardrails implementation
 - Deployment Stacks for resource lifecycle management
 - Subscription Creation APIs for environment isolation
 - RBAC roles for access control
-- Managed Identities for passwordless authentication
+- Managed Identities for authentication
 
 Because these are free-tier services, the platform can create as many landing zones as you need without adding to the bill.
 
@@ -61,7 +59,7 @@ Platform’s secure configuration baseline is enforced via Azure Policy, so most
 ### Advisory Alerts
 Activity log alerts and log search alerts aren’t free — they bill per action and add up fast. To keep the platform cost-free, I rely on Advisory alerts, which come at no charge. They don’t offer the same depth or granularity as paid alerts, but they’re still useful for surfacing signals about platform health and catching issues early. For anything beyond that, application teams use their own monitoring in landing zones — and they own both the data and the bill.
 
-## Scope and Cost Boundaries
+## Cost Boundaries
 
 The platform uses some external services, but their cost sits outside the platform itself:
 

@@ -20,7 +20,7 @@ Direct human access to production is blocked by design. Nobody logs into the pla
 
 ## Building Blocks
 
-From the start, I wanted the platform to be modular—no monoliths, no tangled dependencies. That means breaking everything down into building blocks: complete, independent GitHub Actions workflows, each delivering a single capability end-to-end. Think access control, policy, monitoring—each is its own block, responsible for everything it needs to do its job in Azure.
+I wanted the platform to be modular. That means breaking everything down into building blocks: complete, independent GitHub Actions workflows, each delivering a single capability end-to-end. Think access control, policy, monitoring—each is its own block, responsible for everything it needs to do its job in Azure.
 
 A building block owns its lifecycle. Add a block, and the capability appears in Azure—services, config, connections, everything. Remove it, and it’s gone, with nothing left behind. 
 
@@ -33,13 +33,13 @@ A building block owns its lifecycle. Add a block, and the capability appears in 
 | [**Policy**](/docs/platform-as-code/building-blocks/azure-policy/)       | Deploys policy identities, custom policy definitions, and assigns. |
 | [**Defender for Cloud**](/docs/platform-as-code/building-blocks/defender-for-cloud/)       | Configures Azure Defender for Cloud for platform management subscription |
 
-Blocks are designed to be independent—redeploy or update one without touching the rest. Outputs are passed between blocks using GitHub variables—no hardcoding, no hidden coupling.
+Building blocks are designed to be independent—redeploy or update one without touching the rest. Outputs are passed between blocks using GitHub variables—without hardcoding resource ID.
 
 ## Bicep Modules
 
 Inside each building block, Bicep modules do the heavy lifting. Each module is small and focused—wrapping a single Azure service or capability (like defining a policy, assigning a role, or standing up a workspace).
 
-Logic is built right into the module, using Bicep’s native functions and loops for platform-wide needs. Tuning or scaling? That’s handled by swapping parameter files, not rewriting code. Need to whitelist a new resource or tweak access? Update the parameters, redeploy, done.
+Logic is built right into the module, using Bicep’s native functions and loops for platform-wide needs. Scaling? That’s handled by swapping parameter files, not rewriting code. Need to whitelist a new resource or tweak access? Update the parameters, redeploy, done.
 
 Because modules are isolated, a change in one part of the system, does not break anything somewhere else.
 
@@ -53,9 +53,9 @@ Rather than hardcoding resource IDs in Bicep files, each deployment publishes it
 
 ## Test Environments
 
-Every change gets proven in a fully isolated, production-like replica. Same management group structure, same policies, same access control—just in a separate subscription. It’s a safe space: experiment, test edge cases, or validate changes before they hit production.
+Every change gets proven in a fully isolated, production-like replica. Same management group structure, same policies, same access control—just in a separate subscription. It’s a safe space: experiment, or validate changes before they hit production.
 
-Need to reset? The [`destroy`](#destroy) workflow wipes the environment. Need a fresh start? [`Big Bang`](#big-bang-1) spins up a clean copy,predictable and identical, every time.
+Need to reset? The [`destroy`](#destroy) workflow wipes the environment. Need a fresh start? [`Big Bang`](#big-bang-1) spins up a clean, predictable copy - identical every time.
 
 ## GitHub Flow
 
@@ -69,12 +69,12 @@ You start by opening an Issue to describe the change. From there, create a branc
 
 ## Code as the Source of Truth
 
-Azure Deployment Stacks handle both create and destroy, with DeleteAll set by default. If it’s not in the code, it doesn’t exist—period. For things Azure can’t clean up (like invoice sections), I fall back to classic deployments, accepting the manual cleanup tradeoff.  
+Azure Deployment Stacks handle both create and destroy, with DeleteAll set by default. If it’s not in the code, it doesn’t exist—period. For things Azure can’t clean up (like Entra ID objects), I fall back to classic deployments, accepting the manual cleanup tradeoff.  
 
 ## Deployment Scope
 
-All core capabilities—identity, policy, RBAC—deploy via Deployment Stacks at the top-level management group. Stacks are named after the capability they deliver, so it’s always clear what’s running.  
-Resources land in a dedicated management subscription, grouped by function for clarity and governance.
+All core capabilities—identity, policy, RBAC—deploy via Deployment Stacks at the top-level management group. Deployment Stacks are named after the capability they deliver, so it’s always clear what’s running.  
+Platform resources land in a dedicated management subscription, grouped by `Building bock` for clarity.
 
 ## Big Bang
 
@@ -103,3 +103,4 @@ Together, `Destroy` and `Big Bang` guarantee that the platform can always be res
 - Deployment outputs flow between pipelines via GitHub Variables
 - Every change is tested in a fully isolated, prod-like environment
 - Azure Deployment Stacks enforce “code is the source of truth” and automatic cleanup
+- Big Bang is the one-click way to stand up a brand-new platform from scratch — clean, predictable, and identical every time.

@@ -16,14 +16,12 @@ To keep privileges tight, I created a custom Azure role called Platform Automati
 
 The identity also needs visibility into Entra ID. For that, I grant it Directory.Read.All via Microsoft Graph. This part is slightly different: Graph doesn’t yet support full lifecycle management (you can’t delete permissions via templates), so I fall back to a classic deployment model for extensibility. I know this requires manual cleanup.
 
-## work in progress
-
-note for myself... why not to move compute for automation to gh actions?
-
 ## Automation Jobs
 
 The platform includes scheduled automation jobs that handle routine maintenance tasks. They reduce manual effort, catch drift early, and keep the environment clean without human intervention.
 
-- Cleanup Roles — Scans all subscriptions for orphaned role assignments, where an Entra ID object (user, group, or service principal) has been deleted but the role assignment remains. This keeps access control clean and ensures no orphaned assignments linger. The job runs at the subscription scope and uses Directory.Read.All via Microsoft Graph to check directory objects.
+### Cleanup Roles
+Scans all subscriptions for orphaned role assignments, where an Entra ID object (user, group, or service principal) has been deleted but the role assignment remains. This keeps access control clean and ensures no orphaned assignments linger. The job runs at the subscription scope and uses Directory.Read.All via Microsoft Graph to check directory objects.
 
-- Remediate Policies — Detects resources that are out of compliance and automatically applies the fix, like enforcing required tags or wiring up diagnostic settings. This ensures platform guardrails are always applied, without waiting for someone to notice and correct it by hand.
+### Remediate Policies
+Detects resources that are out of compliance and automatically applies the fix, like enforcing required tags or wiring up diagnostic settings. This ensures platform guardrails are always applied, without waiting for someone to notice and correct it by hand.

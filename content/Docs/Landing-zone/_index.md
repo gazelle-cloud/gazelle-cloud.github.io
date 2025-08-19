@@ -28,7 +28,7 @@ Local Authentication methods (like access keys, or connection strings) is not al
 
 ## Self-service
 
-You request a landing zone via a GitHub Issue by providing few basic parameters. The pipeline runs, and you’ll get an Azure email confirming your budget alerts — that’s your “green light” that the zone is ready. To tweak anything (budget, policy exemptions, network range), edit your landing-zone parameter file and open a Pull Request.
+You request a landing zone via a GitHub Issue by providing few basic parameters. The pipeline runs, and you’ll get an Azure email confirming your budget alerts — that’s your “green light” that the zone is ready. To tweak anything (budget, policy exemptions), edit your landing-zone parameter file and open a Pull Request.
 
 ## Network
 
@@ -40,9 +40,9 @@ Out of the box we keep it lean: paid Defender plans are not enabled by default, 
 
 Security alerts route to the owner email so accountability is crystal clear.
 
-## Resource group
+## Centrally Managed Resources
 
-Centrally managed landing zone pieces — the VNet, the user-assigned identity, and your Log Analytics workspace — live in a dedicated `landing-zone-resources` resource group that’s protected via Azure Deployment Stacks. Protection rules strike a balance: easy daily ops, hard to accidentally mess up.
+Centrally managed landing zone resources — the VNet, the user-assigned identity, and your Log Analytics workspace — live in a dedicated `landing-zone-resources` resource group that’s protected via Azure Deployment Stacks. Protection rules strike a balance: easy daily ops, hard to accidentally mess up.
 
 ## Monitor
 

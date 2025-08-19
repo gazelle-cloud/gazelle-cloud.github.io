@@ -10,37 +10,33 @@ sidebar:
   open: true
 ---
 
-From day one, my goal was simple: enable application teams to move fast, without any bottlenecks. That meant designing for isolation at every layer — network, identity, cost, operations, development, shared services, and even Azure region.  
-
-Let me walk you through how that autonomy is built in.
+From day one, my goal was simple: enable application teams to move fast, without any bottlenecks. That meant designing for isolation at every layer — network, identity, cost, operations, development, shared services, and even Azure region. And because every platform capability is [managed entirely as code](/docs/platform-as-code/), those guardrails are consistent everywhere, with no manual drift.
 
 ## Application Autonomy
 
-Each workload is deployed into its own landing zone — a fully independent cloud environment with the essentials already in place: budgets, networking, diagnostics, and baseline policies. No shared dependencies, no accidental leakage between workloads.
+Each workload runs in its own [landing zone](/docs/landing-zone/) — a fully independent cloud environment with budgets, networking, diagnostics, and baseline policies already in place. No shared dependencies, no accidental leakage between workloads. You get a ready-to-go foundation that lets you start building immediately, without waiting on central teams.
 
-This setup gives you a jump-start — a ready-to-go foundation with budgets, networking, diagnostics, and baseline policies already in place. You can start building immediately, without cross-team dependencies slowing you down.
-
-## Network: Isolated by Default
+## Network
 
 Each landing zone comes with a fresh Azure virtual network. By default, there's no network connectivity — not to on-prem, not to other landing zones. Azure Policy also blocks direct public access. If access is needed, it must be explicitly opened via local PaaS resource firewall rules. This keeps the surface area minimal and the blast radius small.
 
 If workloads in different landing zones need to talk, they can — through virtual network peering. But that’s an explicit configuration. Nothing is automatic or implied. Everything is isolated — intentionally.
 
-## Identity: Entra ID as Only Way In
+## Identity
 
 There’s only one way into Azure: `Entra ID`. All other authentication methods are blocked by policy.
 
-I'm working toward eliminating direct human access entirely. That said, some operations — like restarting a service — are practical to allow. For that, I use custom RBAC roles that match what people actually do — like cloud engineers or security analysts. Each role only gets what they actually need.
+I'm working toward eliminating direct human access entirely. That said, some operations — like restarting a service — are practical to allow. For that, I use custom RBAC roles that match what people actually do — like cloud engineers to operate the platform. Each role only gets what they actually need.
 
 These roles are assigned at the management group level, providing coverage across multiple landing zones. At the same time, access is limited so it doesn’t interfere with what’s defined in code. The code is the source of truth, and deployments will always apply it as-is.
 
-## One Landing Zone, One Purpose
+## Resource Organization
 
 Each landing zone starts as a clean Azure subscription with a predefined blueprint applied. This gives me a one-to-one mapping: one environment, one application, one landing zone.
 
-No mixing environments in the same zone. If you need dev, staging, and prod — you get three isolated landing zones. This prevents developers from accidentally breaking production while testing in dev, and it keeps cost tracking clean and boundaries clear.
+No mixing environments in the same landing zone. If you need dev, staging, and prod — you get three isolated landing zones. This prevents developers from accidentally breaking production while testing in dev, and it keeps cost tracking clean and boundaries clear.
 
-## Cost: Ownership and Visibility
+## Cost
 
 Application teams have full ownership of their costs. Each application is mapped to its own [Azure invoice section](https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/mca-section-invoice), which includes all associated environments.
 
@@ -52,7 +48,7 @@ Budget alerts are set at the landing zone level — default at 80%, because if y
 
 The platform is intentionally built without shared services. That’s a conscious choice.
 
-No central teams managing shared DNS or logging stacks. If an app team needs something, they own it. This avoids bottlenecks and keeps the `you build it, you run it` model clean and scalable.
+No central teams managing network traffic or logging stacks. If an app team needs something, they own it. This avoids bottlenecks and keeps the `you build it, you run it` model clean and scalable.
 
 Instead of building shared services, the platform bakes in the essentials directly into each landing zone. For example, monitoring is built-in — every landing zone gets its own Log Analytics workspace, provisioned automatically during setup. Diagnostic settings are applied using centrally managed policies. The platform defines what gets collected, but the data and cost stay with the app team.
 

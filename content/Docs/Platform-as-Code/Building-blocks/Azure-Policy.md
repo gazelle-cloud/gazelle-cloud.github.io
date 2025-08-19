@@ -10,18 +10,18 @@ toc: true
 
 ## Identity for Azure Policy
 
-Policy enforcement needs both authority and clarity. I use a **single, user-assigned managed identity** for all Azure Policy assignments across the platform — consistent, predictable, and easy to recognize.
+Policy enforcement needs both authority and clarity. I use a single, user-assigned managed identity for all Azure Policy assignments across the platform — consistent, predictable, and easy to recognize.
 
 This identity lives in the platform management subscription with a `Contributor` role at the top-level management group. That role gives it the permissions needed to remediate non-compliant resources automatically. Policies with `modify` or `deployIfNotExists` effects work out of the box without manual fixes.
 
-Using one identity also keeps the Azure Portal clean. Instead of every landing zone listing multiple cryptic system-assigned identities in the **Access Control** section — each one a puzzle to decode — there’s just one clear entry. Anyone looking can immediately see *what* it’s for and *why* it’s there.
+Using one identity also keeps the Azure Portal clean. Instead of every landing zone listing multiple cryptic system-assigned identities in the Access Control section — each one a puzzle to decode — there’s just one clear entry. Anyone looking can immediately see *what* it’s for and *why* it’s there.
 
 
 ## Custom Policy Definitions
 
-Built-in policies are my default choice — they’re simple, supported, and ready to go. But the platform can’t depend on Microsoft covering every edge case. When the built-ins fall short, I create **custom policy definitions** designed to be reusable across all landing zones.
+Built-in policies are my default choice — they’re simple, supported, and ready to go. But the platform can’t depend on Microsoft covering every edge case. When the built-ins fall short, I create custom policy definitions designed to be reusable across all landing zones.
 
-All custom policies live at the **top management group**. That placement ensures they’re available everywhere without duplication, and it keeps the platform’s policy library consistent.
+All custom policies live at the top management group. That placement ensures they’re available everywhere without duplication, and it keeps the platform’s policy library consistent.
 
 Adding one is straightforward: drop a JSON file into `/policy/parameters/customDefinitions` and register it in `policyDefinitions.bicepparam`. The pipeline takes it from there — packaging, deploying, and making it instantly available platform-wide.
 
@@ -30,7 +30,7 @@ This setup keeps the process predictable: one location for authoring, one step t
 
 ## Set Definitions and Assignments
 
-Policy configuration should be lean and predictable. I keep it that way by bundling the **set definition** and **assignment** into a single unit.
+Policy configuration should be lean and predictable. I keep it that way by bundling the set definition and assignment into a single unit.
 
 In this model, the set definition exists purely to group related policies, while all values for policy effects are passed directly from the assignment itself. No double-handling of parameters, no chasing references across files.
 
@@ -43,25 +43,25 @@ The result is a far cleaner Azure Policy parameter file — minimal verbosity, f
 
 ## Set Definitions and Assignments
 
-Policy configuration should be both lean and predictable. I keep it that way by bundling the **set definition** and **assignment** into a single unit.
+Policy configuration should be both lean and predictable. I keep it that way by bundling the set definition and assignment into a single unit.
 
 In this model, the set definition exists purely to group related policies, while all values for policy effects are passed directly from the assignment itself. No double-handling of parameters, no chasing references across files.
 
 Clarity is built in through strict naming conventions: every policy name starts with its effect (`Allow`, `Deny`, `Config`) followed by the requirement. At a glance, both platform engineers and application teams can see exactly what a policy does and why it exists.
 
-Each policy is explicitly declared in the main policy Bicep file, although use the same module. This approach lets me publish the policy assignment ID into a GitHub variable group — crucial when creating policy exemptions later. And as always, there are **no hardcoded resource IDs** in the codebase; everything is resolved and passed through variables to keep deployment flow clean.
+Each policy is explicitly declared in the main policy Bicep file, although use the same module. This approach lets me publish the policy assignment ID into a GitHub variable group — crucial when creating policy exemptions later. And as always, there are no hardcoded resource IDs in the codebase; everything is resolved and passed through variables to keep deployment flow clean.
 
 The result is a far cleaner Azure Policy parameter file — minimal verbosity, fewer opportunities for mistakes, and a faster path to adding or extending policies as requirements change.
 
 ## Assignment Scope
 
-While custom definitions live at the **top management group** for maximum reuse, assignments are scoped to **child management groups**. This gives me fine-grained control over what applies where — `platform` and `isolation` landing zones can each have their own approved resources or even a completely different security baseline.
+While custom definitions live at the top management group for maximum reuse, assignments are scoped to child management groups. This gives me fine-grained control over what applies where — `platform` and `isolation` landing zones can each have their own approved resources or even a completely different security baseline.
 
 ## Policy Exemptions
 
 Even in a tightly governed platform, there are valid cases where a policy doesn’t fit. When that happens, application teams can request an exemption by editing their landing zone parameter file and submitting a Pull Request.
 
-Exemptions are created at the **resource group** level, removing a specific policy from the requirement scope. Teams can create as many exemptions as needed — but with that flexibility comes ownership. If you request the exemption, you’re responsible for the implications.
+Exemptions are created at the resource group level, removing a specific policy from the requirement scope. Teams can create as many exemptions as needed — but with that flexibility comes ownership. If you request the exemption, you’re responsible for the implications.
 
 ```json
   "policyExemptions": [
@@ -77,7 +77,7 @@ Exemptions are created at the **resource group** level, removing a specific poli
 
 ## Diagnostic Settings
 
-Diagnostics follow a slightly different pattern than other policies. The rules for *what* data to collect are managed centrally, but the assignments — specifically, *where* to send that data — happen at the **landing zone** scope instead of the management group level.
+Diagnostics follow a slightly different pattern than other policies. The rules for *what* data to collect are managed centrally, but the assignments — specifically, *where* to send that data — happen at the landing zone scope instead of the management group level.
 
 This ensures that from day one, every landing zone is configured to collect audit logs for all its resources. Each landing zone sends its diagnostics to its own Log Analytics workspace, which the app team owns — along with the data and the costs that come with it. Ownership stays local, but consistency stays central.
 
@@ -97,7 +97,7 @@ Here’s the current set of enforced policies at the ´isolation´ management gr
 **TL;DR**  
 
 - Policy is the enforcement layer of platform intent — if the code says it, policy makes it true.  
-- Managed identity with top-level Contributor role handles all assignments and remediations.  
+- Managed identity with top-level Contributor role handles all assignments and remediation.  
 - Custom policies live at the top management group for maximum reuse.  
 - Bundling set definitions with assignments keeps things lean and scalable.  
 - Central control defines the rules; local enforcement ensures ownership.  

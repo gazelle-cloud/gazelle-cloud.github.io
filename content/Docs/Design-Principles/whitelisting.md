@@ -21,6 +21,6 @@ Requesting a whitelist is straightforward: create a GitHub Issue. The process wa
 - Are diagnostic settings supported?
 - Is cross-tenant data replication involved?
 
-Approval isn’t just adding the resource to the allow-list. As part of the process, all guardrails that apply — such as “deny public network access” or “config diagnostic settings” — must be extended to include the new resource type. That way, the resource isn’t just allowed; it’s automatically aligned with the platform’s security and operational baseline from day one.
+Approval isn’t just adding the resource to the allow-list. As part of the process, all guardrails that apply — such as “deny public network access” or “config diagnostic settings” — must be extended to include the new resource type. That way, it’s automatically aligned with the platform’s security and operational baseline from day one.
 
 Once approved and implemented in code, the updated allow-list and guardrails are deployed at the child management group level. At the same time, I create a simple “hello world” Bicep module for the resource type, so any team can start quickly and build on top of it.
