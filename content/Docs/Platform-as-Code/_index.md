@@ -54,7 +54,7 @@ Rather than hardcoding resource IDs in Bicep files, each deployment publishes it
 
 Every change gets proven in a fully isolated, production-like replica. Same management group structure, same policies, same access control—just in a separate subscription. It’s a safe space: experiment, test edge cases, or validate changes before they hit production.
 
-Need to reset? The `destroy` workflow wipes the environment. Need a fresh start? `Big Bang` spins up a clean copy,predictable and identical, every time.
+Need to reset? The [`destroy`](#destroy) workflow wipes the environment. Need a fresh start? [`Big Bang`](#big-bang-1) spins up a clean copy,predictable and identical, every time.
 
 ## GitHub Flow
 
@@ -81,9 +81,12 @@ The platform must always remain in a reproducible state — capable of being dep
 
 To validate this, two workflows are provided:
 
-- **Destroy** — wipes the entire Azure platform setup. The workflow deletes all deployment stacks with `deleteAll` set by default, clearing the platform management subscription, management group configuration, deployment history, and child management groups. What remains is only the initial tenant configuration described in the *Getting Started* page. It also purges GitHub environment variables tied to the test/prod mirrors so the next run starts with a clean slate end‑to‑end. Repository‑level variables remain untouched — they hold global, tenant‑wide values that production relies on (for example, region). What remains is only the initial tenant configuration described in the Getting Started page.
+### Destroy
 
-- **Big Bang** — a GitHub workflow that chains together every platform building block. It deploys the entire platform from scratch — management groups, policies, automation, monitoring, access control, everything. The result is a clean, fully functioning environment that can be recreated at any time, predictable and identical to the baseline defined in code.
+Wipes the entire Azure platform setup. The workflow deletes all deployment stacks with `deleteAll` set by default, clearing the platform management subscription, management group configuration, deployment history, and child management groups. What remains is only the initial tenant configuration described in the *Getting Started* page. It also purges GitHub environment variables tied to the test/prod mirrors so the next run starts with a clean slate end‑to‑end. Repository‑level variables remain untouched — they hold global, tenant‑wide values that production relies on (for example, region). What remains is only the initial tenant configuration described in the Getting Started page.
+
+### Big Bang
+A GitHub workflow that chains together every platform building block. It deploys the entire platform from scratch — management groups, policies, automation, monitoring, access control, everything. The result is a clean, fully functioning environment that can be recreated at any time, predictable and identical to the baseline defined in code.
 
 Together, `Destroy` and `Big Bang` guarantee that the platform can always be reset, rebuilt, and trusted. The ability to deploy from nothing is the final check of truth.
 

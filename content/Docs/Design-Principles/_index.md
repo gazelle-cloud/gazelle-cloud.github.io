@@ -46,7 +46,7 @@ Application teams have full ownership of their costs. Each application is mapped
 
 Budget alerts are set at the landing zone level — default at 80%, because if you're hitting 100%, it's already too late. Alerts are also configured at the invoice section level to give broader visibility across the application’s total spend.
 
-The platform runs at zero cost, even at full speed, because it’s built on Azure’s free services. Flat-fee traps like Virtual WAN are avoided by design. Everything is free. If the platform bills, it’s doing someone else’s job.
+[The platform runs at zero cost](/Docs/Design-Principles/cost-efficiency/), even at full speed, because it’s built on Azure’s free services. Flat-fee traps like Virtual WAN are avoided by design. Everything is free. If the platform bills, it’s doing someone else’s job.
 
 ## No Shared Services
 
@@ -66,7 +66,7 @@ That region is centrally defined — set once at the GitHub org level and pulled
 
 ## Whitelisting Approach
 
-In Gazelle, nothing runs unless it’s explicitly approved. Every landing zone starts with a tight allow-list of Azure resource types — think storage accounts, virtual networks — and anything outside that list is denied by policy. This keeps the platform intentional: no surprise services, no chasing misconfigurations after the fact. When a new Azure service is needed, it can be whitelisted once — and instantly available to everyone in the tenant.
+In Gazelle, nothing runs unless it’s explicitly approved. Every landing zone starts with a tight allow-list of Azure resource types — think storage accounts, virtual networks — and anything outside that list is denied by policy. This keeps the platform intentional: no surprise services, no chasing misconfigurations after the fact. When a new Azure service is needed, it can be [whitelisted](/Docs/Design-Principles/whitelisting) once — and instantly available to everyone.
 
 ## TL;DR
 

@@ -9,6 +9,9 @@ menu:
     - name: 
       weight: 1
       url: "/"
+    - name: Docs
+      weight: 1
+      url: "/docs/design-principles/"
     # - name: GitHub
     #   weight: 2
     #   url: "https://github.com/gazelle-cloud/Azure-landing-zones"

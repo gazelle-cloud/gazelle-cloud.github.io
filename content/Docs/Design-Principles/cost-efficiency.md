@@ -12,7 +12,7 @@ toc: true
 From the moment the platform spins up, its own cost is kept out of the bill — completely.  
 Not reduced, not offset — just gone.
 
-The trick is simple: the platform’s own services are stateless and avoid powerful compute. They don’t store customer data, they don’t process high-volume workloads, and they don’t rely on billable shared infrastructure. No state means no storage, no CPU, no ongoing bill. Everything runs on Azure’s free governance tier — management groups, policy, deployment stacks, subscription creation, and a few others. The moment you introduce a billable service like Virtual WAN or premium PaaS, you’ve broken the model. So I don’t.
+The trick is simple: the platform’s own services are stateless and avoid powerful compute. They don’t store customer data, they don’t process high-volume workloads, and they don’t rely on billable shared infrastructure. No state means no storage, no CPU, no ongoing bill. Everything runs on Azure’s free tier — management groups, policy, deployment stacks, subscription creation, and a few others. The moment you introduce a billable service like Virtual WAN or premium PaaS, you’ve broken the model. So I don’t.
 
 > If the platform ever bills you, it’s doing someone else’s job.
 
