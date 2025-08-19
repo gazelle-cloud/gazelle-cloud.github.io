@@ -26,19 +26,19 @@ layout: hextra-home
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
     title="Landing Zone Autonomy"
-    link="/Docs/landing-zone/"
+    link="/docs/landing-zone/"
     subtitle="Each landing zone arrives pre-built with the essentials — budgets, networking, identity, monitoring, and baseline policies. From there, teams configure resources their way: code, ClickOps, or both — the guardrails always apply."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
     title="Platform as Code"
-    link="/Docs/Platform-as-Code/"
+    link="/docs/platform-as-code/"
     subtitle="The platform itself — guardrails, access control, landing zone management — is entirely defined in code. Code shines when the rules are clear, so I hardcoded the platform’s opinions into it. This enables consistency and scalability."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
     title="Isolated Applications"
-    link="/Docs/Design-Principles/"
+    link="/docs/design-principles/"
     subtitle="Every workload runs in its own secure space — no shared networks, no public endpoints, no accidental dependencies. Isolation keeps the blast radius small and unlocks real autonomy."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
@@ -49,13 +49,12 @@ layout: hextra-home
   >}}
     {{< hextra/feature-card
     title="Cost Efficiency"
-    link="/Docs/Design-Principles/cost-efficiency/"
+    link="/docs/design-principles/cost-efficiency/"
     subtitle="You only pay for what you use. When the platform is running full speed, the cost scales with usage. When it’s idle, it should cost nothing. Services with flat fees—such as Virtual WAN—are intentionally avoided, as they incur cost even when idle. Instead, the platform uses Azure’s free or consumption-based services, which scale with usage and help maintain predictable, efficient costs."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
   title="Free & Open Source"
-  link="/Docs/"
   subtitle="No black boxes, no license fees. The entire platform is free and open source, so you can inspect the code, run it yourself, and adapt it to your needs."
   style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}

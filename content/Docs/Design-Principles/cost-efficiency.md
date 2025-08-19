@@ -1,5 +1,5 @@
 ---
-linkTitle: Cost Free Platform
+linkTitle: Platform Cost Efficiency
 description: "How the platform eliminates its own cloud costs by design, using Azure’s free governance services, and shifting all usage costs directly to application teams from day one"
 breadcrumbs: true
 weight: 20
@@ -7,7 +7,7 @@ cascade:
   type: docs
 toc: true
 ---
-# Platform Cost-Free by Design 
+# Platform Cost Efficiency
 
 From the moment the platform spins up, its own cost is kept out of the bill — completely.  
 Not reduced, not offset — just gone.
