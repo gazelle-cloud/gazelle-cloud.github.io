@@ -66,21 +66,9 @@ Activity log alerts and log search alerts aren’t free — they bill per action
 The platform uses some external services, but their cost sits outside the platform itself:
 
 - Entra ID licensing — advanced identity features like Conditional Access require premium licenses. The platform relies on Entra ID for authentication, but the license is a tenant-level responsibility, not part of the platform’s bill.
-- GitHub hosting — all automation runs through GitHub Actions. To keep outputs away from public eyes, the platform assumes a GitHub Team plan or higher. It’s required for secure operation.
+- GitHub hosting — all automation runs through GitHub Actions. To keep outputs away from public eyes, the platform assumes a GitHub Team plan or higher. It’s required to keep GitHub Actions logs locked down from the public internet.
 
 A few Azure services technically bill by usage, but their free tiers more than cover the platform’s needs:
 
 - Log Analytics Workspace — Log Analytics Workspace — the platform management subscription has one, but with such a small footprint, the free 5 GB/month is plenty.
 - Container Apps — used for lightweight automation tasks, where the free minutes cover executions that take only seconds.
-
-
-## Shared Responsibility
-
-This model keeps responsibilities clean:
-- The platform defines the rules and enforces the baseline.
-- Application teams build what they want inside those rules, own their data, and pay only for what they use.
-
-The result is a governance-first, cost-free platform that never becomes a bottleneck — and never surprises you with a bill.
-
-
-

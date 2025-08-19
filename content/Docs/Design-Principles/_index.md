@@ -46,7 +46,7 @@ Application teams have full ownership of their costs. Each application is mapped
 
 Budget alerts are set at the landing zone level — default at 80%, because if you're hitting 100%, it's already too late. Alerts are also configured at the invoice section level to give broader visibility across the application’s total spend.
 
-[The platform runs at zero cost](/Docs/Design-Principles/cost-efficiency/), even at full speed, because it’s built on Azure’s free services. Flat-fee traps like Virtual WAN are avoided by design. Everything is free. If the platform bills, it’s doing someone else’s job.
+[The platform runs at zero cost](/docs/design-principles/cost-efficiency/), even at full speed, because it’s built on Azure’s free services. Flat-fee traps like Virtual WAN are avoided by design. Everything is free. If the platform bills, it’s doing someone else’s job.
 
 ## No Shared Services
 

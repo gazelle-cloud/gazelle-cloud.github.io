@@ -18,7 +18,7 @@ Here’s how that foundation is built—and why it matters.
 
 Direct human access to production is blocked by design. Nobody logs into the platform to make changes by hand. All updates flow through code, reviewed and deployed via automated pipelines. This keeps production stable, predictable, and fully reproducible.
 
-## Independent Building Blocks
+## Building Blocks
 
 From the start, I wanted the platform to be modular—no monoliths, no tangled dependencies. That means breaking everything down into building blocks: complete, independent GitHub Actions workflows, each delivering a single capability end-to-end. Think access control, policy, monitoring—each is its own block, responsible for everything it needs to do its job in Azure.
 
@@ -26,15 +26,16 @@ A building block owns its lifecycle. Add a block, and the capability appears in 
 
 | Building Block   | Description |
 |------------------|-------------|
-| **Tenant Level** | Sets up the Azure Management Group hierarchy and billing account. |
-| **Monitor**      | Deploys Log Analytics workspace, alerts, and action groups. |
-| **Access Control** | Manages access control at the management group. |
-| **Automation**   | Handles operational tasks to keep things healthy and clean. |
-| **Policy**       | Deploys policy identities, custom policy definitions, and assigns. |
+| [**Management Groups**](/docs/platform-as-code/building-blocks/management-groups/) | Sets up the Azure Management Group hierarchy. |
+| [**Monitor**](/docs/platform-as-code/building-blocks/monitor/)      | Deploys Log Analytics workspace, alerts, and action groups. |
+| [**Access Control**](/docs/platform-as-code/building-blocks/access-control/) | Manages access control at the management group. |
+| [**Automation**](/docs/platform-as-code/building-blocks/platform-automation/)   | Handles operational tasks to keep things healthy and clean. |
+| [**Policy**](/docs/platform-as-code/building-blocks/azure-policy/)       | Deploys policy identities, custom policy definitions, and assigns. |
+| [**Defender for Cloud**](/docs/platform-as-code/building-blocks/defender-for-cloud/)       | Configures Azure Defender for Cloud for platform management subscription |
 
 Blocks are designed to be independent—redeploy or update one without touching the rest. Outputs are passed between blocks using GitHub variables—no hardcoding, no hidden coupling.
 
-## Purpose-Built Bicep Modules
+## Bicep Modules
 
 Inside each building block, Bicep modules do the heavy lifting. Each module is small and focused—wrapping a single Azure service or capability (like defining a policy, assigning a role, or standing up a workspace).
 
@@ -50,7 +51,7 @@ All deployments run via GitHub Actions, using federated Entra ID credentials sco
 
 Rather than hardcoding resource IDs in Bicep files, each deployment publishes its outputs — such as resource IDs — to GitHub variables. Downstream pipelines consume those variables as inputs, keeping deployments modular, decoupled, and easy to chain together.
 
-## Built-in Test Environments
+## Test Environments
 
 Every change gets proven in a fully isolated, production-like replica. Same management group structure, same policies, same access control—just in a separate subscription. It’s a safe space: experiment, test edge cases, or validate changes before they hit production.
 
@@ -83,7 +84,9 @@ To validate this, two workflows are provided:
 
 ### Destroy
 
-Wipes the entire Azure platform setup. The workflow deletes all deployment stacks with `deleteAll` set by default, clearing the platform management subscription, management group configuration, deployment history, and child management groups. What remains is only the initial tenant configuration described in the *Getting Started* page. It also purges GitHub environment variables tied to the test/prod mirrors so the next run starts with a clean slate end‑to‑end. Repository‑level variables remain untouched — they hold global, tenant‑wide values that production relies on (for example, region). What remains is only the initial tenant configuration described in the Getting Started page.
+The workflow wipes the entire Azure platform setup. By default, it deletes all deployment stacks with `deleteAll` enabled, clearing out the platform management subscription, management group configuration, deployment history, and child management groups. Subscriptions from those child groups are moved back under the top-level management group.
+
+What’s left is only the initial tenant configuration, exactly as described on the Getting Started page. The workflow also purges GitHub environment variables tied to the test/prod mirrors, so the next run starts with a clean slate end-to-end. Repository-level variables remain untouched, since they hold global tenant-wide values that production relies on (for example, the region).
 
 ### Big Bang
 A GitHub workflow that chains together every platform building block. It deploys the entire platform from scratch — management groups, policies, automation, monitoring, access control, everything. The result is a clean, fully functioning environment that can be recreated at any time, predictable and identical to the baseline defined in code.

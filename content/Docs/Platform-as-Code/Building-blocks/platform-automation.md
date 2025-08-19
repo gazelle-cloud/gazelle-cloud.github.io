@@ -2,7 +2,7 @@
 linkTitle: Platform Automation
 description: "How I automate landing zone operations with Azure Container Apps jobs, PowerShell, and Bicep"
 breadcrumbs: true
-weight: 40
+weight: 50
 cascade:
   type: docs
 toc: true
