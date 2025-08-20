@@ -60,14 +60,3 @@ Azure policies configured by default:
 - **Configure diagnostic settings**: diagnostic settings applied on all whitelisted resources. 
 
 If you  need an exception, propose a policy exemption by editing your landing zone parameter file and Pull Request.
-
-
-# TL;DR
-
-* Request with a GitHub Issue; you’re shipping code minutes later.
-* Budgets at 80% and cost ownership by app.
-* Passwordless GitHub→Entra federation; User-Assigned managed Identity with subscription `Owner` for pipelines.
-* VNet is isolated by default; peering is explicit; public is denied by default.
-* Monitoring, diagnostics, and action groups are prewired to your Log Analytics workspace.
-* Guardrails via Azure Policy; exemptions via PR when you accept the risk.
-* In your landing zone, you choose how to build — code, ClickOps, or both — the guardrails still apply.

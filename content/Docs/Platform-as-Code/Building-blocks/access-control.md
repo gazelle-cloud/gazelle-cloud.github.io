@@ -25,3 +25,36 @@ If a role isn’t needed anymore, deleting the block removes both the definition
 ## Assignments
 
 Assignments are always scoped at the management group level and linked to Entra ID groups — never to individuals. Membership stays managed centrally in Entra ID, while permissions live entirely in code. Identity ownership in one place, access control in another. Clear, automated, reproducible.
+
+## How To 
+
+to modify access control, edit parameter file `building-blocks/access-control/parameters/accessControl.bicepparam`
+
+From there, you declare exactly what you need: update an existing role by adjusting its actions, introduce a new one by adding a block with roleName, actions, principalId, and scope, or remove a role entirely by deleting its block from the file.
+
+```bicep
+param accessControl = [
+  {
+    roleName: 'Platform Engineer'
+    actions: [
+      '*/read'
+      'Microsoft.App/jobs/*/action'
+      'Microsoft.Insights/actiongroups/*/action'
+      'microsoft.policyinsights/remediations/write'
+      'Microsoft.Insights/alertRules/*'
+      'Microsoft.Resources/deployments/*'
+      'Microsoft.Resources/deploymentStacks/*'
+    ]
+    principalId: azurePlatformEngineerGroupId
+    scope: topLevelManagementGroupName
+  }
+  {
+    roleName: 'Platform Owner' 
+    actions: [
+      '*'
+    ]
+    principalId: azurePlatformOwnerGroupId
+    scope: topLevelManagementGroupName
+  }
+]
+```

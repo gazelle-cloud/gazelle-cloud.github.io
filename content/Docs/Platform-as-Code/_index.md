@@ -10,13 +10,11 @@ sidebar:
   open: true
 ---
 
-I wanted every piece to be self-contained, and easier to evolve. Just clear, independent blocks you can assemble, update, or remove without breaking a sweat. The goal: deliver every capability as a standalone building block, managed entirely in code. 
-
-Here’s how that foundation is built—and why it matters.
+Some things have to be the same everywhere — Azure policies, access control, landing zone configuration. If those foundations drift, the platform loses credibility. The only way to guarantee consistency is to manage landing zones as code, enforcing every rule the same way, every time. With code as the single source of truth, autonomy stays possible without ever compromising trust.
 
 ## No Human Touch
 
-Direct human access to production is blocked by design. Nobody logs into the platform to make changes by hand. All updates flow through code, reviewed and deployed via automated pipelines. This keeps production stable, predictable, and fully reproducible.
+To make that consistency real, I eliminated direct human access to production. Nobody logs into the platform to make changes by hand. All updates flow through code, reviewed and deployed via automated pipelines. This keeps production stable, predictable, and fully reproducible.
 
 ## Building Blocks
 
@@ -37,11 +35,7 @@ Building blocks are designed to be independent—redeploy or update one without 
 
 ## Bicep Modules
 
-Inside each building block, Bicep modules do the heavy lifting. Each module is small and focused—wrapping a single Azure service or capability (like defining a policy, assigning a role, or standing up a workspace).
-
-Logic is built right into the module, using Bicep’s native functions and loops for platform-wide needs. Scaling? That’s handled by swapping parameter files, not rewriting code. Need to whitelist a new resource or tweak access? Update the parameters, redeploy, done.
-
-Because modules are isolated, a change in one part of the system, does not break anything somewhere else.
+Inside each building block, Bicep modules do the heavy lifting. Each one is task-focused, wrapping a single Azure service or capability — like defining a policy or assigning a role. Platform management logic lives inside the module, aimed at solving one challenge at a time. It makes design decisions explicit and expresses how the capability scales through nothing more than a parameter file. Because everything stays human-readable and self-contained, the code is easier to follow, safer to evolve, and changes never spill over into parts of the system they don’t belong.
 
 ## GitHub 
 
@@ -53,9 +47,13 @@ Rather than hardcoding resource IDs in Bicep files, each deployment publishes it
 
 ## Test Environments
 
-Every change gets proven in a fully isolated, production-like replica. Same management group structure, same policies, same access control—just in a separate subscription. It’s a safe space: experiment, or validate changes before they hit production.
+Every change gets proven in a fully isolated, production-like replica. Same management group structure, same policies, same access control — just in a separate subscription. Nothing is “similar” or “close enough.” It’s the same thing, end to end.
 
-Need to reset? The [`destroy`](#destroy) workflow wipes the environment. Need a fresh start? [`Big Bang`](#big-bang-1) spins up a clean, predictable copy - identical every time.
+The flow is simple: open an Issue, check out a branch (name it whatever you want), push your changes — and that branch deploys straight into the test environment. You validate the results there, by hand. The main branch is protected: the only path to production is through a Pull Request. That way, the exact same code that passed in test is what lands in prod. No drift, no guessing.
+
+This symmetry is by design. If it works in test, it works in prod — exactly the same way. The environment context is baked into the GitHub workflows using environment variables, so environment-specific values are fetched on the fly. No hardcoding, no duplication, no “oops, forgot to update prod.”
+
+Need to reset? Follow a [BigBang](#big-bang)
 
 ## GitHub Flow
 
@@ -92,15 +90,3 @@ What’s left is only the initial tenant configuration, exactly as described on 
 A GitHub workflow that chains together every platform building block. It deploys the entire platform from scratch — management groups, policies, automation, monitoring, access control, everything. The result is a clean, fully functioning environment that can be recreated at any time, predictable and identical to the baseline defined in code.
 
 Together, `Destroy` and `Big Bang` guarantee that the platform can always be reset, rebuilt, and trusted. The ability to deploy from nothing is the final check of truth.
-
-## TL;DR
-
-- Everything—build and operations—is defined in code
-- Capabilities are delivered as independent building blocks, each with its own lifecycle
-- Building blocks are made from small, purpose-built Bicep modules
-- GitHub is platform management plane
-- All platform changes follow a GitHub Flow 
-- Deployment outputs flow between pipelines via GitHub Variables
-- Every change is tested in a fully isolated, prod-like environment
-- Azure Deployment Stacks enforce “code is the source of truth” and automatic cleanup
-- Big Bang is the one-click way to stand up a brand-new platform from scratch — clean, predictable, and identical every time.

@@ -13,9 +13,10 @@ toc: true
 
 I wanted the management group structure to be as simple and predictable as possible. No deep trees, no hidden complexity. Just one top-level management group, and as many children as we need — all side by side.
 
-Why? Because every extra layer you nest is another place for a misconfiguration to hide. Instead of stacking, Gazelle scales horizontally: add a child, reuse proven patterns, move on. Adding a new child is literally one parameter away:
-```bicep
-//management-groups/parameters/managementGroups.bicepparam  
+Why? Because every extra layer you nest is another place for a misconfiguration to hide. Instead of stacking, Gazelle scales horizontally: add a child, reuse proven patterns, move on. Adding a new child is literally one parameter away:    
+`building-blocks/management-groups/parameters/managementGroups.bicepparam`
+
+```bicep 
 param childManagementGroupNames = [
   'platform'
   'isolation'

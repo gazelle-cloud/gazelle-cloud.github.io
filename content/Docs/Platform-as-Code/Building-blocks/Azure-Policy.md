@@ -23,39 +23,20 @@ Built-in policies are my default choice — they’re simple, supported, and rea
 
 All custom policies live at the top management group. That placement ensures they’re available everywhere without duplication, and it keeps the platform’s policy library consistent.
 
-Adding one is straightforward: drop a JSON file into `/policy/parameters/customDefinitions` and register it in `policyDefinitions.bicepparam`. The pipeline takes it from there — packaging, deploying, and making it instantly available platform-wide.
+## Policy Assignments
+### Naming
+Azure Policies are grouped by compliance requirement and named for intent. Each starts with its effect (`Allow`, `Deny`, `Config`) followed by the requirement. Example: `Deny public network access`. Behind the naming is a clear mapping to Azure Policy effects: `Allow` and `Deny` both use the `Deny` effect, while `Config` relies on `modify` or `deployIfNotExists` to enforce configuration baselines automatically. The pattern is simple and explicit, so both platform engineers and application teams can immediately see what a policy does and how it is enforced.
 
-This setup keeps the process predictable: one location for authoring, one step to register, and zero manual deployments. Every landing zone sees the same definitions, and changes flow automatically through the platform.
+### Bicep Module 
+Bicep modules for Azure Policy bundle the SetDefinition and Assignment into a single unit. The SetDefinition groups related policies, while effect values are passed directly from the assignment. Each SetDefinition is tightly coupled with its assignment. From the Bicep perspective, this keeps parameter files short and human-friendly, reducing verbosity and making changes straightforward. It’s a shift away from the traditional model — where one SetDefinition is shared across many assignments — toward a design that optimizes clarity and simplicity.
 
+### Assignment Scope
+Assignments themselves are scoped to child management groups like `platform` or `isolation`. Each scope runs its own deployment stack, bundling all relevant policies and parameters. This structure delivers precision: every scope can fine-tune its security and operational baseline while still drawing from the same central library of definitions.
 
-## Set Definitions and Assignments
+### Main Bicep 
+Each child management group has a dedicated Bicep file that contains all assignments at the scope. It calls the same shared module with prebuilt logic, but applies a local naming pattern, local parameters, and captures outputs. Those outputs (assignment IDs) are published to GitHub environment variables by the workflow, so landing‑zone engineers can request policy exemptions by referencing variables — never hardcoding resource IDs. Clean separation, no coupling, fully reproducible.
 
-Policy configuration should be lean and predictable. I keep it that way by bundling the set definition and assignment into a single unit.
-
-In this model, the set definition exists purely to group related policies, while all values for policy effects are passed directly from the assignment itself. No double-handling of parameters, no chasing references across files.
-
-Clarity is built in through strict naming conventions: every policy name starts with its effect (`Allow`, `Deny`, `Config`) followed by the requirement. At a glance, both platform engineers and application teams can see exactly what a policy does and why it exists.
-
-Each policy is explicitly declared in the main policy Bicep file, all using the same module. This makes it easy to publish the policy assignment ID into a GitHub variable group — essential for creating policy exemptions — while keeping the codebase free of hardcoded resource IDs. Everything is resolved and passed through variables so deployments stay clean.
-
-The result is a far cleaner Azure Policy parameter file — minimal verbosity, fewer opportunities for mistakes, and a faster path to adding or extending policies as requirements change.
-
-
-## Set Definitions and Assignments
-
-Policy configuration should be both lean and predictable. I keep it that way by bundling the set definition and assignment into a single unit.
-
-In this model, the set definition exists purely to group related policies, while all values for policy effects are passed directly from the assignment itself. No double-handling of parameters, no chasing references across files.
-
-Clarity is built in through strict naming conventions: every policy name starts with its effect (`Allow`, `Deny`, `Config`) followed by the requirement. At a glance, both platform engineers and application teams can see exactly what a policy does and why it exists.
-
-Each policy is explicitly declared in the main policy Bicep file, although use the same module. This approach lets me publish the policy assignment ID into a GitHub variable group — crucial when creating policy exemptions later. And as always, there are no hardcoded resource IDs in the codebase; everything is resolved and passed through variables to keep deployment flow clean.
-
-The result is a far cleaner Azure Policy parameter file — minimal verbosity, fewer opportunities for mistakes, and a faster path to adding or extending policies as requirements change.
-
-## Assignment Scope
-
-While custom definitions live at the top management group for maximum reuse, assignments are scoped to child management groups. This gives me fine-grained control over what applies where — `platform` and `isolation` landing zones can each have their own approved resources or even a completely different security baseline.
+The outcome is clarity at every level — naming, assignment, and exemptions. Policies scale across the tenant without drift, and each environment can enforce exactly what it needs.
 
 ## Policy Exemptions
 
@@ -63,17 +44,6 @@ Even in a tightly governed platform, there are valid cases where a policy doesn�
 
 Exemptions are created at the resource group level, removing a specific policy from the requirement scope. Teams can create as many exemptions as needed — but with that flexibility comes ownership. If you request the exemption, you’re responsible for the implications.
 
-```json
-  "policyExemptions": [
-    {
-      "PolicyAssignmentId": "policy_isolation_deny_local_authentication_id",
-      "policyDefinitionReferenceId": "storageAccount",
-      "resourceGroup": "myApp-test",
-      "description": "the app does not support Entra ID authentication"
-    }
-  ]
-
-```
 
 ## Diagnostic Settings
 
@@ -94,11 +64,75 @@ Here’s the current set of enforced policies at the ´isolation´ management gr
 - **Deny cross-tenant replication** – prevent data leakage across tenants  
 - **Config diagnostic settings** – enforce collection of required logs and metrics
 
-**TL;DR**  
+## How to
+### Whitelist New Resource
 
-- Policy is the enforcement layer of platform intent — if the code says it, policy makes it true.  
-- Managed identity with top-level Contributor role handles all assignments and remediation.  
-- Custom policies live at the top management group for maximum reuse.  
-- Bundling set definitions with assignments keeps things lean and scalable.  
-- Central control defines the rules; local enforcement ensures ownership.  
-- Scoped assignments allow tailored rules per landing zone type without losing baseline consistency.
+To whitelist a new resource under the `isolation` management group, navigate to `building-blocks/policy/parameters/isolation/`. Review each parameter (aka policy assignment) to see how the resource fits against the current guardrails. 
+- allowedResources.json
+- denyLocalAuthentication.json
+- denyPublicNetworkAccess.json
+- diagnosticSettings.bicepparam
+
+Here is an example how to extend parameter files to include Azure Storage Account.
+ `Deny public network access`
+```json
+[
+  {
+    "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/34c877ad-507e-4c82-993e-3452a6e0ad3c",
+    "policyDefinitionReferenceId": "storageAccount-publicNetworkAccess",
+    "parameters": {
+      "effect": {
+        "value": "Deny"
+      }
+    }
+  }
+]
+```
+`Deny local authentication methods`
+```json
+[
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/8c6a50c6-9ffd-4ae7-986f-5fa6111f9a54",
+        "policyDefinitionReferenceId": "storageAccount-sharedAccessKeys",
+        "parameters": {
+            "effect": {
+                "value": "Deny"
+            }
+        }
+    }
+]
+```
+
+`Allowed resources`
+```json
+[
+    ...
+    "Microsoft.Storage/storageAccounts",
+    ...
+]
+```
+
+That’s the whole flow: pick the right policy, extend its parameter file, commit. The deployment logic handle the rest.
+
+### Add Custom Definition
+
+Sometimes the built-in policies don’t cover everything. In that case, you bring your own definition. A custom definition must be authored in JSON and follow the standard schema:
+```json
+{
+  "name": "MyCustomDefinition",
+  "properties": {
+    // insert policy logic here
+  }
+}
+```
+From there, it’s a simple two-step process:
+- Drop the file into:
+   `building-blocks/policy/parameters/customDefinitions/`
+- Register it in `policyDefinitions.bicepparam` 
+  
+```bicep
+param customDefinitions = [
+  loadJsonContent('MyCustomDefinition.json')
+]
+```
+Once committed, the pipeline deploys the definition, making it instantly available platform-wide.

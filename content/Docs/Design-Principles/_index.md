@@ -10,7 +10,8 @@ sidebar:
   open: true
 ---
 
-From day one, my goal was simple: enable application teams to move fast, without any bottlenecks. That meant designing for isolation at every layer — network, identity, cost, operations, development, shared services, and even Azure region. And because every platform capability is [managed entirely as code](/docs/platform-as-code/), those guardrails are consistent everywhere, with no manual drift.
+
+From day one, the goal was clear: let application teams move fast without bottlenecks. That meant isolation at every layer — network, identity, cost, operations, even region. And because every capability is [managed entirely as code](/docs/platform-as-code/), the guardrails stay identical everywhere, enforced automatically with no need of manual drift.
 
 ## Application Autonomy
 
@@ -63,14 +64,3 @@ That region is centrally defined — set once at the GitHub org level and pulled
 ## Whitelisting Approach
 
 In Gazelle, nothing runs unless it’s explicitly approved. Every landing zone starts with a tight allow-list of Azure resource types — think storage accounts, virtual networks — and anything outside that list is denied by policy. This keeps the platform intentional: no surprise services, no chasing misconfigurations after the fact. When a new Azure service is needed, it can be [whitelisted](/Docs/Design-Principles/whitelisting) once — and instantly available to everyone.
-
-## TL;DR
-
-- Every workload runs in its own isolated, pre-built landing zone — no shared infra, no accidental dependencies
-- Network access is locked down by default; nothing talks unless explicitly allowed
-- `Entra ID` is the only way in; custom roles provide just enough access, nothing more
-- Each environment (dev, test, prod) gets its own landing zone — no mixing
-- App teams fully own their costs and budgets per application
-- No shared services — if a team needs it, they build it
-- Everything deploys in a single Azure region for simplicity and predictability
-- Only approved resource types are allowed
