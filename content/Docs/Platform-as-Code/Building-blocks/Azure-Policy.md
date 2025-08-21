@@ -136,3 +136,17 @@ param customDefinitions = [
 ]
 ```
 Once committed, the pipeline deploys the definition, making it instantly available platform-wide.
+
+### Assign Custom Definition
+Custom policy definitions live at the top management group level, which means their resource IDs follow a different path than built-in policies. To handle that difference, I use a `{{custom}}` prefix. The deployment logic automatically resolves the correct path to the definition.
+```json
+    {
+        "policyDefinitionId": "{{custom}}/providers/Microsoft.Authorization/policyDefinitions/MyCustomDefinition",
+        "policyDefinitionReferenceId": "MyCustomDefinition",
+        "parameters": {
+            "effect": {
+                "value": "Modify"
+            }
+        }
+    }
+```
