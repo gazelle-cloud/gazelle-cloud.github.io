@@ -1,5 +1,5 @@
 ---
-linkTitle: Platform Cost Efficiency
+linkTitle: Cost Efficiency
 description: "How the platform eliminates its own cloud costs by design, using Azure’s free governance services, and shifting all usage costs directly to application teams from day one"
 breadcrumbs: true
 weight: 20
