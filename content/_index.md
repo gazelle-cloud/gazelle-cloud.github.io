@@ -26,7 +26,7 @@ layout: hextra-home
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
     title="Pull Requests as Governance"
-    subtitle="Everyone works the same way: through pull requests. Application teams request exemptions. Platform engineers propose changes. Stakeholders approve strategy. One workflow, one record, one truth."
+    subtitle="Everyone works the same way: through pull requests. Application teams request exemptions. Platform engineers propose changes. Stakeholders approve strategy. One flow, one truth."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card

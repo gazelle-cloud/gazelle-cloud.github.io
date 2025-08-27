@@ -20,6 +20,7 @@ Requesting a whitelist is straightforward: create a GitHub Issue. The process wa
 - Can public network access be restricted?
 - Are diagnostic settings supported?
 - Is cross-tenant data replication involved?
+- Does it support TLS configuration?
 
 Approval isn’t just adding the resource to the allow-list. As part of the process, all guardrails that apply — such as `deny public network access` or `config diagnostic settings` — must be extended to include the new resource type. That way, it’s automatically aligned with the platform’s security and operational baseline from day one.
 

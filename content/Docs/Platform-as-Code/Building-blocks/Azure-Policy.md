@@ -62,6 +62,7 @@ Here’s the current set of enforced policies at the ´isolation´ management gr
 - **Deny public network access** – block public endpoints by default  
 - **Deny local authentication methods** – enforce Entra ID as the only way in  
 - **Deny cross-tenant replication** – prevent data leakage across tenants  
+- **Deny weak TLS** - network traffic should be encrypted
 - **Config diagnostic settings** – enforce collection of required logs and metrics
 
 ## How to
@@ -71,6 +72,8 @@ To whitelist a new resource under the `isolation` management group, navigate to 
 - allowedResources.json
 - denyLocalAuthentication.json
 - denyPublicNetworkAccess.json
+- denyCrossTenantReplication.json
+- denyWeakTLS.json
 - diagnosticSettings.bicepparam
 
 Here is an example how to extend parameter files to include Azure Storage Account.
@@ -94,6 +97,37 @@ Here is an example how to extend parameter files to include Azure Storage Accoun
       {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/8c6a50c6-9ffd-4ae7-986f-5fa6111f9a54",
         "policyDefinitionReferenceId": "storageAccount-sharedAccessKeys",
+        "parameters": {
+            "effect": {
+                "value": "Deny"
+            }
+        }
+    }
+]
+```
+`Deny weak TLS`
+```json
+[
+    {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fe83a0eb-a853-422d-aac2-1bffd182c5d0",
+        "policyDefinitionReferenceId": "storageAccount-weakTLS",
+        "parameters": {
+            "effect": {
+                "value": "Deny"
+            },
+            "minimumTlsVersion": {
+                "value": "TLS1_2"
+            }
+        }
+    }
+]
+```
+`Deny cross tenant replication`
+```json
+[
+    {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/92a89a79-6c52-4a7e-a03f-61306fc49312",
+        "policyDefinitionReferenceId": "storageAccount-crossTenantReplication",
         "parameters": {
             "effect": {
                 "value": "Deny"

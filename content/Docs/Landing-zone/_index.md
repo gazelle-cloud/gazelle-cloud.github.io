@@ -6,7 +6,7 @@ cascade:
   type: docs  
 toc: true
 sidebar:
-  open: false
+  open: true
 ---
 
 
@@ -57,6 +57,7 @@ Azure policies configured by default:
 - **Deny public network access**: network access to Azure PaaS services should be restricted using local firewalls or virtual networks, to reduce attack surface.
 - **Deny local (non-Entra) auth**: Entra ID is the only one way to get authenticate, everything else - deny be default
 - **Deny cross-tenant replication**: data replication between azure tenants is not allowed by default.
+- **Deny weak TLS**: the network traffic should be encrypted using TLS 1.2.
 - **Configure diagnostic settings**: diagnostic settings applied on all whitelisted resources. 
 
 If you  need an exception, propose a policy exemption by editing your landing zone parameter file and Pull Request.

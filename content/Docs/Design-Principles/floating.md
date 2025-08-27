@@ -33,6 +33,10 @@ Once the [building block model](/docs/platform-as-code/#building-blocks) was in 
 
 This independence is what makes floating possible. When the baseline shifts — a new Azure policy model, or a security hardening pattern — only the relevant block floats forward. The rest keep working as-is.
 
+### Outputs
+
+Building blocks need a way to talk with each other. That’s where outputs come in. Each block publishes what it creates — the IDs, the names, the handles you’ll need later — straight into GitHub variables. As a result, a building block can completely redesign its internals — as long as it keeps solving the challenge and publishing the outputs, the rest of the platform doesn’t notice. The change is isolated. Outputs are the interface that keeps the system running while the engine evolves underneath.
+
 ### Test environment
 
 Every new idea lands in a full replica test environment first. Same management groups, same policies, same automation. If it works there, it will work in prod.  
@@ -50,7 +54,7 @@ Issue → Branch → Test → Validate → Pull Request
 An issue starts the conversation, a branch carries the change into a test environment, validation proves it works, and only then does the pull request merge it into the platform. This cycle turns floating into a discipline — every experiment, every breaking change, every design shift is visible, reviewed, and proven before it touches production.
 
 ## Designed to Float
-Cloud is motion. Azure evolves weekly, GitHub monthly, and my own understanding just as fast. A sinking platform resists change until it breaks. A floating platform embraces the change. For Gazelle, that means:  
+Azure evolves weekly, GitHub monthly, and my own understanding just as fast. A sinking platform resists change until it breaks. A floating platform embraces the change. For Gazelle, that means:  
 - Embracing breaking changes as opportunities.  
 - Structuring building blocks to be replaced without drama.  
 - Using test environment as safe space for bold ideas.  
