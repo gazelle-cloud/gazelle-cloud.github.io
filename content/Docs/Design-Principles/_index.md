@@ -63,4 +63,4 @@ That region is centrally defined — set once at the GitHub org level and pulled
 
 ## Whitelisting Approach
 
-In Gazelle, nothing runs unless it’s explicitly approved. Every landing zone starts with a tight allow-list of Azure resource types — think storage accounts, virtual networks — and anything outside that list is denied by policy. This keeps the platform intentional: no surprise services, no chasing misconfigurations after the fact. When a new Azure service is needed, it can be [whitelisted](/Docs/Design-Principles/whitelisting) once — and instantly available to everyone.
+In Gazelle, nothing runs unless it’s explicitly approved. Every landing zone starts with a tight allow-list of Azure resource types — think storage accounts, virtual networks — and anything outside that list is denied by policy. This keeps the platform intentional: no surprise services, no chasing misconfigurations after the fact. When a new Azure service is needed, it can be [whitelisted](/docs/design-principles/whitelisting) once — and instantly available to everyone.
