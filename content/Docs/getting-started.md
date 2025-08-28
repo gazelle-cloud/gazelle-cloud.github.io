@@ -8,7 +8,7 @@ cascade:
 toc: true
 ---
 # Getting Started
-Gazelle is a platform-as-code framework. To run it you bootstrap the platform in your own GitHub organization, wired to your Azure tenant and Entra ID. This guide assumes you are an Azure engineer preparing to stand up Gazelle for your organization.
+Gazelle is a [platform-as-code](/docs/platform-as-code/) framework. To run it you bootstrap the platform in your own GitHub organization, wired to your Azure tenant and Entra ID. This guide assumes you are an Azure engineer preparing to stand up Gazelle for your organization.
 
 ## Prerequisite
 
@@ -24,7 +24,7 @@ Gazelle is a platform-as-code framework. To run it you bootstrap the platform in
   - Federated credential scenario: `GitHub`
   - Entity type: `Environment`
   > Case sensitive — make sure your environment names match exactly.
-- Grant API permissions:
+- [Grant API permissions:](/docs/platform-as-code/building-blocks/platform-automation/#identity)
   - `Directory.ReadWrite.All`
   - `AppRoleAssignment.ReadWrite.All`
 - Create four Entra ID groups (suggested names):
@@ -37,7 +37,7 @@ Gazelle is a platform-as-code framework. To run it you bootstrap the platform in
 
 ## Azure
 
-- Create two management groups under the `tenant root` Example: `org-test` and `org-prod`.
+- [Create two management groups](/docs/platform-as-code/building-blocks/management-groups/) under the `tenant root` Example: `org-test` and `org-prod`.
 - Assign roles to your Entra ID applications:
   - Prod app: `Owner` at the `tenant root group`.
   - Test app: `Owner` at the top-level `org-test`.
@@ -113,12 +113,12 @@ Gazelle is a platform-as-code framework. To run it you bootstrap the platform in
 
 ## BigBang
 
-Once your initial configuration is complete, you’re ready for the first launch of Gazelle by triggering the GitHub Actions workflow [`platform - flow - BigBang`](/docs/platform-as-code/#big-bang), which bootstraps your platform by provisioning and configuring the Azure resources in your tenant.
-- Creates the landing zone management groups
-- Wires Entra ID apps and groups into role assignments
+Once your initial configuration is complete, you’re ready for the first launch by triggering the GitHub Actions workflow [`platform - flow - BigBang`](/docs/platform-as-code/#big-bang). It bootstraps your platform by provisioning and configuring the Azure resources in your tenant.
+- Creates management group hierarchy 
+- Wires access control
 - Sets up the initial subscriptions for platform management
- -Loads baseline policies and guardrails
-
+ -Loads baseline policies
+ 
 If all configuration values were set correctly, the run completes in about 15 minutes.
 
 After BigBang succeeds, your test environment is a fully functioning Gazelle platform. From here, you take over — adjusting, refining, and evolving the platform to fit your needs. Gazelle gives you a working baseline; the real power comes from making it yours.

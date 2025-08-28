@@ -41,7 +41,7 @@ Inside each building block, Bicep modules do the heavy lifting. Each one is task
 
 GitHub is the management plane for Gazelle. Every platform operation — from creating a landing zone to updating a policy — starts as an issue and makes its way to a pull request. This keeps every change visible, reviewed, and traceable — nothing happens in the dark.
 
-All deployments run via GitHub Actions, using federated Entra ID credentials scoped to `org/repo/environment`. It has `Owner` permissions at the top level management group. The service connection also has a token with write permissions for GitHub operations, like write variables.
+All deployments run via GitHub Actions, using federated Entra ID credentials scoped to `org/repo/environment`. It has `Owner` permissions at the top level management group. The service connection also has a token with write [permissions for GitHub operations](/docs/getting-started/#github), like write variables.
 
 Rather than hardcoding resource IDs in Bicep files, each deployment publishes its outputs — such as resource IDs — to GitHub variables. Downstream pipelines consume those variables as inputs, keeping deployments modular, decoupled, and easy to chain together.
 
