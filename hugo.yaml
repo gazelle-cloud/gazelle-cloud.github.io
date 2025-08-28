@@ -1,4 +1,5 @@
 title: Lightweight Landing Zones
+baseURL: "https://gazelle.cloud/"
 
 module:
   imports:
