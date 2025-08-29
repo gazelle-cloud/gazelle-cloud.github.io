@@ -36,6 +36,7 @@ layout: hextra-home
   >}}
     {{< hextra/feature-card
     title="Free & Open Source"
+    link="https://github.com/gazelle-cloud/gazelle-platform"
     subtitle="Gazelle is free and open source. The rules are visible, the code is yours to inspect or adapt, and the platform grows with your company."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}

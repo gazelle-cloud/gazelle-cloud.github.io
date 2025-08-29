@@ -13,16 +13,16 @@ menu:
     - name: Docs
       weight: 1
       url: "/docs/design-principles/"
-    # - name: GitHub
-    #   weight: 2
-    #   url: "https://github.com/gazelle-cloud/Azure-landing-zones"
-    #   params:
-    #     icon: github
-    # - name: Linkedin
-    #   url: "https://www.linkedin.com/in/mantas-karciauskas/"
-    #   weight: 3
-    #   params:
-    #     icon: linkedin
+    - name: GitHub
+      weight: 2
+      url: "https://github.com/gazelle-cloud/gazelle-platform"
+      params:
+        icon: github
+    - name: Linkedin
+      url: "https://www.linkedin.com/in/mantas-karciauskas/"
+      weight: 3
+      params:
+        icon: linkedin
 
 markup:
   highlight:

@@ -48,7 +48,7 @@ Gazelle is a [platform-as-code](/docs/platform-as-code/) framework. To run it yo
 
 ## GitHub
 
-- Fork the Gazelle repo into your organization.
+- [Fork the Gazelle repo](https://github.com/gazelle-cloud/gazelle-platform) into your organization.
 - Create GitHub app
   - Generate a private key and save it as an org secret named `APP_GITHUB_AZUREPLATFORM_KEY`.
   - configure repository permissions:
