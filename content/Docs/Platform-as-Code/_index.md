@@ -1,6 +1,6 @@
 ---
 linkTitle: Platform-as-Code
-description: "How I apply infrastructure-as-code principles to build Azure landing zones with Bicep and GitHub"
+description: "How I apply infrastructure-as-code principles to build composable Azure landing zones with Bicep and GitHub"
 breadcrumbs: false
 weight: 20
 cascade:
@@ -25,11 +25,10 @@ A building block owns its lifecycle. Add a block, and the capability appears in 
 | Building Block   | Description |
 |------------------|-------------|
 | [**Management Groups**](/docs/platform-as-code/building-blocks/management-groups/) | Sets up the Azure Management Group hierarchy. |
-| [**Monitor**](/docs/platform-as-code/building-blocks/monitor/)      | Deploys Log Analytics workspace, alerts, and action groups. |
 | [**Access Control**](/docs/platform-as-code/building-blocks/access-control/) | Manages access control at the management group. |
 | [**Automation**](/docs/platform-as-code/building-blocks/platform-automation/)   | Handles operational tasks to keep things healthy and clean. |
 | [**Policy**](/docs/platform-as-code/building-blocks/azure-policy/)       | Deploys policy identities, custom policy definitions, and assigns. |
-| [**Defender for Cloud**](/docs/platform-as-code/building-blocks/defender-for-cloud/)       | Configures Azure Defender for Cloud for platform management subscription |
+| [**Initial Landing Zone**](/docs/platform-as-code/building-blocks/initial-landing-zone/)       | Bootstraps the initial subscription, so the platform can stand up from day zero |
 
 Building blocks are designed to be independent—redeploy or update one without touching the rest. Outputs are passed between blocks using GitHub variables—without hardcoding resource ID.
 

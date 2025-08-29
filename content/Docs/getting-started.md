@@ -41,7 +41,7 @@ Gazelle is a [platform-as-code](/docs/platform-as-code/) framework. To run it yo
 - Assign roles to your Entra ID applications:
   - Prod app: `Owner` at the `tenant root group`.
   - Test app: `Owner` at the top-level `org-test`.
-- Create two Azure subscriptions — one for platform management test, one for prod.
+- Create two [initial Azure subscriptions](/docs/platform-as-code/building-blocks/initial-landing-zone/#bring-your-own-subscription) — one for platform management test, one for prod.
 - Assign `Contributor` role to both apps at the billing profile level.
 
 

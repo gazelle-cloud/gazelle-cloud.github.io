@@ -2,7 +2,7 @@
 linkTitle: Access Control
 description: "Manage Azure access control with Bicep: custom role definitions and assignments tied to Entra ID groups, lifecycle-managed in code for clean, automated RBAC"
 breadcrumbs: true
-weight: 30
+weight: 20
 cascade:
   type: docs
 toc: true

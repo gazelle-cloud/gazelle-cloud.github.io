@@ -2,7 +2,7 @@
 linkTitle: Azure Policy
 description: "How I implement Azure Policy–driven governance as-code, with Bicep"
 breadcrumbs: true
-weight: 60
+weight: 30
 cascade:
   type: docs
 toc: true
