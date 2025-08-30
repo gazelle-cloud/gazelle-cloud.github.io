@@ -48,9 +48,11 @@ Rather than hardcoding resource IDs in Bicep files, each deployment publishes it
 
 Every change gets proven in a fully isolated, production-like replica. Same management group structure, same policies, same access control — just in a separate subscription. Nothing is “similar” or “close enough.” It’s the same thing, end to end.
 
-The flow is simple: open an Issue, check out a branch (name it whatever you want), push your changes — and that branch deploys straight into the test environment. You validate the results there, by hand. The main branch is protected: the only path to production is through a Pull Request. That way, the exact same code that passed in test is what lands in prod. No drift, no guessing.
+The flow is simple: open an Issue, check out a branch (name it whatever you want), push your changes — and that branch deploys straight into the test environment. You validate the results there, by hand. 
 
-This symmetry is by design. If it works in test, it works in prod — exactly the same way. The environment context is baked into the GitHub workflows using environment variables, so environment-specific values are fetched on the fly. No hardcoding, no duplication, no “oops, forgot to update prod.”
+The main branch is protected: the only path to production is through a Pull Request. That way, the exact same code that passed in test is what lands in prod.
+
+If it works in test, it works in prod — exactly the same way. The environment context is baked into the GitHub workflows using environment variables, so environment-specific values are fetched on the fly. 
 
 Need to reset? Follow a [BigBang](#big-bang)
 

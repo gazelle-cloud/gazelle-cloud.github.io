@@ -43,7 +43,7 @@ Straight from GitHub — fast, flexible, and costless.
   {{< hextra/feature-card
     title="Maneuverability"
     link="/docs/platform-as-code/#building-blocks"
-    subtitle="The platform is built from composable, independent components. Each block owns its lifecycle — add one and a capability appears, remove it and it vanishes cleanly. The platform evolves in small, safe steps."
+    subtitle="The platform is built from composable, independent components. Each component owns its lifecycle — add one and a capability appears, remove it and it vanishes cleanly. The platform evolves in small steps."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
