@@ -14,7 +14,7 @@ Run Azure Landing Zones
 <div style="height: 1.5rem;"></div>
 <div class="hx:mb-10">
 {{< hextra/hero-subtitle >}}
-Gazelle is code in GitHub — building and running landing zones
+Straight from GitHub — fast, flexible, and costless.  
 {{< /hextra/hero-subtitle >}}
 </div>
 </div>
@@ -43,7 +43,7 @@ Gazelle is code in GitHub — building and running landing zones
   {{< hextra/feature-card
     title="Maneuverability"
     link="/docs/platform-as-code/#building-blocks"
-    subtitle="The platform is built from composable, independent components. Each block owns its lifecycle — add one and a capability appears, remove it and it vanishes cleanly. The platform evolves in safe, incremental steps."
+    subtitle="The platform is built from composable, independent components. Each block owns its lifecycle — add one and a capability appears, remove it and it vanishes cleanly. The platform evolves in small, safe steps."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
