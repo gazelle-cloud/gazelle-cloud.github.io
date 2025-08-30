@@ -53,26 +53,12 @@ Because modules are human-readable and self-contained, the code is easier to fol
 
 Every change runs through a production twin — same management groups, same policies, same access control. It isn’t “close enough” or “similar.” It’s identical, end to end, just isolated in a separate subscription.
 
-The flow is simple: every edit starts with [GitHub Flow](#github-flow). A branch deploys straight into test (call it preview if you like), where you see the real Azure and GitHub behavior. If it works there, it works in prod. 
+The flow is simple: every edit follows [GitHub Flow](#github-flow). A branch deploys straight into a test environment — a production-identical mirror of the platform. If it works there, it works in prod.
 
 The main branch is locked down. The only way to production is through a Pull Request. That guarantees the exact code proven in test is what ships. Environment context comes baked into the workflows — GitHub variables inject the right values on the fly.
 
 Need to reset? Follow a [BigBang](#big-bang)
 
-## GitHub Flow
-
-Every change in the platform starts the same way: with an Issue. That’s the conversation starter — a place to describe what you want to change and why. From there, you spin up a short-lived branch, make the edits in code, and push.
-
-The push goes straight into a full test environment. That’s where you validate the change by hand. If it works in test, you know it will work in prod.
-
-Once you’re happy, the last step is simple: open a Pull Request. That PR is the only doorway into main, and merging it is what takes the exact same code you just validated and applies it to production.
-
-```
-Issue → Branch → Push → Test Environment → Validate → Pull Request
-
-```
-
-The loop is short, lightweight, and predictable. It keeps every change visible, reviewed, and fully aligned with the source code — no drift, no surprises.
 
 ## Code as the Source of Truth
 
@@ -92,15 +78,44 @@ The supporting resources (like the automation identity or monitoring workspace) 
 
 ## GitHub 
 
-### Management Plane
-GitHub is the management plane for Gazelle. Every platform operation — from creating a landing zone to updating a policy — starts as an issue and makes its way to a pull request. This keeps every change visible, reviewed, and traceable — nothing happens in the dark.
+### Pull Request
+GitHub is the management plane for Gazelle. Every platform operation — from creating a landing zone to updating a policy — runs through a pull request. One simple mechanism covers every role and every scenario.
+
+- Application teams open pull requests for policy exemptions or budget adjustments.
+- Stakeholders review design changes.
+- Platform engineers introduce new capabilities in a preview environment — a production-identical space where changes prove themselves before merging.
+
+When a pull request opens, the test environment becomes the live demo. Changes prove themselves directly in Azure — a policy tweak, an access control reshape, a new design pattern. Review isn’t just reading code on a screen; it’s watching behavior in action. And because the whole flow is captured in GitHub, traceability comes built in.
 
 ### Github Actions
-All deployments run via GitHub Actions, using federated Entra ID credentials scoped to `org/repo/environment`. It has `Owner` permissions at the top level management group. The service connection also has a token with write [permissions for GitHub operations](/docs/getting-started/#github), like write variables.
+
+All deployments run through GitHub Actions, hosted entirely by GitHub. It’s the execution engine for the platform — every change flows through these pipelines.
+
+Each workflow authenticates to Azure using federated Entra ID credentials scoped to `org/repo/environment`. That identity has `Owner` rights at the top-level management group, so the workflows can deploy anything the platform needs.
+
+The service connection also carries a GitHub token with write permissions, which the workflows use for [GitHub operations like publishing variables.](/docs/getting-started/#github)
+
+
+### GitHub Flow
+
+Every change in the platform starts the same way: with an Issue. That’s the conversation starter — a place to describe what you want to change and why. From there, you spin up a short-lived branch, make the edits in code, and push.
+
+The push goes straight into a full test environment. That’s where you validate the change by hand. If it works in test, you know it will work in prod.
+
+Once you’re happy, the last step is simple: open a Pull Request. That PR is the only doorway into main, and merging it is what takes the exact same code you just validated and applies it to production.
+
+```
+Issue → Branch → Push → Test Environment → Validate → Pull Request
+
+```
+
+The loop is short, lightweight, and predictable. It keeps every change visible, reviewed, and fully aligned with the source code.
 
 ### Outputs
 
-Rather than hardcoding resource IDs in Bicep files, each deployment publishes its outputs — such as resource IDs — to GitHub variables. Downstream pipelines consume those variables as inputs, keeping deployments modular, decoupled, and easy to chain together.
+Some building blocks need to pass information to the next — like resource IDs or other values. To do that, they publish their outputs into GitHub variables at the moment they’re created. Downstream pipelines then read those variables as inputs.
+
+This makes the blocks modular and decoupled: capabilities connect without manual wiring. And because communication happens only through outputs, you can redesign the internal logic of a capability without breaking the rest of the platform — as long as it provides the same service, everything downstream keeps working.
 
 ## Big Bang
 
