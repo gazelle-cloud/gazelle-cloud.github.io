@@ -22,14 +22,6 @@ In Gazelle, I aim for the right balance between centralized and decentralized co
 
 Each landing zone arrives pre-built with the essentials — budgets, networking, identity, monitoring, and baseline policies — so you can start building immediately. From there, it’s up to you how to configure resources: code, ClickOps, or a mix of both. The platform doesn’t mandate the workflow. Autonomy means choosing the approach that fits your project — while guardrails keep you safe no matter how you deploy.
 
-## Cost
-
-Budgets are created on day one with an 80% alert threshold — because if you only hear at 100%, it’s already too late. Cost ownership is local to your app; we keep visibility high and surprises low.
-
-## Identity
-
-Every landing zone ships with a user-assigned managed identity at the subscription scope `Owner` so infrastructure pipelines can deploy immediately. I use federated credentials (Entra ID ↔︎ GitHub) scoped to `org/repo/environment`, so pipelines authenticate without secrets. 
-
 ## Self-service
 
 You request a landing zone through a GitHub Issue with just a few parameters. The pipeline provisions a ready-to-use subscription with guardrails already in place.  
@@ -41,6 +33,14 @@ Every step is captured in GitHub, so it’s always clear who requested the zone,
 In Gazelle, a landing zone is more than just an Azure subscription — the GitHub repository is part of it. The repo holds everything that ties the environment together: getting-started deployment templates, global and environment-specific parameters, and the authentication link between GitHub and Azure.  
 
 During setup, a new repo is cloned from a starter template that includes “hello world” examples, so teams can deploy something real on day one. Every landing zone comes with a GitHub repo pre-configured for its subscription. Environment variables handle the mapping, so the repo already “knows” where to deploy. The deployment flow is baked in from day one.
+
+## Cost
+
+Budgets are created on day one with an 80% alert threshold — because if you only hear at 100%, it’s already too late. Cost ownership is local to your app; we keep visibility high and surprises low.
+
+## Identity
+
+Every landing zone ships with a user-assigned managed identity at the subscription scope `Owner` so infrastructure pipelines can deploy immediately. I use federated credentials (Entra ID ↔︎ GitHub) scoped to `org/repo/environment`, so pipelines authenticate without secrets. 
 
 
 ## Network

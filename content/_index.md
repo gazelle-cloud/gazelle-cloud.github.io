@@ -3,60 +3,60 @@ description: "Opinionated Azure landing zones with Bicep and GitHub. Reproducibl
 title: Hextra Theme
 layout: hextra-home
 ---
+
 <div style="margin: auto; text-align: center;">
 <div class="hx:mt-6 hx:mb-6">
 {{< hextra/hero-headline >}}
- Run Azure Landing Zones&nbsp;<br class="hx:sm:block hx:hidden" />All from GitHub 
+Run Azure Landing Zones
 {{< /hextra/hero-headline >}}
 </div>
 
-  <div style="height: 2rem;"></div>
-<div class="hx:mb-12">
+<div style="height: 1.5rem;"></div>
+<div class="hx:mb-10">
 {{< hextra/hero-subtitle >}}
-  CAF gives you principles&nbsp;<br class="hx:sm:block hx:hidden" />Consultants give you slides&nbsp;<br class="hx:sm:block hx:hidden" />I give you a working platform
+Gazelle is code in GitHub — building and running landing zones
 {{< /hextra/hero-subtitle >}}
 </div>
-  <div style="height: 2 rem;"></div>
-
 </div>
- <div style="height: 3rem;"></div>
 
-<div class="hx:mt-6"></div>
+<div style="height: 3rem;"></div>
 
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
-    title="Pull Requests as Governance"
-    subtitle="Everyone works the same way: through pull requests. Application teams request exemptions. Platform engineers propose changes. Stakeholders approve strategy. One flow, one truth."
+    title="Flexible by Design"
+    link="/docs/landing-zone/#built-your-way"
+    subtitle="The platform bends without breaking. It defines the boundaries, but your team makes the choices. No matter the path, every environment stays consistent."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
-    title="Self-Service"
-    subtitle="Developers request landing zones through GitHub. Guardrails are automatic, so teams move fast without needing a central platform crew behind every change."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
-  >}}
-    {{< hextra/feature-card
-    title="Free & Open Source"
-    link="https://github.com/gazelle-cloud/gazelle-platform"
-    subtitle="Gazelle is free and open source. The rules are visible, the code is yours to inspect or adapt, and the platform grows with your company."
+    title="Fast Feedback"
+    link="/docs/platform-as-code/#test-environments"
+    subtitle="Every change proves itself in minutes in a full test environment. The same code then flows into production, boosting confidence and eliminating surprises."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
-    title="Autonomy by Default"
-    link="/docs/landing-zone/"
-    subtitle="Every team owns its own cloud space. No shared services, no central bottlenecks. Guardrails apply everywhere, but freedom inside them belongs to the team."
+    title="Grace Under Pressure"
+    link="/docs/platform-as-code/#big-bang"
+    subtitle="A full redeploy, from nothing, isn’t a crisis. It’s a coffee break — proof that the platform can always reset itself cleanly and keep moving."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
-    {{< hextra/feature-card
+  {{< hextra/feature-card
+    title="Maneuverability"
+    link="/docs/platform-as-code/#building-blocks"
+    subtitle="The platform is built from composable, independent components. Each block owns its lifecycle — add one and a capability appears, remove it and it vanishes cleanly. The platform evolves in safe, incremental steps."
+    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
+  >}}
+  {{< hextra/feature-card
     title="Zero Platform Cost"
     link="/docs/design-principles/cost-efficiency/"
-    subtitle="Gazelle runs on Azure’s free tier — management groups, policy, deployment stacks, and few others. The platform stays off the bill; costs land directly with the workloads that generate them."
+    subtitle="Gazelle runs entirely on Azure’s free tier. Costs live only with the workloads that generate them."
     style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
-  title="Platform-as-Code"
-  link="/docs/platform-as-code/"
-  subtitle="Landing zones, access, policies — everything that shapes the platform is written in code. Changes flow through pull requests, making governance predictable, auditable, and reproducible."
-  style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
+    title="Open Source"
+    link="https://github.com/gazelle-cloud/gazelle-platform/"
+    subtitle="All the code is public. Fork it, adapt it, rebuild it your way — every option is open."
+    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
   >}}
 {{< /hextra/feature-grid >}}
 
@@ -64,7 +64,7 @@ layout: hextra-home
 <div style="margin: auto; text-align: center;">
 
 {{< hextra/hero-subtitle >}}
-Gazelle is code: reproducible in minutes, scalable by design, opinionated where it matters
+Gazelle is code that breathes and moves in the direction you choose.
 {{< /hextra/hero-subtitle >}}
 
 </div>
