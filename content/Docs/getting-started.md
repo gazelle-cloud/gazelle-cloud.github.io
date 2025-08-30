@@ -8,7 +8,7 @@ cascade:
 toc: true
 ---
 # Getting Started
-Gazelle is a [platform-as-code](/docs/platform-as-code/) framework. To run it you bootstrap the platform in your own GitHub organization, wired to your Azure tenant and Entra ID. This guide assumes you are an Azure engineer preparing to stand up Gazelle for your organization.
+[Gazelle is a code](/docs/platform-as-code/). To run it you bootstrap the platform in your own GitHub organization, wired to your Azure tenant, Entra ID and GitHub. This guide assumes you are an cloud engineer preparing to stand up Gazelle for your tenant.
 
 ## Prerequisite
 
