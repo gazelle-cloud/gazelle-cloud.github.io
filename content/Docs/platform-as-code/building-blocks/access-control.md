@@ -1,36 +1,40 @@
 ---
 linkTitle: Access Control
-description: "Manage Azure access control with Bicep: custom role definitions and assignments tied to Entra ID groups, lifecycle-managed in code for clean, automated RBAC"
+description: "Manage Azure access control to Azure at Management Group level with Bicep: custom role definitions and assignments tied to Entra ID groups"
 breadcrumbs: true
 weight: 20
 cascade:
   type: docs
 toc: true
 ---
+# Access Control
+Gazelle is built from modular blocks, each designed to be deployed and managed independently end-to-end. This page covers the access control, with focus on assigning access to humans at the platform level.
 
-## No Human Touch
+## Limited Human Access
+Direct access to cloud resources is eliminated by default. Nobody edits infrastructure by hand. Manual changes drift, and the next deployment either overwrites them or leaves the environment inconsistent. Both break reproducibility. To avoid that, I restrict human access to the smallest set of operations that make sense — like restarting a service. Access is cut down to essentials.
 
-Direct human access is minimized by design — nobody edits infrastructure by hand. If someone were to change an Azure service manually, the next deployment would overwrite it, or worse, leave the environment drifting out of sync. Either way, consistency across environments is broken. To avoid that, I only allow custom roles for operations that make sense — like restarting a service — and nothing beyond that. Roles are pared down to just enough permissions, never more
+## Roles by Function
 
-## Custom Roles
+Azure ships a wide catalog of built-in roles, but they are resource-centric and grant far more than any one job requires. `Storage Account Contributor` is the classic example: it fits a resource, not a role.
 
-Every custom role starts from Reader. From there, I add only the specific actions required for the job function. A platform engineer role, for example, can operate platform services but cannot modify Azure resources defined in code. This keeps operations safe without breaking Infrastructure-as-Code.
+In Gazelle, roles are defined by function, not resource. Every role starts at Reader. From there, I add only the actions tied to a specific function.
+- **Platform engineer** — can operate the platform services (read logs, remediate policies) but cannot modify Azure resources defined in code.
+- **Cost reader** — can view consumption and billing data, and nothing else.
 
-## Lifecycle Management
-
-From the deployment perspective, a role definition and its assignment form a single unit. They are created together, updated together, and retired together when no longer needed. Each role is tied to a single scope and a single Entra ID group — no sharing, no reassigning. If another scope or group needs access, it gets its own role defined in code.
-
-If a role isn’t needed anymore, deleting the block removes both the definition and the assignment in one step. Nothing lingers — no orphaned roles, no leftover permissions. Just clean state, exactly as the code defines it.
+This way, people get exactly what they need — safer to run, easier to reason about.
 
 ## Assignments
 
-Assignments are always scoped at the management group level and linked to Entra ID groups — never to individuals. Membership stays managed centrally in Entra ID, while permissions live entirely in code. Identity ownership in one place, access control in another. Clear, automated, reproducible.
+Role assignments are always at the management group scope and linked only to Entra ID groups, never to individuals. Membership stays owned in Entra ID, while permissions are defined in templates. From there, each custom role and its assignment move together as one unit — created, updated, and deleted in sync. Delete the block, and both vanish from Azure. This lifecycle is managed by an Azure Deployment Stack and a Bicep module purpose-built for access control, driven by a simple parameter file.
 
-## How To 
+## How To
 
-to modify access control, edit parameter file `building-blocks/access-control/parameters/accessControl.bicepparam`
+Access control is fully parameterized. Edit:
+`building-blocks/access-control/parameters/accessControl.bicepparam`
 
-From there, you declare exactly what you need: update an existing role by adjusting its actions, introduce a new one by adding a block with roleName, actions, principalId, and scope, or remove a role entirely by deleting its block from the file.
+- Update a role → adjust its actions.
+- Create a role → add a block with roleName, actions, principalId, and scope.
+- Remove a role → delete the block.
 
 ```bicep
 param accessControl = [
@@ -58,3 +62,7 @@ param accessControl = [
   }
 ]
 ```
+> The Platform Owner role exists only as an emergency account. It is not intended for daily operations and should remain unused under normal circumstances.
+
+
+
