@@ -1,6 +1,6 @@
 ---
 linkTitle: Azure Policy
-description: "End-to-End Azure Policy Governance: From Identity Setup to Policy Exemptions"
+description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
 breadcrumbs: true
 weight: 30
 cascade:

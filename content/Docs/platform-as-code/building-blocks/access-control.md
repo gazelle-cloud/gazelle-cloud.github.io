@@ -1,13 +1,13 @@
 ---
 linkTitle: Access Control
-description: "Manage Azure access control to Azure at Management Group level with Bicep: custom role definitions and assignments tied to Entra ID groups"
+description: "Azure Landing Zones: Access Control — Custom roles to provide just enough access"
 breadcrumbs: true
 weight: 20
 cascade:
   type: docs
 toc: true
 ---
-# Access Control
+# Azure Landing Zone Access Control
 Gazelle is built from modular blocks, each designed to be deployed and managed independently end-to-end. This page covers the access control, with focus on assigning access to humans at the platform level.
 
 ## Limited Human Access
