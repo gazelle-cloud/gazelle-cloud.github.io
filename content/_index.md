@@ -1,70 +1,30 @@
 ---
-description: "Opinionated Azure landing zones with Bicep and GitHub. Reproducible in minutes, scalable by design, open source by default."
-title: Hextra Theme
-layout: hextra-home
+weight: 1
+bookFlatSection: true
+title: "azure lz"
 ---
+# Lightweight Azure Landing Zone
 
-<div style="margin: auto; text-align: center;">
-<div class="hx:mt-6 hx:mb-6">
-{{< hextra/hero-headline >}}
-Run Azure Landing Zones
-{{< /hextra/hero-headline >}}
-</div>
+Gazelle is a lightweight Azure landing zone platform designed to maximize team autonomy and minimize platform overhead. It achieves this by keeping shared services to an absolute minimum, avoiding central bottlenecks and operational friction. Each landing zone is fully self-contained — including networking, monitoring, and identity — enabling teams to move at their own pace while maintaining consistent operational and security baselines
 
-<div style="height: 1.5rem;"></div>
-<div class="hx:mb-10">
-{{< hextra/hero-subtitle >}}
-Straight from GitHub — fast, flexible, and costless.  
-{{< /hextra/hero-subtitle >}}
-</div>
-</div>
+Built on the principles of the Microsoft Cloud Adoption Framework, Gazelle turns theory into practice. While CAF offers hundreds of design considerations, Gazelle provides a clear, opinionated implementation — a working example of how to build a secure, consistent, and cost-efficient Azure platform managed entirely as code.
 
-<div style="height: 3rem;"></div>
+## Free to Run
 
-{{< hextra/feature-grid >}}
-  {{< hextra/feature-card
-    title="Flexible by Design"
-    link="/docs/landing-zone/#built-your-way"
-    subtitle="The platform bends without breaking. It defines the boundaries, but your team makes the choices. No matter the path, every environment stays consistent."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
-  >}}
-  {{< hextra/feature-card
-    title="Fast Feedback"
-    link="/docs/platform-as-code/#test-environments"
-    subtitle="Every change proves itself in minutes in a full test environment. The same code then flows into production, boosting confidence and eliminating surprises."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
-  >}}
-  {{< hextra/feature-card
-    title="Grace Under Pressure"
-    link="/docs/platform-as-code/#big-bang"
-    subtitle="A full redeploy, from nothing, isn’t a crisis. It’s a coffee break — proof that the platform can always reset itself cleanly and keep moving."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
-  >}}
-  {{< hextra/feature-card
-    title="Maneuverability"
-    link="/docs/platform-as-code/#building-blocks"
-    subtitle="The platform is built from composable, independent components. Each component owns its lifecycle — add one and a capability appears, remove it and it vanishes cleanly. The platform evolves in small steps."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
-  >}}
-  {{< hextra/feature-card
-    title="Zero Platform Cost"
-    link="/docs/design-principles/cost-efficiency/"
-    subtitle="Gazelle runs entirely on Azure’s free tier. Costs live only with the workloads that generate them."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
-  >}}
-  {{< hextra/feature-card
-    title="Open Source"
-    link="https://github.com/gazelle-cloud/gazelle-platform/"
-    subtitle="All the code is public. Fork it, adapt it, rebuild it your way — every option is open."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(190, 187, 243, 0.15),hsla(0,0%,100%,0));"
-  >}}
-{{< /hextra/feature-grid >}}
+Gazelle runs entirely on free Azure services, avoiding components with fixed fees such as Virtual WAN. The platform itself has near-zero cost — all spending occurs within application workloads. While total Azure usage may increase, this trade-off favors speed, flexibility, and team ownership over centralized optimization.
 
-<div style="height: 5rem;"></div>
-<div style="margin: auto; text-align: center;">
+## Team Autonomy
 
-{{< hextra/hero-subtitle >}}
-Gazelle is code that breathes and moves in the direction you choose.
-{{< /hextra/hero-subtitle >}}
+Each landing zone is fully isolated and self-contained, including networking, diagnostics, monitoring, identity, and cost management. This independence removes cross-team dependencies and lets application teams fine-tune their infrastructure directly through self-service.
 
-</div>
+## Self-Service
+
+Landing zone lifecycle operations — creation, budget updates, policy exemptions — are managed by application teams through GitHub in a self-service model. All changes flow through pull requests, providing full transparency and control. With that flexibility comes responsibility: teams own their changes, costs, and risks.
+
+## Everything-as-Code
+
+The platform is fully automated — no manual steps. All resources are defined and deployed as code using modular Bicep templates purpose-built for each platform capability. The entire environment can be destroyed and rebuilt at any time. To validate this, the Gazelle test environment is automatically redeployed from scratch every Sunday night.
+
+## Why Gazelle
+
+Gazelle is not a replacement for the Microsoft Cloud Adoption Framework — it’s a practical companion. Instead of theoretical checklists, it offers concrete, working answers to CAF’s design areas: identity, network, security, billing, resource organization, governance and deployment automation. The goal is to provide a minimal yet complete foundation that platform teams can understand, extend, and operate with confidence.

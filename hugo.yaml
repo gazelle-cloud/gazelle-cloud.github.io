@@ -51,7 +51,7 @@ params:
       height: 20
   theme:
     default: light
-    displayToggle: false
+    displayToggle: true
 
   footer:
     enable: false
