@@ -44,11 +44,11 @@ Getting started in Gazelle begins with a quick application registration. This st
 
 ## New Landing Zone
 
-Once the initial application configuration is complete, a new landing zone can be created by submitting the `New Landing Zone Request` GitHub Issue template. The workflow is triggered when the issue is `closed`
+Once the initial application configuration is complete, a new landing zone can be requested by opening the `New Landing Zone Request` GitHub Issue template. The workflow is triggered when the issue is `closed`. What happens is:
 
 - **Parameter File**: generates a parameter file for the landing zone and places it under `azurePlatform/landingzones`. This file defines all settings like name, and budget. It serves as the single source of truth for the landing zone. You can modifyed at any time by opening a Pull Request.
 
-- **GitHub Workflow**: a landing  zone specific GitHub workflow is created. It contains the triggers rules and Bicep templates that will configures landing zone.
+- **GitHub Workflow**: a landing zone specific GitHub workflow is created. It contains the triggers rules and Bicep templates that will configures landing zone foundational services.
 
 - **Ready**: landing zone is considered ready when engineer receive an email from Azure Monitor. That notification means budgets are configured, guardrails are enforced, and the environment is prepared for building in Azure.
 

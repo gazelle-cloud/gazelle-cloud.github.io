@@ -85,9 +85,9 @@ Workloads that require a permanent exlusion from an Azure Policy can request it 
 
 ### Policy Assignment Dump File
 
-To simplify use experience to create a policy exemption, a `json` file containing policy assignments details (assignment and refentrece id) is provided, allowing engineers to use tab-completion, making the exemption process clear and stightforward process.  
+To simplify use experience to create a policy exemption, a `policy-assignment-reference.json` file containing policy assignments details (assignment and refentrece id) is provided, allowing engineers to use tab-completion, making the exemption process clear and stightforward flow.  
 
-The reference file is update automatically, in a GitHub Actions, during a policy assignment workflow. After the policy is assigned, next step is to fetch policy assignments data from the live Azure environment and generate a json file. If there any update in the file, a Pull Request is created by the GitHub Actions. This flow helps to ensure that policy reference is allways up to date and provides users a friendly exeprience to create policy exemptions.
+The reference file is update automatically, in a GitHub Actions, during a policy assignment workflow. After the policy is assigned, next step is to fetch policy assignments data using Azure Resource Graph from the live Azure environment and generate a json file. If there are any updates in the file, a Pull Request is created by the GitHub Actions. This flow helps to ensure that policy reference is allways up to date and provides users a friendly exeprience to create policy exemptions.
 
 ## Policy Identity
 
