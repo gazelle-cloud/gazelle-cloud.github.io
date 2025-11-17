@@ -10,19 +10,19 @@ toc: true
 
 # Deployment Logic
 
-Everything in Azure is a resource — each with its own properties, parameters, and configuration rules. Once you view the platform through that lens, you can standardize the entire lifecycle of every capability. The desired state is defined through purpose-built Bicep modules. Inputs and outputs flow in a controlled loop between GitHub variables and Azure, ensuring every deployment has the information it needs. Resources lifecycle is managed by Azure Deployment Stack, making the repository the single source of truth. And every change flows through GitHub Actions — validated in the test environment before being applied to production.
+Everything in Azure is a resource — each with its own properties, parameters, and configuration rules. Once you view the platform through that lens, you can standardize the entire lifecycle of every capability. The desired state is defined through purpose-built Bicep modules. Inputs and outputs flow in a controlled loop between GitHub variables and Azure, ensuring every deployment has the information it needs. Resources lifecycle is managed by Azure Deployment Stack, making the codebase the single source of truth. And every change flows through GitHub Actions — validated in the test environment before being applied to production.
 
 ## GitHub Flow
 
 Every change to the platform starts the same way: with an Issue. That’s the conversation starter — the place to describe what you want to change and why. From there, you create a short-lived branch, make the edits in code, and push your changes.
 
-The push triggers a full deployment into the test environment, where you validate the change directly in Azure. If it works in test, you can trust it will work in production — same code, same structure, same platform.
+The push triggers a deployment into the test environment, where you validate the change directly in Azure. If it works in test, you can trust it will work in production — same code, same structure.
 
-Once you’re satisfied, the final step is simple: open a Pull Request. The PR is the only doorway into main, and merging it applies the exact same code you just validated to production.
+Once you’re satisfied, the final step is open a Pull Request. The Pull Request is the only doorway into main, and merging it applies the exact same code you just validated to production.
 
 ## GitHub Actions
 
-Every change to the platform runs through GitHub Actions. All deployments — test and production — are executed by pipelines hosted entirely on GitHub. Nothing is applied directly in Azure; GitHub Actions is the single entry point for updating the platform. To support this model, each workflow authenticates using a service connection with permissions:
+Every change to the platform runs through GitHub Actions. All deployments — test and production — are executed by pipelines hosted on GitHub. Nothing is applied directly in Azure; GitHub Actions is the single entry point for updating the platform. To support this model, each workflow authenticates using a service connection with permissions:
 
 - **Entra ID** — Authentication via the `azure-gazelle-landingzones` application using federated credentials scoped at `organization/repository/environment`.
 - **Microsoft Graph** — `Directory.ReadWrite.All` and `AppRoleAssignment.ReadWrite.All` for managing Graph permissions for managed identities.
@@ -31,7 +31,7 @@ Every change to the platform runs through GitHub Actions. All deployments — te
 
 ## Deployment Orchestration
 
-To ensure modularity, consistency, and independence across all platform capabilities, deployments are executed through a custom-built PowerShell cmdlet. This cmdlet standardizes how resources are created, updated, and removed by invoking an Azure Deployment Stack. Any resources no longer present in the templates are automatically removed, ensuring environment drift is minimized and the desired state is always enforced.
+To ensure modularity, consistency, and independence across all platform capabilities, deployments are executed through a custom-built PowerShell cmdlet. This cmdlet standardizes how resources are created, updated, and removed by invoking an Azure Deployment Stack. Any resources no longer present in the templates are removed, ensuring environment drift is minimized and the desired state is always enforced.
 
 After each deployment completes, the cmdlet processes the outputs from the Bicep templates. Outputs can be sent back to GitHub by defining one of the supported output objects:
 - **GitHubEnvironmentVariables**

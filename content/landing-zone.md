@@ -16,16 +16,16 @@ The landing zone is built for team autonomy, minimized dependencies on centrally
 ## What you Get
 
 - **Self-service**: create, update, and remove landing zones via GitHub Issues and Pull Request.
-- **You build it, you run it**: application teams own their landing zones and and operational lifecycle.
+- **You build it, you run it**: design, implement and operate the application from the start to sunset.
 - **Autonomy**: foundational Azure configuration baked straight in the landing zone.
-- **hello-world**: a getting started deployment pipeline aligned with platform management priinciples.
+- **hello-world**: a getting started deployment pipeline aligned with platform management principles.
 
 ## Platform Rules
 
 - **Cost**: is tracked at the application level — every landing zone maps directly to the app’s invoice section.
 - **Isolated Landing zones**: One application - one environment - one landing zone — a fully isolated subscription for each application/environment
-- **Diagnostic settings**: logs are collected in the landing zone’s Log Analytics workspace.
 - **Policy-driven governance**: Azure Policies enforce allowed configurations and deny anything outside the security baseline.
+- **Diagnostic settings**: logs are collected in the landing zone’s Log Analytics workspace.
 
 ## Register the Application
 
