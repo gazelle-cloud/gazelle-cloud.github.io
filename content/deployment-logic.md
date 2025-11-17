@@ -61,6 +61,10 @@ Landing zones are also provisioned using Azure Deployment Stacks, but their scop
 
 Every change to the platform is validated in a test environment first. It mirrors production exactly — same management group hierarchy, same policies, same access control, and the same deployment flow — but runs in an isolated, separate subscription. This ensures every capability and configuration change is fully exercised before reaching production. Engineers can verify new functionality end-to-end — not just theoretically or by reading the code, but by observing real Azure behavior in a real Azure environment. This ensures changes are safe, predictable, and production-ready.
 
+- Everything that is not on the main branch is deployed to the test environment first. Create a Pull Request to merge changes to main.
+- Platform engineers have `Owner` permissions, allowing manual operations. It's used for troubleshooting and development purposes.
+- Environment can be fully wipe-out and recreated from scratch.
+
 ## End-to-End Flow
 
 To keep the platform modular and lightweight deployment experience, the platform is broken into a set of “building blocks.” Each building block is an independent GitHub Actions workflow that delivers a single capability end-to-end. Every workflow is responsible for everything it needs to operate in Azure, to writing deployment outputs back into GitHub variables, by allowing other platfrom capabilities to to fetch a property, like `log-analytics-resource-id`.

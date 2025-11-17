@@ -17,7 +17,7 @@ To make Azure policy work smooth, few moving parts have to click together, so pl
 
 - Following a whitelist approach, only approved Azure resources and configurations can be deployed to landing zones, ensuring consistency.
 
-- Every change to a policy is first validated in a production-like test environment, identical to the live setup, minimizing the risk of misconfiguration.
+- Every change to a policy is first [validated in a production-like test environment](../deployment-logic/#test-environment), identical to the live setup, minimizing the risk of misconfiguration.
   
 - Everything is managed as code — from deployment and configuration to exemptions — eliminating manual steps and ensuring consistency and reproducability.
   

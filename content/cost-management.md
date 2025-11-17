@@ -15,9 +15,9 @@ By using Azure-native tools and isolating each environment within its own landin
 
 ## Cost per Applicaiton
 
-Each application has a dedicated Azure invoice section, which serves as its financial boundary. All landing zones required by the application are created under this same invoice section. This structure provides a complete view of the total cost of running the application — including compute, storage, networking, monitoring, and other supporting Azure services.
+Each application has a dedicated Azure invoice section, which serves as its financial boundary. All landing zones required by the application are created under this same invoice section. This structure provides a complete view of the total cost of running the application — including application infrastructure and other supporting Azure services.
 
-To ensure visibility and transparency, an Entra ID group named `Azure-application-reader` is created for each application. This group includes `Reader` permissions across all related subscriptions, along with `Invoice Section reader`  — giving a clear view of all costs for the application.
+To ensure visibility and transparency, an Entra ID group named `Azure-applicationName-reader` is created for each application. This group includes `Reader` permissions across all related subscriptions, along with `Invoice Section reader`  — giving a clear view of total costs for the application.
 
 ## Budget Alerts
 
