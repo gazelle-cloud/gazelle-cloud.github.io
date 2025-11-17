@@ -1,7 +1,10 @@
 ---
-linkTitle: Cost management
+linkTitle: Cost Management
 description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
 weight: 70
+breadcrumbs: false
+cascade:
+  type: docs
 toc: true
 ---
 # Cost Management

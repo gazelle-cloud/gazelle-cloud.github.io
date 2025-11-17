@@ -1,9 +1,13 @@
 ---
 linkTitle: Access Control
-description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
+description: "A step-by-step guide to implementing Azure Landing Zones in your tenant — free and open source"
 weight: 20
+breadcrumbs: false
+cascade:
+  type: docs
 toc: true
 ---
+
 
 ## Entra ID as Identity Provider
 
@@ -27,9 +31,7 @@ Direct access to cloud resources is eliminated by default. Nobody edits infrastr
 Azure provides many built-in roles, but these are resource-centric and often grant broader permissions than a specific job requires—for example, the `Storage Account Contributor` role aligns with a resource rather than a real-world function. In Gazelle, roles are defined by function, not resoruce, for example: 
 - **Platform engineer** — can operate the platform services (read logs, remediate policies) but cannot modify Azure resources defined in code.
 
-## How to
-
-### Edit Role Assignments
+## Role Assignments
 
 Bicep templates streamline access management by abstracting Azure Role Definitions and Assignments. Membership is managed through Entra ID groups, while permissions are defined directly in the templates. All access configurations—role name, actions, scope, and Entra ID target—are centralized in a single parameter file that serves as the single source of truth: any role or permission removed from this file is automatically removed from Azure.
 

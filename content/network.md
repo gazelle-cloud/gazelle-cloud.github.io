@@ -2,6 +2,9 @@
 linkTitle: Network
 description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
 weight: 30
+breadcrumbs: false
+cascade:
+  type: docs
 toc: true
 ---
 
@@ -26,4 +29,4 @@ If public network access is required for legitimate business or application purp
 
 To maintain flexibility for future connectivity, each virtual network is assigned a unique, non-overlapping address space (default /24). This approach ensures that VNet peerings can be established later without IP conflicts, supporting Azure-native communication between landing zones when required.
 
-Address space allocation is fully automated using the bom bam boom PowerShell script, which dynamically determines the next available address block. During new landing zone creation, the script queries Azure Resource Graph in real time to identify and assign the next free CIDR range.
+Address space allocation is fully automated using the bom bam boom PowerShell script, which dynamically determines the next available address block. During new landing zone creation, the script queries Azure Resource Graph in real time to identify and assign the next free CIDR range. Address space saved in applications github repo as environment variable. 

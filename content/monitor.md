@@ -2,6 +2,9 @@
 linkTitle: Monitor
 description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
 weight: 50
+breadcrumbs: false
+cascade:
+  type: docs
 toc: true
 ---
 # Monitor

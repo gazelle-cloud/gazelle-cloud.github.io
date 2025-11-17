@@ -2,6 +2,9 @@
 linkTitle: Platform Automation
 description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
 weight: 60
+breadcrumbs: false
+cascade:
+  type: docs
 toc: true
 ---
 # Automating Platform Operations

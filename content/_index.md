@@ -1,7 +1,13 @@
 ---
+linkTitle: index
+description: "A step-by-step guide to implementing Azure Landing Zones in your tenant — free and open source"
+breadcrumbs: false
 weight: 1
-bookFlatSection: true
-title: "azure lz"
+cascade:
+  type: docs
+toc: true
+---
+
 ---
 # Lightweight Azure Landing Zone
 
@@ -28,3 +34,5 @@ The platform is fully automated — no manual steps. All resources are defined a
 ## Why Gazelle
 
 Gazelle is not a replacement for the Microsoft Cloud Adoption Framework — it’s a practical companion. Instead of theoretical checklists, it offers concrete, working answers to CAF’s design areas: identity, network, security, billing, resource organization, governance and deployment automation. The goal is to provide a minimal yet complete foundation that platform teams can understand, extend, and operate with confidence.
+
+it's free and the code is on github

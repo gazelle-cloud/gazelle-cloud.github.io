@@ -1,7 +1,10 @@
 ---
 linkTitle: Deployment Logic
 description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
-weight: 90
+weight: 80
+breadcrumbs: false
+cascade:
+  type: docs
 toc: true
 ---
 

@@ -2,33 +2,34 @@
 linkTitle: Azure Policy
 description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
 weight: 40
+breadcrumbs: false
+cascade:
+  type: docs
 toc: true
 ---
 # Policy Driven Governance
 
-Azure Policy is a powerful service that helps ensure consistent configuration of Azure resources across all subscriptions in a tenant. It enables you to enforce organization-wide standards — for example, denying public network access, disabling insecure authentication methods, or configuring diagnostic settings — on all resources including Storage Accounts, Key Vaults, and databases.
+Azure Policy is a powerful service that helps ensure consistent configuration of Azure resources across all subscriptions. It enables you to enforce organization-wide standards — for example, denying public network access, disabling insecure authentication methods, or configuring diagnostic settings — on all resources including Storage Accounts, Key Vaults, and databases.
 
-Under the Azure Policy umbrella, I manage everything from custom definitions, assignments, exemptions, and remediation tasks to a full Bicep and GitHub Actions codebase that orchestrates the service end to end.
+Under the Azure Policy umbrella, I manage everything from custom definitions, assignments, exemptions, and remediation tasks to a Bicep and GitHub Actions that orchestrates the service end to end.
 
 In this post, I’ll explain how Azure Policy is managed in Gazelle tenant, so platform engineers can focus on defining new rules using parameter files only. It also empowers application teams to request Policy Exemptions through self-service — eliminating ticket overhead while keeping every exemption documented and traceable.
 
 ## Design Principles
 
-Before diving into configuraiton and implementation details, these design principles outline how Azure Policy is structured and operated in Gazelle tenant.
-
 - All custom Policy Definitions are deployed at the top-level management group, allowing them to be reused across child management groups just like built-in definitions.
 
-- Policies are grouped into Policy Set Definitions (initiatives) based on their purpose, following strict naming conventions to make their intent immediately clear.
+- Policies are grouped into Policy Set Definitions based on their purpose, following naming conventions to make their intent clear.
 
-- Assignments are configured at the child management group level, providing fine-grained control for different types of cloud applications.
+- Assignments are configured at the child management groups, where each policy has it's own Bicep module, for fine-grain configuration posiblities
 
-- Application teams can request Policy Exemptions by editing their landing zone parameter file and submitting a Pull Request — enabling a self-service workflow with full traceability.
+- Application teams can request Policy Exemptions by editing their landing zone parameter file and submitting a Pull Request — as a self-service.
 
 - Everything is managed as code — from deployment and configuration to exemptions — eliminating manual steps and ensuring consistency across environments.
 
-- Every change to a policy is first validated in a production-like test environment, identical to the live setup, minimizing the risk of misconfiguration or unintended impact.
+- Every change to a policy is first validated in a production-like test environment, identical to the live setup, minimizing the risk of misconfiguration.
 
-- Following a whitelist approach, only approved Azure resources and configurations can be deployed to landing zones, ensuring consistent and compliant environments.
+- Following a whitelist approach, only approved Azure resources and configurations can be deployed to landing zones, ensuring consistency.
 
 
 ## Policy Assignment Structure
@@ -36,7 +37,7 @@ Before diving into configuraiton and implementation details, these design princi
 ### Assignment Scope
 Policy assignments are applied at the child management group level, where each scope runs its own deployment stack bundling all relevant policies and parameters. While the overall governance model remains consistent across the tenant, the allowed resources and configurations can vary slightly between scopes. This structure ensures uniform governance while still allowing each environment to fine-tune its security and operational baseline.
 
-### Name Convention
+### Name Standards
 To maintain clarity and consistency, Azure Policies are grouped by compliance requirement and named by intent. Each policy name begins with its effect (`Allow`, `Deny`, or `Config`) followed by the requirement — for example, `Deny Public Network Access`.
 Behind this naming convention is a simple, explicit mapping to Azure Policy effects:
 
@@ -105,15 +106,11 @@ The identity lives in a platform management subscriotion with a `Contributor` ro
 
 ## Remediation Tasks
 
-Azurer Policies that has `modify` or `deployIfNotExists` effect are remediate on a schedule base by the platform automation jobs. The job detectes resoruces that are out of compliance and automaticaly applies the fix, like enforcing required tags or wiring up diagnostic settings. This ensures platform guardrails are always applied, without waiting for someone to notice and correct it by hand.
-
-The automation itself is written in PowerShell, packed into the Docker container and hosted under in the container app environment under the platform-automation capability. 
-
+Azurer Policies that has `modify` or `deployIfNotExists` effect are remediate on a schedule base by the platform automation jobs. The job detectes resoruces that are out of drift and automaticaly applies the fix, like enforcing required tags or wiring up diagnostic settings. This ensures platform guardrails are always applied, without waiting for someone to notice and correct it by hand.
 
 ## Deployment Logic
 
-- **Zero Human Touch** - all aspects of the Azure Policy is managed as a code, there is no direct human involved in the flow.
-- **Test Envirornment** - all changes are first pushed to the identitical test environment, to validate that everything works as expected. 
+
 - **Hardcoded SetDefiniition Values**: To reduce policy management verbosity from the Bicep perspective, Policy Set Definitions and Policy Assignment bundle into a single unit. Intead of tradional flow, where Set Definition is decleared onced and re-used accross all assignments, I flip it around - set definition is dedicated to policy assignment. It's one-to-one mapping. This tweak enables to have a single, user-friendly parameter file for each policy assignment. 
 - **GitHub workflow**:
   -  **Identity** - create a user assigned identity and RBAC role at the management group level.

@@ -1,4 +1,4 @@
-title: Lightweight Landing Zones
+title: gazelle cloud
 baseURL: "https://gazelle.cloud/"
 
 module:
@@ -7,12 +7,6 @@ module:
 
 menu:
   main:
-    - name: 
-      weight: 1
-      url: "/"
-    - name: Docs
-      weight: 1
-      url: "/docs/design-principles/"
     - name: GitHub
       weight: 2
       url: "https://github.com/gazelle-cloud/gazelle-platform"
@@ -39,7 +33,7 @@ markup:
 
 params:
   description: An open source toolkit for deploying Azure landing zones with GitHub Actions and Bicep.
-
+  contentDir: /
   navbar:
     displayTitle: true
     displayLogo: false
@@ -50,7 +44,7 @@ params:
       width: 40
       height: 20
   theme:
-    default: light
+    default: system
     displayToggle: true
 
   footer:
