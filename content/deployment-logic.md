@@ -47,8 +47,7 @@ output GitHubEnvironmentVariables object = {
 ```
 The deployment script flattens this object into key–value pairs and writes them into GitHub variables. These values then become inputs to downstream workflows, enabling sharing of information—such as a Log Analytics workspace ID or the resource ID of a virtual network—across all deployment pipelines. 
 
-By standardizing how inputs are collected, how deployments are executed, and how outputs flow back into GitHub, the platform achieves a consistent and scalable model. 
-
+By standardizing how inputs are collected, how deployments are executed, and how outputs flow back into GitHub, the platform achieves a consistent and scalable model.
 
 ## Azure Deployment Stacks
 
@@ -74,13 +73,11 @@ Inside each building block, the platform configuration is expressed through a se
 
 Because every module is built for a specific purpose, the configuration remains simple and readable. There is no need for deeply complex or overly generic templates. Instead, each purpose-built module clearly communicates what the platform is deploying, how it behaves, and which standards it enforces — making it obvious how the environment is actually configured in Azure.
 
-Modules also define the scaling rules, the standardized values, and which configuration options are intentionally exposed versus hardcoded. As a result, scaling or extending the platform becomes straightforward: engineers modify a human-readable parameter file, and the automation handles the rest. This approach keeps deployments predictable, maintainable, and aligned with the platform’s design principles.
+Modules also define the scaling rules, the standardized values, and which configuration options are intentionally exposed versus hardcoded. As a result, scaling the platform becomes straightforward: engineers modify a human-readable parameter file, and the automation handles the rest. This approach keeps deployments predictable, maintainable, and aligned with the platform’s design principles.
 
 ## Always in Reproducable State
 
-The platform must always remain in a reproducible state — capable of being deployed and configured from scratch, end-to-end, using a single GitHub workflow. Every change to the platform, whether introducing a new capability or updating an existing one, is held to that principle. If you can’t destroy and rebuild cleanly, the change isn’t ready. 
-
-To validate this, two workflows are provided:
+The platform must always remain in a reproducible state — capable of being resotred from scratch to fully functioning state by using a Bigbang GitHub workflow. Every change to the platform, whether introducing a new capability or updating an existing one, is held to that principle. To validate this, two workflows are provided:
 
 ### Destroy 
 The workflow wipes the entire Azure platform setup. By default, it deletes all deployment stacks, clearing out the platform management subscription, management group configuration, deployment history, and child management groups. Subscriptions from those child groups are moved back under the top-level management group.
@@ -90,4 +87,4 @@ What’s left is only the initial tenant configuration, exactly as described on 
 ### Big Bang 
 A GitHub workflow that chains together every platform capability. It deploys the entire platform from scratch — management groups, policies, automation, initial landing zone - everything. The result is a clean, fully functioning environment that can be recreated at any time, predictable and identical to the baseline defined in code.
 
-Together, Destroy and Big Bang guarantee that the platform can always be reset, rebuilt, and trusted. The ability to deploy from nothing is the final check of truth.
+Together, Destroy and Big Bang guarantee that the platform can always be reset and rebuilt. The ability to deploy from nothing is the final check of truth.

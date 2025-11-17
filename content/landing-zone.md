@@ -9,7 +9,7 @@ toc: true
 ---
 # What is a landing zone
 
-A landing zone is a blueprint applied to an empty Azure subscription — a standardized foundation that every cloud application must follow. It defines how costs are controlled, how and what security and operational baselines are enforced, and it provides a ready-to-use deployment pipeline so application teams never have to start from scratch.
+A landing zone is a blueprint applied to an empty Azure subscription — a standardized foundation that every cloud application must follow. It defines how costs are controlled, what security and operational baselines are enforced, and it provides a ready-to-use deployment pipeline so application teams never have to start from scratch.
 
 The landing zone is built for team autonomy, minimized dependencies on centrally managed components and promote self-service model to create/update landing zones to match applicion's path from development to production. 
 
@@ -26,19 +26,20 @@ The landing zone is built for team autonomy, minimized dependencies on centrally
 - **Isolated Landing zones**: One application - one environment - one landing zone — a fully isolated subscription for each application/environment
 - **Policy-driven governance**: Azure Policies enforce allowed configurations and deny anything outside the security baseline.
 - **Diagnostic settings**: logs are collected in the landing zone’s Log Analytics workspace.
+- **Single Region Deployments**: deployment flow is streamlined to a singular Azure region deployments.
+
 
 ## Register the Application
 
-Getting started in Azure with Gazelle begins with a quick application registration. This step wires up the essentials — Azure, Entra ID, and GitHub — so teams can immediately create and manage landing zones through a fully self-service experience. The entire process is automated and requires only a few basic inputs, making onboarding fast, predictable, and effortless.
+Getting started in Gazelle begins with a quick application registration. This step wires up the essentials — Azure, Entra ID, and GitHub — so engineers can immediately create and manage landing zones through a fully self-service experience. The entire process is automated and requires only a few basic inputs, making onboarding effortless.
 
-- **Azure** A dedicated Invoice Section is created for the application.  
-All landing zones for this app are created under the same section, ensuring that costs roll up into a single financial boundary. This gives teams immediate, accurate visibility into total application spend.
+- **Azure** A dedicated Invoice Section is created for the application. All landing zones for this app are created under the same section, ensuring that costs roll up into a single financial boundary. This gives teams accurate visibility into total application spend.
 
-- **Entra ID** An Entra ID group is provisioned with read access to all landing zone subscriptions and cost visibility at the invoice section level.  This provides out-of-the-box transparency across environments without any additional steps.
+- **Entra ID** An Entra ID group is provisioned with read access to all landing zone subscriptions and cost visibility at the invoice section level.
 
-- **Getting Started Pipelines** A GitHub repository is cloned from the starter template, containing a hello-world deployment pipeline already aligned with Gazelle’s development and deployment flow. Teams can begin building immediately without needing to set up their own pipelines.
+- **Getting Started Pipelines** A GitHub repository is cloned from the starter template, containing a hello-world deployment pipeline already aligned with Gazelle’s development and deployment flow. Engineers can continue building without needing to set up their own pipelines from nothing.
 
-- **Application variables** with application-specific values — such as the resource IDs for the Log Analytics workspace, virtual network, and the Invoice Section ID created during registration. These values are consumed by automation pipelines when creating and updating landing zones.
+- **Application variables** application-specific values — like the Invoice Section ID created during registration and stored as GitHub Variables These values are consumed by automation pipelines when creating and updating landing zones.
 
 
 ## New Landing Zone

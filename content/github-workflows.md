@@ -21,31 +21,32 @@ Interestringely, the project is all about managing azure landing zones, however 
 
 ### Management Groups
 
-- Deployes Azure Management Group hierarchy
+- Deployes Azure Management Group hierarchy.
+- Configures a default Management Group.
 
 ### Access Control 
 
- - Configures function based roles at the Management Groups
+ - Configures function based roles at the Management Groups.
   
 ### Platform Automation
 
-- Configures identity and access for automation jobs
-- Push docker image to GitHub Package Registry
-- Configures Azure infrastructure for Container Apps
-- Provides "Bring-Your-PwSh-Script" experience
+- Configures identity and access for automation jobs.
+- Push docker image to GitHub Container Registry.
+- Configures Azure infrastructure for Container Apps.
+- Provides "Bring-Your-PwSh-Script" experience.
   
 ### Azure Policy
 
-- Configures identity and access for Azure Policy
-- Deploys custom policy definitions
-- Assigns Azure Policies
-- Creates a Pull Request to update Azure Policy references 
+- Configures identity and access for Azure Policy.
+- Deploys custom policy definitions.
+- Assigns Azure Policies.
+- Updates AzurePolicyRefence.json file using life data.
 
 ### GitHub Configuration
 
-- set global platform variables
-- create GitHub Environments
-- configures github labels for issue tracking
+- set global platform variables.
+- create GitHub Environments.
+- configures GitHub labels for Issue organizing.
 
 ### Destroy Platform
 
@@ -63,19 +64,19 @@ Interestringely, the project is all about managing azure landing zones, however 
 
 ### Create Landing Zone
 
-- generate landing zone variables
-- create azure subscription
-- configures landing zone identity
-- configures Virtual Network
-- configures Diagnostic Settings
-- configures cost, security and operational notifications
-- configures Azure Policy Exemptions
-- configures Azure Tags
-- Writes Azure deployment outputs to GitHub Variables
+- generate landing zone variables.
+- create azure subscription.
+- configures landing zone identity.
+- configures Virtual Network.
+- configures Diagnostic Settings.
+- configures cost, security and operational notifications.
+- configures Azure Policy Exemptions.
+- configures Azure Tags.
+- Writes Azure deployment outputs to GitHub Variables.
   
 ### Create Policy Exemption
 
-- fetch management group name and environment where the subscription belongs
-- maps GitHub workflow inputs to Azure Policy resource id
-- Calculates exemption expiration time
-- create a temporary Azure Policy Exemption
+- fetch management group name and environment where the subscription belongs.
+- maps GitHub workflow inputs to Azure Policy resource id.
+- Calculates exemption expiration time.
+- create a temporary Azure Policy Exemption.
