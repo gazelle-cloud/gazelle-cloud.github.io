@@ -1,13 +1,11 @@
 ---
 linkTitle: index
-description: "A step-by-step guide to implementing Azure Landing Zones in your tenant — free and open source"
+description: "Exploring Azure Landing Zone management: Self-Service, team autonomy and GitHub as a management plane"
 breadcrumbs: false
 weight: 1
 cascade:
   type: docs
 toc: true
----
-
 ---
 # Lightweight Azure Landing Zone
 

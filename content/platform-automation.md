@@ -1,6 +1,6 @@
 ---
 linkTitle: Platform Automation
-description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
+description: "Azure landing zones: exploring platform automation in the Gazelle tenant"
 weight: 60
 breadcrumbs: false
 cascade:

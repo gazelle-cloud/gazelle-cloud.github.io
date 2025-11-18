@@ -1,6 +1,6 @@
 ---
 linkTitle: Azure Policy
-description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
+description: "Azure landing zones: exploring Azure Policy in the Gazelle tenant"
 weight: 40
 breadcrumbs: false
 cascade:

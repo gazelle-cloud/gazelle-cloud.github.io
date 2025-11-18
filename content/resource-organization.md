@@ -1,6 +1,6 @@
 ---
 linkTitle: Resource Organization
-description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
+description: "Azure landing zones: exploring resource organization in the Gazelle tenant"
 weight: 10
 breadcrumbs: false
 cascade:

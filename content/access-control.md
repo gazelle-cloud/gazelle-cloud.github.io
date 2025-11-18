@@ -1,13 +1,12 @@
 ---
 linkTitle: Access Control
-description: "A step-by-step guide to implementing Azure Landing Zones in your tenant — free and open source"
+description: "Azure landing zones: exploring identity and access management in the Gazelle tenant"
 weight: 20
 breadcrumbs: false
 cascade:
   type: docs
 toc: true
 ---
-
 
 ## Entra ID as Identity Provider
 

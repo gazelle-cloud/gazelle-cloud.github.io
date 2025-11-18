@@ -1,6 +1,6 @@
 ---
 linkTitle: Deployment Logic
-description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
+description: "Azure landing zones: deploying to Azure with Bicep, GitHub Actions and Deployment Stacks"
 weight: 80
 breadcrumbs: false
 cascade:

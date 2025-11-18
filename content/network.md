@@ -1,6 +1,6 @@
 ---
 linkTitle: Network
-description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
+description: "Azure landing zones: exploring Azure virtual Network management in the Gazelle tenant"
 weight: 30
 breadcrumbs: false
 cascade:

@@ -1,6 +1,6 @@
 ---
 linkTitle: GitHub - Management Plane
-description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
+description: "Azure landing zones: managing Azure through GitHub workflows"
 weight: 90
 breadcrumbs: false
 cascade:

@@ -1,6 +1,6 @@
 ---
 linkTitle: Cost Management
-description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
+description: "Azure landing zones: exploring cost management in the Gazelle tenant"
 weight: 70
 breadcrumbs: false
 cascade:

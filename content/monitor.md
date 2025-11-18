@@ -1,6 +1,6 @@
 ---
 linkTitle: Monitor
-description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
+description: "Azure landing zones: exploring monitoring in the Gazelle tenant"
 weight: 50
 breadcrumbs: false
 cascade:
