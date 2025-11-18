@@ -1,5 +1,5 @@
 ---
-linkTitle: GitHub - Workflows
+linkTitle: GitHub - Management Plane
 description: "Azure Landing Zones: Azure Policy — end-to-end flow, from policy identity to exemption"
 weight: 90
 breadcrumbs: false
@@ -54,6 +54,11 @@ The platform management is running in a single repo style, where each platform c
 - Create GitHub Environments.
 - Configures GitHub labels for Issue organizing.
 
+### Subscription Bank
+
+- Validate that subscription is not in use
+- Delete
+
 ### [Destroy Platform](../deployment-logic/#destroy)
 
 - Manually triggered by running `platform-flow-Destory` GitHub Actions workflow.
@@ -100,7 +105,7 @@ The platform management is running in a single repo style, where each platform c
 - Configures Azure Tags.
 - Writes Azure deployment outputs to GitHub Variables.
   
-### [Create Policy Exemption](../azure-policy/#policy-exemptions)
+### [Create Policy Exemption](../azure-policy/#temporary)
 
 - Manually triggered by running `Create Policy Exemption` GitHub Actions workflow
 - Fetch management group name and environment where the subscription belongs.

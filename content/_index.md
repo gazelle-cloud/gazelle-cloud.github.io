@@ -11,7 +11,7 @@ toc: true
 ---
 # Lightweight Azure Landing Zone
 
-Gazelle is a lightweight Azure landing zone platform designed to maximize team autonomy and minimize platform overhead. It achieves this by keeping shared services to an absolute minimum, avoiding central bottlenecks and operational friction. Each landing zone is fully self-contained — including networking, monitoring, and identity — enabling teams to move at their own pace while maintaining consistent operational and security baselines.
+Gazelle is a lightweight Azure landing zone platform designed to maximize team autonomy and minimize platform overhead. It achieves this by keeping shared services to an absolute minimum, avoiding central bottlenecks and operational friction. Each landing zone is self-contained — including networking, monitoring, and identity — enabling teams to move at their own pace while maintaining consistent operational and security baselines.
 
 Built on the principles of the Microsoft Cloud Adoption Framework, Gazelle turns theory into practice. While CAF offers hundreds of design considerations, Gazelle provides a clear, opinionated implementation — a working example of how to build a secure, consistent, and cost-efficient Azure platform managed entirely as code.
 
@@ -21,7 +21,7 @@ Gazelle runs entirely on free Azure services, avoiding components with fixed fee
 
 ## Team Autonomy
 
-Each landing zone is fully isolated and self-contained, including all Azure resources and cost management. This independence removes cross-team dependencies and lets application teams fine-tune their infrastructure directly through self-service.
+Each landing zone is isolated and self-contained, including all Azure resources and cost management. This independence removes cross-team dependencies and lets application teams fine-tune their infrastructure directly through self-service.
 
 ## Self-Service
 
