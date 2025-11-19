@@ -2,6 +2,9 @@ title: gazelle cloud
 baseURL: "https://gazelle.cloud/"
 
 module:
+  hugoVersion:
+    extended: true
+    min: "0.146.0"
   imports:
     - path: github.com/imfing/hextra
 
