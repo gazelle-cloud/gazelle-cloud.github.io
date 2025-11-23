@@ -1,6 +1,6 @@
 ---
 linkTitle: Network
-description: "Azure landing zones: exploring Azure virtual Network management in the Gazelle tenant"
+description: "Azure landing zones: isolationg Azure Virtual Networks"
 weight: 30
 breadcrumbs: false
 cascade:

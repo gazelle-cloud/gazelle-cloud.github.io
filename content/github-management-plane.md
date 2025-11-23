@@ -1,6 +1,6 @@
 ---
 linkTitle: GitHub - Management Plane
-description: "Azure landing zones: managing Azure through GitHub workflows"
+description: "Azure landing zones: managing Azure operations through GitHub automated workflows."
 weight: 90
 breadcrumbs: false
 cascade:

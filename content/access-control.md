@@ -1,6 +1,6 @@
 ---
 linkTitle: Access Control
-description: "Azure landing zones: exploring identity and access management in the Gazelle tenant"
+description: "Azure landing zones: exploring identity and access management."
 weight: 20
 breadcrumbs: false
 cascade:

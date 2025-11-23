@@ -1,6 +1,6 @@
 ---
 linkTitle: Monitor
-description: "Azure landing zones: exploring monitoring in the Gazelle tenant"
+description: "Azure landing zones: exploring monitoring"
 weight: 50
 breadcrumbs: false
 cascade:

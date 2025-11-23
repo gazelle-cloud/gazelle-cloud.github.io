@@ -1,6 +1,6 @@
 ---
 linkTitle: Platform Automation
-description: "Azure landing zones: exploring platform automation in the Gazelle tenant"
+description: "Azure landing zones: automate with PowerShell and serverless Azure Container App Jobs"
 weight: 60
 breadcrumbs: false
 cascade:

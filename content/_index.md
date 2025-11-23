@@ -1,6 +1,6 @@
 ---
 linkTitle: index
-description: "Exploring Azure Landing Zone management: Self-Service, team autonomy and GitHub as a management plane"
+description: "Azure Landing Zones: a complete guide to a Self-Service, team autonomy and GitHub as a management plane"
 breadcrumbs: false
 weight: 1
 cascade:

@@ -1,6 +1,6 @@
 ---
 linkTitle: Deployment Logic
-description: "Azure landing zones: deploying to Azure with Bicep, GitHub Actions and Deployment Stacks"
+description: "Azure landing zones: managing Azure resoruces with Bicep, GitHub Actions and Deployment Stacks"
 weight: 80
 breadcrumbs: false
 cascade:
@@ -51,11 +51,13 @@ By standardizing how inputs are collected, how deployments are executed, and how
 
 ## Azure Deployment Stacks
 
-All platform resources in Azure are managed through Azure Deployment Stacks. A deployment stack creates new resources, updates existing configuration, and automatically removes anything no longer defined in the templates — making the code the single source of truth for the platform.
+All platform resources in Azure are managed through [Azure Deployment Stacks](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-stacks?tabs=azure-powershell). A deployment stack creates new resources, updates existing configuration, and automatically removes anything no longer defined in the templates — making the code the single source of truth for the platform.
 
+### Platform
 All essential platform capabilities — such as policies, management groups, and access control — are deployed at the top-level management group. Each deployment stack is named after the capability it delivers, ensuring it’s always clear what the stack manages.
 
-Landing zones are also provisioned using Azure Deployment Stacks, but their scope is set to the corresponding child management group (platform or isolation) and protected from accidental or unauthorized changes. Even if a landing zone developer receives privileged access at the subscription level, the resources managed by the deployment stack cannot be modified or deleted outside the stack — because the stack’s authoritative scope is higher, and regular users never have access to that layer.
+### Landing Zone
+Landing zones are provisioned using Azure Deployment Stacks, but their scope is set to the corresponding child management group (platform or isolation) and protected from accidental or unauthorized changes. Even if a landing zone developer receives privileged access at the subscription level, the resources managed by the deployment stack cannot be modified or deleted outside the stack — because the stack’s authoritative scope is higher, and regular users never have access to that layer. Deployment stacks also create a clean ownership boundary: anything deployed by the stack is owned and maintained by the platform, while everything outside the stack is fully under the application team’s control.
 
 ## Test Environment
 

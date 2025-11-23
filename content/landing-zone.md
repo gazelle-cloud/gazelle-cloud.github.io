@@ -1,6 +1,6 @@
 ---
 linkTitle: Landing Zone
-description: "Azure landing zones: exploring self-service and autonomy in the Gazelle tenant"
+description: "Azure landing zones: GitHub as a self-service portal for Azure Landing Zones"
 weight: 100
 breadcrumbs: false
 cascade:
@@ -15,44 +15,29 @@ The landing zone is built for team autonomy, minimized dependencies on centrally
 
 ## What You Get
 
-- **Self-service**: create, update, and remove landing zones via GitHub Issues and Pull Requests.
-- **You build it, you run it**: design, implement, and operate the application from start to sunset.
-- **Autonomy**: foundational Azure configuration baked directly into the landing zone.
-- **hello-world**: a getting-started deployment pipeline aligned with platform management principles.
+- **Self-service** — create, update, and remove landing zones via GitHub Issues and Pull Requests.
+- **You Build It, You Run It** — design, implement, and operate the application from start to sunset.
+- **Autonomy** — foundational Azure configuration baked directly into the landing zone, without any shared services.
+- **Hello-World** — a getting-started deployment pipeline aligned with platform management principles.
 
 ## Platform Rules
 
-- **Cost** — tracked at the application level — every landing zone maps directly to the [app’s invoice section](../cost-management/#cost-per-applicaiton).
-- **Isolated landing zones** — one application — one environment — one landing zone: a isolated subscription for each application/environment.
+- **Cost** — tracked at the application level — every landing zone maps directly to the [app’s invoice section](../cost-management/#cost-per-applicaition).
+- **Isolated Landing Zones** — one application — one environment — one landing zone: a isolated subscription for each application/environment.
 - **[Policy-driven governance](../azure-policy/#existing-assignments)** — Azure Policies enforce allowed configurations and deny anything outside the security baseline.
-- **Diagnostic settings** — logs are collected in the [landing zone’s Log Analytics workspace](../monitor/#central-control-with-local-ownership).
-- **[Single Region Deployments](../resource-organization/#single-region-deployment)**: deployment flow is streamlined to a single Azure region.
+- **[Single Region Deployments](../resource-organization/#single-region-deployment)**: deployment flow is streamlined to a single Azure region. 
 
-## Register the Application
+## Step 1: Register the Application
 
-Getting started in Gazelle begins with a quick application registration. This step wires up the essentials — Azure, Entra ID, and GitHub — so engineers can create and manage landing zones through a self-service model. [The entire process is automated](../github-workflows/#request-new-cloud-application) and requires only a few basic inputs, making onboarding effortless.
+Before creating the first landing zone, the application must be registered. This step establishes the application’s financial boundary by creating a dedicated Azure invoice section and defines  metadata—such as owner, engineering contacts, and criticality—that is automatically applied to every landing zone.
 
-- **Azure** — a dedicated Invoice Section is created for the application. All landing zones for this app are created under this same section, ensuring costs roll up into a single financial boundary. This gives teams accurate visibility into total application spend.
+The registration workflow also provisions an Entra ID reader group with read-only visibility into all future subscriptions, and sets up a GitHub repository containing getting-started deployment pipelines and Bicep modules. Application-specific values are stored as GitHub environment variables, enabling automation to create and manage landing zones as a self-service experience.
 
-- **Entra ID** — an Entra ID group is provisioned with read access to all landing zone subscriptions and cost visibility at the invoice section level.
+## Step 2: Request Landing Zone
 
-- **Getting Started Pipelines** — a GitHub repository is cloned from the starter template, containing a hello-world deployment pipeline aligned with Gazelle’s development and deployment flow. Engineers can continue building without needing to set up their own pipelines.
+Users create a new landing zone by providing environment-specific details in the `New Landing Zone Request` GitHub Issue template. The automated workflow generates the landing zone parameter file and a dedicated GitHub Actions workflow, then opens a Pull Request.
 
-- **Application variables** — application-specific values — like the Invoice Section ID created during registration — are stored as GitHub Variables. These values are consumed by automation pipelines when creating and updating landing zones.
-
-## Request New Landing Zone
-
-Once the initial application configuration is complete, a new landing zone can be requested by opening the `New Landing Zone Request` GitHub Issue template. The workflow generates only the files required to operate a landing zone, not the Azure resources themselves. Landing zone workflows are triggered immediately after the Pull Request is merged.
-
-- **Parameter File** — generates a parameter file for the landing zone and places it under `azurePlatform/landingzones`. This file defines all settings, such as name and budget. It serves as the single source of truth for the landing zone. You can modify it at any time by opening a Pull Request.
-
-- **GitHub Workflow** — a landing zone–specific GitHub workflow is created. It contains the trigger rules and Bicep templates that configure foundational landing zone services.
-
-- **Pull Request** — once the landing zone parameter file and GitHub workflow are generated, a Pull Request is opened automatically. When the Pull Request is merged to main, the landing zone is ready to be configured in the actual Azure environment.
-
-## Landing Zone Workflows
-
-- **Ready** — a landing zone is considered ready when the engineer receives an email from Azure Monitor. That notification means budgets are configured, guardrails are enforced, and the environment is prepared for building in Azure.
+Once the Pull Request is merged into the main branch, the platform provisions and configures the Azure landing zone. The landing zone is considered ready when the user receives an Azure Monitor email indicating that a new Action Group has been created — an indirect confirmation that budgets, policies, and guardrails have been applied and the environment is ready to use.
 
 ## Landing Zone parameters
 
@@ -98,7 +83,7 @@ var policyRefences = loadJsonContent('policy-assignment-reference.json')
 
 - **Engineer email** — Used for sending budget alerts and Azure Health notifications.
 
-- **addressPrefix** — Defines the virtual network address space for the landing zone. Once configured, it cannot be changed later. The default is `/24`, which provides 255 IP addresses.
+- **addressPrefix** — Defines the virtual network address space for the landing zone. The default is `/24`, which provides 255 IP addresses. Once configured, it cannot be changed later.
 
 - **subscriptionId** — Used when Bring-Your-Own-Subscription is required so the landing zone can be built on top of an existing Azure subscription. In all other cases, this value should be left empty so automation can provision a new subscription.
 

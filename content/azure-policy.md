@@ -1,6 +1,6 @@
 ---
 linkTitle: Azure Policy
-description: "Azure landing zones: exploring Azure Policy in the Gazelle tenant"
+description: "Azure landing zones: exploring Azure Policy driven governance."
 weight: 40
 breadcrumbs: false
 cascade:

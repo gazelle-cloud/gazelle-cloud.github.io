@@ -1,6 +1,6 @@
 ---
 linkTitle: Resource Organization
-description: "Azure landing zones: exploring resource organization in the Gazelle tenant"
+description: "Azure landing zones: exploring Azure resource organization"
 weight: 10
 breadcrumbs: false
 cascade:
@@ -8,7 +8,6 @@ cascade:
 toc: true
 ---
 # Resource Organization
-
 Resource organization defines how Azure resources are structured across the tenant. It’s a core design area in the Microsoft Cloud Adoption Framework. While it might seem straightforward, a well-designed hierarchy, regional organization, and subscription isolation form the foundation for application development and operations across the tenant.
 
 This section covers how Azure resources are organized from the tenant root level all the way to the platform-managed resources in a landing zone. 

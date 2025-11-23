@@ -1,6 +1,6 @@
 ---
 linkTitle: Cost Management
-description: "Azure landing zones: exploring cost management in the Gazelle tenant"
+description: "Azure landing zones: exploring cost management and application-level accountability"
 weight: 70
 breadcrumbs: false
 cascade:
@@ -28,4 +28,5 @@ If you reach 100% of your budget, it’s already too late to react — costs are
 
 ## Invoice Section Creation
 
+![](/new-cloud-app.png)
 Azure invoice sections are created as part of the “Register New Cloud App” GitHub workflow. The invoice section ID is stored as a GitHub variable in the application repository, so `create-landing-zone` workflows can fetch the ID and create Azure subscriptions associated with the invoice section id.
