@@ -54,16 +54,16 @@ param subscriptionId = ''
 param exemptions = [
   {
     clarifications: 'pam param pam pam - urgen!'
-    policyToExclude: policyRefences.allowedLocations.assignmentId
+    policyToExclude: policyReference.allowedLocations.assignmentId
     referenceId: [
-      policyRefences.allowedLocations.referenceIds['allowed-locations']
+      policyReference.allowedLocations.referenceIds['allowed-locations']
     ]
   }
   {
     clarifications: 'another policy exemption'
-    policyToExclude: policyRefences.denyCrossTenantReplicati.assignmentId
+    policyToExclude: policyReference.denyCrossTenantReplicati.assignmentId
     referenceId: [
-      policyRefences.denyCrossTenantReplicati.referenceIds['storageAccount-crossTenantReplication']
+      policyReference.denyCrossTenantReplicati.referenceIds['storageAccount-crossTenantReplication']
     ]
   }
 ]
@@ -72,7 +72,7 @@ param exemptions = [
 param applicationReaderEntraGroupId = readEnvironmentVariable('ENTRAID_READER_GROUP_ID', '')
 param diagnosticSettingsPolicyResourceId = readEnvironmentVariable('POLICY_CONFIG_DIAGNOSTICSETTINGS_RESOURCE_ID', '')
 
-var policyRefences = loadJsonContent('policy-assignment-reference.json')
+var policyReference = loadJsonContent('policy-assignment-reference.json')
 
 ```
 
