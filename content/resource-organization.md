@@ -14,27 +14,40 @@ This section covers how Azure resources are organized from the tenant root level
 
 ## Top Level Management Groups
 
-These top-level management groups are created manually under the `Tenant Root Group` during initial platform setup. The Gazelle management group serves as the logical home for Azure Deployment Stacks that provision platform-wide services — for example, Access Control and Azure Policy.
+These top-level management groups are created manually under the `Tenant Root Group` during initial platform setup. The Gazelle management group serves as the logical home for Azure Deployment Stacks that provision platform managed services — for example Azure Policy.
 
-- Gazelle-test — Used exclusively by platform engineers for development and learning; hidden from end users by default.
-- Gazelle-prod — Hosts application workloads from early development through production. Landing zones here are stable, created using the same automated flows and Azure configuration blueprints to ensure consistency and reliability across environments.
-- Subscription Bank — The default management group for newly created subscriptions. It contains empty subscriptions that can be converted into landing zones; to convert one, provide the subscription ID via the GitHub issue template. The Subscription Bank is also the destination for decommissioned landing zones: automated workflows reset those subscriptions by removing all resources and configurations. This approach is particularly useful under a Microsoft Customer Agreement, where the number of available subscriptions is limited. 
+- Gazelle-test — Mirrors production but is used by platform engineers for development and learning purposes; hidden from end users by default.
+- Gazelle-prod — Hosts application workloads across all lifecycle stages — from early development through production — under the same standardized management operations. Landing zones here are created using GitHub flows and Azure configuration blueprints.
+- Subscription Bank — The default management group for newly created subscriptions. It contains empty subscriptions that can be converted into landing zones. The Subscription Bank is also the destination for decommissioned landing zones: automated workflows reset those subscriptions by removing all resources and configurations. This approach is particularly useful under a Microsoft Customer Agreement, where the number of available subscriptions is limited. 
+
+The platform does not use a dedicated subscription. Instead, all platform-managed resources — are deployed at the management group scope or directly into each landing zone subscription.
 
 ## Child Management Groups
 
-Child management groups serve application workloads to ensure a security baseline and operational consistency. Their key purposes include:
+### App Isolation
 
-- **Policy Assignments** — Guardrails applied here are tuned for specific requirements — whether it’s `platform`, `isolation`, or something new.
-- **Access Control** — Role-Based Access Control applied here covers every subscription under the child management group.
-- **Deployment Stacks** — Landing zone configuration is managed by Azure Deployment Stacks under the corresponding child management group. Deployment Stacks are configured to protect managed resources from unwanted changes.
+The `app-isolation` is designed to host applications that require isolation and follow the you build it, you run it model. It provides landing zones with clearly defined boundaries and standardized templates that align with platform rules.
+
+Each landing zone includes the required infrastructure built directly into it — networking, monitoring, identity and cost — without any direct dependency on the platform team.
+
+At this scope, Azure Policies enforce platform-wide requirements, Role-Based Access Control provides centralized access management, and Azure Deployment Stacks handle the lifecycle of landing zone resources and their associated platform components.
 
 ## Landing Zone Resources
 
-Each landing zone includes essential resources — such as a virtual network, managed identity, and Log Analytics workspace — provisioned through the “create landing zone” pipeline. All centrally managed resources are placed under the `landing-zone-resource` resource group and managed by Azure Deployment Stack.
+`landing-zone-resources` it's a resource group created during the initial landing zone setup and keeps all centrally managed resources in one place. Everything inside is maintained through Azure Deployment Stacks, so application teams can build on top of the existing setup without worrying about breaking what keeps the landing zone running — the stack is configured to protect managed resources.
+
+- **Virtual Network** — A fully isolated network environment with no implicit connections to other landing zones or on-premises networks.  
+- **Managed Identity** — A user-assigned identity with `Owner` permissions at the subscription scope, configured for GitHub federation. It also has Read access at Micrsoft Grap API.  
+- **Log Analytics Workspace** — Collects landing zone specific diagnostic data.  
+- **Alerts** — Notify platform engineers of health issues detected within the landing zone.  
+- **Container App Jobs** — Run scheduled maintenance routines and small automation tasks.  
+
+This resource group represents the operational core of each landing zone — self-contained, policy-enforced, and fully managed as code.
+
 
 ## Landing Zone Isolation
 
-Each landing zone is an isolated Azure subscription dedicated to a single application and environment. This one-to-one mapping (one environment, one application, one subscription) ensures clear operational boundaries, clean cost tracking, and reduces the risk of test deployments impacting production.
+Each landing zone is an isolated Azure subscription dedicated to a single application and environment. This one-to-one mapping — one environment, one application, one subscription — keeps operational boundaries clear, cost tracking simple, and removes dependencies on other teams.
 
 ## Single Region Deployment
 

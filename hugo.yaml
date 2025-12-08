@@ -36,8 +36,11 @@ markup:
 
 params:
   description: An open source toolkit for deploying Azure landing zones with GitHub Actions and Bicep.
+
   contentDir: /
+
   externalLinkDecoration: true
+
   navbar:
     displayTitle: true
     displayLogo: false
@@ -47,14 +50,15 @@ params:
       link: /
       width: 40
       height: 20
+
   theme:
     default: system
     displayToggle: true
 
   footer:
-    enable: false
+    enable: true
     displayCopyright: true
-    displayPoweredBy: false
+    displayPoweredBy: true
 
   page:
   # full (100%), wide (90rem), normal (80rem)
