@@ -14,19 +14,11 @@ This section covers how Azure resources are organized from the tenant root level
 
 ## Top Level Management Groups
 
-The top-level management groups are created manually under the tenant-root management group during initial platform setup:
-- Gazelle - test  
-- Gazelle - prod  
-- Subscription Bank  
+These top-level management groups are created manually under the `Tenant Root Group` during initial platform setup. The Gazelle management group serves as the logical home for Azure Deployment Stacks that provision platform-wide services — for example, Access Control and Azure Policy.
 
-The purpose of top-level management group is:
-
-- **Child management groups** - Host child management groups, like `platform` and `isolation`
-- **Access Control** — Role assignments applied here cascade to all child management groups and subscriptions.
-- **Custom Azure Policy Definitions** — Maintained here to maximize reusability across different child management groups.
-- **Deployment Stacks** — Platform-wide services such as Access Management, Azure Policy, or management group hierarchy are managed here via Deployment Stacks.
-
-The `Subscription Bank` contains empty subscriptions that can be converted into landing zones. It is configured as the default management group for all newly created subscriptions. It also serves as the destination for cleaned-up landing zones after decommissioning. Automated workflows reset subscriptions by removing all resources and configurations. This approach is particularly valuable under a Microsoft Customer Agreement, where the number of available subscriptions is limited.
+- Gazelle-test — Used exclusively by platform engineers for development and learning; hidden from end users by default.
+- Gazelle-prod — Hosts application workloads from early development through production. Landing zones here are stable, created using the same automated flows and Azure configuration blueprints to ensure consistency and reliability across environments.
+- Subscription Bank — The default management group for newly created subscriptions. It contains empty subscriptions that can be converted into landing zones; to convert one, provide the subscription ID via the GitHub issue template. The Subscription Bank is also the destination for decommissioned landing zones: automated workflows reset those subscriptions by removing all resources and configurations. This approach is particularly useful under a Microsoft Customer Agreement, where the number of available subscriptions is limited. 
 
 ## Child Management Groups
 
