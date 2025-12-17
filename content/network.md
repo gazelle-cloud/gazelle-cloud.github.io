@@ -1,4 +1,5 @@
 ---
+title: "Azure Landing Zones - virtual network isolation"
 linkTitle: Network
 description: "Azure landing zones: isolationg Azure Virtual Networks"
 weight: 30
