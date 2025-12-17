@@ -1,4 +1,5 @@
 ---
+title: "Azure Landing Zones – team autonomy and self-service"
 linkTitle: Landing Zone
 description: "Azure landing zones: GitHub as a self-service portal for Azure Landing Zones"
 weight: 100
@@ -7,7 +8,7 @@ cascade:
   type: docs
 toc: true
 ---
-# What is a landing zone
+## What is a landing zone
 
 A landing zone is a blueprint applied to an empty Azure subscription — a standardized foundation that every cloud application must follow. It defines how costs are controlled, what security and operational baselines are enforced, and it provides a ready-to-use deployment pipeline so application teams never have to start from scratch.
 
