@@ -1,4 +1,5 @@
 ---
+title: "Azure Landing Zones - monitoring resource configuration"
 linkTitle: Monitor
 description: "Azure landing zones: exploring monitoring"
 weight: 50
