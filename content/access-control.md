@@ -1,6 +1,6 @@
 ---
+title: "Azure Landing Zones - identity and access management"
 linkTitle: Access Control
-description: "Azure landing zones: exploring identity and access management."
 weight: 20
 breadcrumbs: false
 cascade:
@@ -11,7 +11,6 @@ toc: true
 ## Entra ID as Identity Provider
 
 All authentication flows through Entra ID, and authorization is handled by Azure Role-Based Access Control. That’s the only entry point into Azure — for both users and applications. Local authentication methods such as passwords, access keys, or connection strings are disabled by Azure Policy.
-
 
 ## Platform Identities
 
