@@ -1,4 +1,5 @@
 ---
+title: "Azure Landing Zones - automating platform operations"
 linkTitle: Platform Automation
 description: "Azure landing zones: automate with PowerShell and serverless Azure Container App Jobs"
 weight: 60
@@ -7,8 +8,6 @@ cascade:
   type: docs
 toc: true
 ---
-# Automating Platform Operations
-
 The engine behind automating Azure landing zone operational tasks is built to provide a serverless experience. The heavy lifting — compute, identity, networking, monitoring, and runtime infrastructure — is managed by Azure Container Apps, so engineers never have to think about runtime plumbing.
 
 Deployment pipelines are designed so that onboarding a new automation job is as simple as editing a few lines in a user-friendly parameter file. This lets platform engineers focus entirely on automation logic and desired outcomes, instead of runtime configuration or deployment setup.
