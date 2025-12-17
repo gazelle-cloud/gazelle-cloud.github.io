@@ -1,4 +1,5 @@
 ---
+title: "Azure Landing Zones - enabling application level cost tracking"
 linkTitle: Cost Management
 description: "Azure landing zones: exploring cost management and application-level accountability"
 weight: 70
@@ -7,7 +8,6 @@ cascade:
   type: docs
 toc: true
 ---
-# Cost Management
 
 Cost management follows the same principles as the rest of the platform — a “you build it, you run it” mindset, where each application team has full responsibility for its infrastructure and costs. Since there are no shared services, all supporting resources and expenses are allocated directly to the application.
 
