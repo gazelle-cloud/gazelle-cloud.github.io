@@ -8,7 +8,6 @@ cascade:
   type: docs
 toc: true
 ---
-# Lightweight Azure Landing Zone
 
 Gazelle is a lightweight Azure landing zone platform designed to maximize team autonomy and minimize platform overhead. It achieves this by keeping shared services to an absolute minimum, avoiding central bottlenecks and operational friction. Each landing zone is self-contained — including networking, monitoring, and identity — enabling teams to move at their own pace while maintaining consistent operational and security baselines.
 
