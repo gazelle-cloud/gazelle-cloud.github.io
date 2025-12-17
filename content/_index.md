@@ -1,5 +1,5 @@
 ---
-title: "Lightweight Azure Landing Zones platform tailored for self-service and team autonomy"
+title: "Azure Landing Zones - platform tailored for self-service and team autonomy"
 linkTitle: Azure Landing Zones
 description: "Azure Landing Zones: a guide to implementing Landing Zones as self-service, promoting team autonomy and using GitHub as a management plane."
 breadcrumbs: false

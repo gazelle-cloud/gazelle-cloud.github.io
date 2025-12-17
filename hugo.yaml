@@ -1,6 +1,8 @@
 title: gazelle cloud
 baseURL: "https://gazelle.cloud/"
 
+enableRobotsTXT: true
+
 module:
   hugoVersion:
     extended: true
