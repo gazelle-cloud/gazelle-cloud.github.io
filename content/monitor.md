@@ -8,8 +8,6 @@ cascade:
   type: docs
 toc: true
 ---
-# Monitor
-
 ## Central Control with Local Ownership
 
 Each landing zone comes with its dedicated Log Analytics workspace, used to collect diagnostic settings. The rules for which diagnostic settings must be collected are configured by the platform team as a custom Azure Policy Definition at the top-level management group, but the data and cost associated with it are owned by the application team. This approach ensures that platform-required logs are captured from day one and that cost responsibility remains with the application team.
