@@ -1,4 +1,5 @@
 ---
+title: "Azure Landing Zones – unified platform management with GitHub Actions"
 linkTitle: GitHub - Management Plane
 description: "Azure landing zones: managing Azure operations through GitHub automated workflows."
 weight: 90
@@ -7,8 +8,6 @@ cascade:
   type: docs
 toc: true
 ---
-# GitHub as management plane
-
 ## Naming
 
 The platform management is running in a single repo style, where each platform capability and landing zone is deplyed indepdently - meaning that there are multiple GitHub Actions to manage. To make the process managable - all workflows have a prefix: 
