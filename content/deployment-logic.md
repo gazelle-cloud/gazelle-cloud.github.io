@@ -1,4 +1,5 @@
 ---
+title: "Azure Landing Zones – Standardizing Deployment Flow with Bicep Modules, GitHub Actions, and Azure Deployment Stacks"
 linkTitle: Deployment Logic
 description: "Azure landing zones: managing Azure resoruces with Bicep, GitHub Actions and Deployment Stacks"
 weight: 80
@@ -7,8 +8,6 @@ cascade:
   type: docs
 toc: true
 ---
-
-# Deployment Logic
 
 Everything in Azure is a resource — each with its own properties, parameters, and configuration rules. Once you view the platform through that lens, you can standardize the entire lifecycle of every capability. The desired state is defined through purpose-built Bicep modules. Inputs and outputs flow in a controlled loop between GitHub variables and Azure, ensuring every deployment has the information it needs. Resource lifecycles are managed by Azure Deployment Stacks, making the codebase the single source of truth. And every change flows through GitHub Actions — validated in the test environment before being applied to production.
 
