@@ -1,14 +1,13 @@
 ---
+title: Azure Landing Zones - Policy Driven Governance
 linkTitle: Azure Policy
-description: "Azure landing zones: exploring Azure Policy driven governance."
+description: "Azure Policy: design and implement end-to-end solutions, from custom definitions to policy exemptions, to ensure infrastructure configuration standards"
 weight: 40
 breadcrumbs: false
 cascade:
   type: docs
 toc: true
 ---
-# Policy Driven Governance
-
 Azure Policy is a powerful service that helps ensure consistent configuration of Azure resources across all subscriptions. It enables enforcing standards — for example, denying public network access, disabling insecure authentication methods, or configuring diagnostic settings — on all resources including Storage Accounts, Key Vaults, and so on.
 
 To make Azure Policy work smoothly, a few moving parts have to click together, so platform engineers can manage platform rules by editing parameter files only, while enabling application teams to request Policy Exemptions through GitHub Workflows and Pull Requests.  
