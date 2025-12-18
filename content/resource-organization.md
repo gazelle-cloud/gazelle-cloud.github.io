@@ -44,6 +44,19 @@ At this scope, Azure Policies enforce platform-wide requirements, Role-Based Acc
 
 This resource group represents the operational core of each landing zone — self-contained, policy-enforced, and fully managed as code.
 
+## Tags
+
+Tags enable quick identification of resource criticality and associated contact information. Tag values are provided during the initial app registration process and are applied to each application landing zone via an Azure Policy with a modify effect. These tags are enforced throughout the resource lifecycle, ensuring that all resources always have the required metadata for operational efficiency.
+
+- **Subscription-Level**:
+  - `owner`: Contact information for the application owner, used for critical notifications and communications at the subscription scope.
+- **Resource-Level**:
+  - `engineer`:  Contact details for ongoing maintenance.
+  - `criticality`: indicates the importance of the application (low, medium, or high), supporting operational prioritization and incident response.
+
+**Custom Tags:**
+
+Beyond these mandatory tags, landing zone engineers have the flexibility to define additional tags that address unique application needs. Custom tags are configured by editing the landing zone parameter file. Platform automation ensures that all tags (including custom ones) are propagated to every resource within the landing zone.
 
 ## Landing Zone Isolation
 
