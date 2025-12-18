@@ -48,10 +48,10 @@ This resource group represents the operational core of each landing zone — sel
 
 Tags enable quick identification of resource criticality and associated contact information. Tag values are provided during the initial app registration process and are applied to each application landing zone via an Azure Policy with a modify effect. These tags are enforced throughout the resource lifecycle, ensuring that all resources always have the required metadata for operational efficiency.
 
-**Subscription-Level**
- - `owner`: Contact information for the application owner, used for critical notifications and communications at the subscription scope. 
-  
-**Resource-Level**
+### Subscription-Level
+ - `owner`: Contact information for the application owner, used for critical notifications and communications at the subscription scope.
+   
+### Resource-Level
  - `engineer`:  Contact details for ongoing maintenance.
  - `criticality`: indicates the importance of the application (low, medium, or high), supporting operational prioritization and incident response.
 
