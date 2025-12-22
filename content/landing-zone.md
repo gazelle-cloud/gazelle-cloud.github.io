@@ -14,23 +14,20 @@ A landing zone is a blueprint applied to an empty Azure subscription — a stand
 
 The landing zone is built for team autonomy, minimized dependencies on centrally managed components, and promotes a self-service model to create or update landing zones to match an application's path from development to production. 
 
-## Platform Rules
+## What Landing Zone Offers
 
-Success in managing landing zones is a shared responsibility between application teams and the platform team. Both teams play a role in ensuring that landing zones are created, operated, and maintained in alignment with business and technical requirements. Clear lines of responsibility ensure each team understands its role and accountabilities.
+- **Self-service landing zones**: Create, update, and remove landing zones through GitHub Issues and Pull Requests. Application teams control their own environments with a minimal reliance on platform team.
 
-### Application Team
+- **You Build It, You Run It**: Application teams own design, implementation, and operations of their Azure resources — from first deployment to eventual sunset. The platform provides guardrails and tooling; the app team owns the workload.
 
-- **Ownership of the Application:** The application team operates by the "You Build It, You Run It" principle, taking full responsibility for designing, implementing, and managing Azure resources for their application throughout its lifecycle—from development to production and eventual sunset.
-- **Landing Zone Management:** Configure and maintain landing zones using self-service tools and workflows, making changes as needed to meet application requirements.
-- **Policy Exemptions Ownership:** If Azure Policy exemptions are required, the application team takes ownership of the associated risks and maintains justification for exemptions.
+- **Autonomous environments**: Each landing zone is an isolated Azure subscription, tied to a single application and environment (for example: `myapp-dev`, `myapp-test`, `myapp-prod`). Foundational configuration is baked directly into the subscription, with no dependency on shared runtime services.
 
-### Platform Team
+- **Hello-World pipeline**: A ready-to-use GitHub repository containing a “hello world” application, infrastructure-as-code modules (Bicep), and deployment pipelines. This lets teams ship their first deployment in minutes, not weeks.
 
-- **Enable Self-Service:** Deliver and maintain a self-service experience that allows application teams to manage Azure landing zones with minimal reliance on platform engineers.
-- **Policy-Driven Governance:** Implement and enforce Azure Policies to uphold security and operational baselines across all landing zones. Denying anything outside the security baseline.
-- **Cost Management:** Ensure cost transparency at the application level and provide proactive notifications as expenses approach defined budget thresholds.
-- **Hello-World Pipeline:** Provide a “getting started” deployment pipeline, aligned with platform management principles, to help application teams accelerate development on a standardized foundation.
-  
+- **Policy-driven governance**: Azure Policies enforce allowed configurations and deny anything outside the security baseline.
+
+- **Cost visibility per application**: Each application receives a dedicated Azure invoice section. All of its landing zones are linked to this invoice section, enabling cost tracking, alerting, and reporting at the application level.
+
 ## Getting Started
 ### Step 1: Create Application Profile
 
