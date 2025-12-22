@@ -28,11 +28,16 @@ The landing zone is built for team autonomy, minimized dependencies on centrally
 - **[Policy-driven governance](../azure-policy/#existing-assignments)** — Azure Policies enforce allowed configurations and deny anything outside the security baseline.
 - **[Single Region Deployments](../resource-organization/#single-region-deployment)**: deployment flow is streamlined to a single Azure region. 
 
-## Step 1: Register the Application
+## Step 1: Create Application Profile
 
-Before creating the first landing zone, the application must be registered. This step establishes the application’s financial boundary by creating a dedicated Azure invoice section and defines  metadata—such as owner, engineering contacts, and criticality—that is automatically applied to every landing zone.
+The application profile is the foundational record for each application in the Gazelle tenant. This profile serves as the single source of truth for all associated landing zones, ensuring they inherit application-specific Azure and GitHub configurations.
 
-The registration workflow also provisions an Entra ID reader group with read-only visibility into all future subscriptions, and sets up a GitHub repository containing getting-started deployment pipelines and Bicep modules. Application-specific values are stored as GitHub environment variables, enabling automation to create and manage landing zones as a self-service experience.
+- **Financial Tracking**: a dedicated Azure invoice section is created for the application, with all application landing zones (e.g., dev, test, prod) are automatically linked to this invoise section
+
+- **Metadata**: includes tags for an application's criticality level (low, medium, high) as well as contact details for the app owner and engineer.
+- **GitHub Repository Setup**: a "hello world" repository is cloned, including deployment pipelines and Bicep modules. Application-specific values are stored as GitHub environment variables.
+
+- **Access Control:** an Entra ID group is provisioned, granting read-only visibility into all subscriptions and associated cost details tied to the application.
 
 ## Step 2: Request Landing Zone
 
