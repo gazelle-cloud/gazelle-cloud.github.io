@@ -28,7 +28,8 @@ The landing zone is built for team autonomy, minimized dependencies on centrally
 - **[Policy-driven governance](../azure-policy/#existing-assignments)** — Azure Policies enforce allowed configurations and deny anything outside the security baseline.
 - **[Single Region Deployments](../resource-organization/#single-region-deployment)**: deployment flow is streamlined to a single Azure region. 
 
-## Step 1: Create Application Profile
+## Getting Started
+### Step 1: Create Application Profile
 
 The application profile is the foundational record for each application in the Gazelle tenant. This profile serves as the single source of truth for all associated landing zones, ensuring they inherit application-specific Azure and GitHub configurations.
 
@@ -37,11 +38,14 @@ The application profile is the foundational record for each application in the G
 - **GitHub Repository Setup**: a "hello world" repository is cloned, including deployment pipelines and Bicep modules. Application-specific values are stored as GitHub environment variables.
 - **Access Control:** an Entra ID group is provisioned, granting read-only visibility into all subscriptions and cost details tied to the application.
 
-## Step 2: Request Landing Zone
+### Step 2: Request Landing Zone
 
-Users create a new landing zone by providing environment-specific details in the `New Landing Zone Request` GitHub Issue template. The automated workflow generates the landing zone parameter file and a dedicated GitHub Actions workflow, then opens a Pull Request.
+Application teams have full control over their landing zones, enabling them to provision as many environments as needed. The process begins by submitting a GitHub Issue with landing zone details, such as virtual network size and budget. Automation then takes over, generating two landing zone–specific files and opening a Pull Request for platform engineers to review:
 
-Once the Pull Request is merged into the main branch, the platform provisions and configures the Azure landing zone. The landing zone is considered ready when the user receives an Azure Monitor email indicating that a new Action Group has been created — an indirect confirmation that budgets, policies, and guardrails have been applied and the environment is ready to use.
+- **Parameter File**: A Bicep parameter file containing landing zone–specific values. This file can be updated later to align with environment requirements by submitting additional Pull Requests.
+- **GitHub Actions Workflow**: A workflow file tied to the landing zone, containing triggers that enable independent deployment for each landing zone.
+
+Once the Pull Request is merged into the main branch, the platform automation configures the Azure landing zone. The environment is considered ready when the application engineer receives an Azure Monitor email confirming the creation of a new Action Group—an indirect confirmation that budgets, policies, and network configurations are in place, and the landing zone is ready for use.
 
 ## Landing Zone parameters
 
