@@ -8,7 +8,7 @@ cascade:
   type: docs
 toc: true
 ---
-## What is a landing zone
+## What is a landing Zone
 
 A landing zone is a blueprint applied to an empty Azure subscription — a standardized foundation that every cloud application must follow. It defines how costs are controlled, what security and operational baselines are enforced, and it provides a ready-to-use deployment pipeline so application teams never have to start from scratch.
 
@@ -47,7 +47,7 @@ Application teams have full control over their landing zones, enabling them to p
 
 Once the Pull Request is merged into the main branch, the platform automation configures the Azure landing zone. The environment is considered ready when the application engineer receives an Azure Monitor email confirming the creation of a new Action Group—an indirect confirmation that budgets, policies, and network configurations are in place, and the landing zone is ready for use.
 
-## Landing Zone parameters
+## Landing Zone Parameters
 
 ```bicep
 using '../bicep/main.bicep'
