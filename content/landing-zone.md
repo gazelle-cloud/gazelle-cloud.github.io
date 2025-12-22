@@ -32,12 +32,10 @@ The landing zone is built for team autonomy, minimized dependencies on centrally
 
 The application profile is the foundational record for each application in the Gazelle tenant. This profile serves as the single source of truth for all associated landing zones, ensuring they inherit application-specific Azure and GitHub configurations.
 
-- **Financial Tracking**: a dedicated Azure invoice section is created for the application, with all application landing zones (e.g., dev, test, prod) are automatically linked to this invoise section
-
+- **Financial Tracking**: a dedicated Azure invoice section is created for the application, with all application landing zones (e.g., dev, test, prod) are automatically linked to this invoise section.
 - **Metadata**: includes tags for an application's criticality level (low, medium, high) as well as contact details for the app owner and engineer.
 - **GitHub Repository Setup**: a "hello world" repository is cloned, including deployment pipelines and Bicep modules. Application-specific values are stored as GitHub environment variables.
-
-- **Access Control:** an Entra ID group is provisioned, granting read-only visibility into all subscriptions and associated cost details tied to the application.
+- **Access Control:** an Entra ID group is provisioned, granting read-only visibility into all subscriptions and cost details tied to the application.
 
 ## Step 2: Request Landing Zone
 
