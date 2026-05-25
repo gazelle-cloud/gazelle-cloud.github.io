@@ -1,6 +1,7 @@
 {
-  "id": "no-hand-touches-the-cloud",
-  "priority": 4,
+  "id": "0-100-0",
+  "description": "The platform provisions from zero and returns to zero without human access to Azure. Deployment Stacks enforce template-as-reality; BigBang and Destroy workflows validate full reproductibility weekly.",
+  "priority": 3,
   "decisions": [
     "end-to-end-deployment",
     "deployment-stack-delete-all-lifecycle",

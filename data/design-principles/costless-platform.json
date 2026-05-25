@@ -1,5 +1,6 @@
 {
-  "id": "idle-costs-nothing",
+  "id": "costless-platform",
+  "description": "Platform infrastructure carries no committed spend — every service runs on consumption pricing with no idle floor. Cost ownership is structural: each application's spend flows to a dedicated invoice section, never pooled.",
   "priority": 1,
   "decisions": [
     "zero-cost-at-idle",

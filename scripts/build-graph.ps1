@@ -22,10 +22,10 @@ Get-ChildItem (Join-Path $dataDir 'design-decisions') -Filter *.json | ForEach-O
     }
 }
 
-# platform-anchors
-Get-ChildItem (Join-Path $dataDir 'platform-anchors') -Filter *.json | ForEach-Object {
+# design-principles
+Get-ChildItem (Join-Path $dataDir 'design-principles') -Filter *.json | ForEach-Object {
     $a = Get-Content $_.FullName -Raw | ConvertFrom-Json
-    Add-Node $a.id 'anchor'
+    Add-Node $a.id 'principle' @{ description = $a.description }
     foreach ($decId in $a.decisions) {
         $links.Add(@{ source = $a.id; target = $decId; relationship = 'groups' })
     }
@@ -55,7 +55,7 @@ Write-Host "graph.json written"
 Write-Host "  nodes : $($nodes.Count)"
 Write-Host "  links : $($links.Count)"
 Write-Host "  breakdown:"
-foreach ($type in 'decision','anchor','operation','unknown') {
+foreach ($type in 'decision','principle','operation','unknown') {
     $count = ($nodes | Where-Object { $_.type -eq $type }).Count
     if ($count) { Write-Host ("    {0,-12} {1}" -f $type, $count) }
 }

@@ -1,5 +1,6 @@
 {
-  "id": "landing-zone-stands-alone",
+  "id": "you-built-it-you-run-it",
+  "description": "Each landing zone is a fully isolated unit — subscription, identity at Owner scope, VNet, monitoring, and automation runtime. The platform creates the boundary; the team owns full operational control inside it.",
   "priority": 2,
   "decisions": [
     "landing-zone-autonomy",

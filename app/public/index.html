@@ -69,12 +69,18 @@
     // ─── constants ───────────────────────────────────────────────────────────
 
     const COLORS = {
-      anchor:    '#f0a500',
+      principle: '#f0a500',
       operation: '#3dba7f',
       decision:  '#4e8ef7',
     };
 
-    const NODE_TYPES = ['anchor', 'operation', 'decision'];
+    const NODE_TYPES = ['principle', 'operation', 'decision'];
+
+    const TYPE_LABELS = {
+      principle: 'design-principles',
+      operation: 'platform-operations',
+      decision:  'design-decisions',
+    };
 
     const dotRadius = node =>
       node.type === 'decision' ? 2 + node.__weight * 7 : 5;
@@ -98,10 +104,10 @@
       // pin anchors and operations evenly on a circle (interleaved)
       const byType = t => raw.nodes.filter(n => n.type === t);
       const rim = [];
-      const anchors = byType('anchor'), ops = byType('operation');
-      for (let i = 0; i < Math.max(anchors.length, ops.length); i++) {
-        if (anchors[i]) rim.push(anchors[i]);
-        if (ops[i])     rim.push(ops[i]);
+      const principles = byType('principle'), ops = byType('operation');
+      for (let i = 0; i < Math.max(principles.length, ops.length); i++) {
+        if (principles[i]) rim.push(principles[i]);
+        if (ops[i])        rim.push(ops[i]);
       }
       rim.forEach((n, i) => {
         const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
@@ -169,6 +175,7 @@
           fg.d3Force('radial', forceRadial(0, 0, 0)
             .strength(n => n.type === 'decision' ? 0.04 + n.__weight * 0.25 : 0));
           fg.d3ReheatSimulation();
+          setTimeout(() => fg.zoomToFit(400, 40), 100);
           setTimeout(() => fg.zoomToFit(400, 40), 4500);
         }, [graph]);
 
@@ -195,7 +202,7 @@
           ctx.fillStyle = isActive ? '#fff' : COLORS[node.type];
           ctx.fill();
 
-          const isRim      = node.type === 'anchor' || node.type === 'operation';
+          const isRim      = node.type === 'principle' || node.type === 'operation';
           const showLabel  = isRim || isActive || isNeighbour;
           if (showLabel) {
             const fs  = 12 / globalScale;
@@ -249,14 +256,18 @@
                 onClick={() => toggleType(type)}
               >
                 <div className="chip-dot" style={{ background: COLORS[type] }} />
-                {type}
+                {TYPE_LABELS[type]}
               </div>
             ))}
           </div>
 
-          {(activeNode?.mechanism || activeNode?.why) && (
+          {(activeNode?.mechanism || activeNode?.why || activeNode?.description) && (
             <div id="info-panel">
               <div className="info-id">{activeNode.id}</div>
+              {activeNode.description && <>
+                <div className="info-label">Description</div>
+                <p className="info-text">{activeNode.description}</p>
+              </>}
               {activeNode.mechanism && <>
                 <div className="info-label">Mechanism</div>
                 <p className="info-text">{activeNode.mechanism}</p>
