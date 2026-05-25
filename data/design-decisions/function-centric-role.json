@@ -1,0 +1,15 @@
+{
+  "id": "function-centric-role",
+  "mechanism": "Humans get only permissions for their job function via custom roles scoped to function, not resource. Roles are extended with new actions when capabilities require it.",
+  "scope": ["platform"],
+  "why": "Resource-specific roles multiply with every new resource type — role count grows unbounded and auditing becomes impractical. Function-scoped roles absorb new actions into existing definitions without proliferation.",
+  "related": [
+    { "id": "entra-id-groups-over-individual-assignments", "relationship": "enables", "note": "Custom roles assigned to Entra ID groups — role defines permission, group is the assignment unit." },
+    { "id": "allowed-resources", "relationship": "constrains", "note": "New resource type triggers review of whether roles need new actions." }
+  ],
+  "violations": [
+    "Custom role with */write permissions.",
+    "Resource-specific role at management group level.",
+    "Role named after a user."
+  ]
+}

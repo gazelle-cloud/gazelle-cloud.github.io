@@ -1,0 +1,19 @@
+{
+  "id": "self-service-policy-exemptions",
+  "mechanism": "Landing zone owners self-service policy exemptions through their bicepparam and a workflow dispatch. The platform does not gate individual exemptions.",
+  "scope": ["landing-zone"],
+  "why": "Deny policies without self-service create a dependency on platform operators — teams route workloads outside the platform, removing them from the policy boundary entirely.",
+  "related": [
+    { "id": "allowed-resources", "relationship": "enables", "note": "Hard deny on resource types is viable because exemptions are self-service." },
+    { "id": "deny-local-authentication", "relationship": "enables", "note": "Hard deny on local auth is viable." },
+    { "id": "deny-weak-tls", "relationship": "enables", "note": "Hard deny on weak TLS is viable." },
+    { "id": "deny-public-network-access", "relationship": "enables", "note": "Hard deny on public network access is viable." },
+    { "id": "deny-cross-tenant-replication", "relationship": "enables", "note": "Hard deny on cross-tenant replication is viable." },
+    { "id": "exemptions-defender-for-cloud", "relationship": "enables", "note": "Defender exemptions are a specific application of this mechanism for cost-driven recommendations." },
+    { "id": "policy-assignment-reference", "relationship": "enables", "note": "Generated reference file makes self-service exemption authoring user-friendly — no manual portal lookup or hardcoded IDs." }
+  ],
+  "violations": [
+    "Exemption created directly in Azure portal — no PR record.",
+    "Exemption hardcoding an ARM assignment ID instead of referencing policy-assignment-reference.json."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "zero-cost-at-idle",
+  "mechanism": "Platform services use only consumption-based pricing tiers with no idle cost. Flat-rate and reserved-capacity services are not eligible.",
+  "scope": ["platform"],
+  "why": "Flat-rate services accrue cost at idle — fixed overhead accumulates independent of activity and cannot be attributed to application value.",
+  "related": [
+    { "id": "serverless-automation-jobs", "relationship": "enables", "note": "Container App Jobs are consumption-based — zero cost when idle." },
+    { "id": "application-teams-own-the-cost", "relationship": "enables", "note": "Zero platform idle cost ensures billing reflects actual use, not shared overhead." },
+    { "id": "landing-zone-log-analytics", "relationship": "enables", "note": "30-day retention keeps Log Analytics within the free storage tier." }
+  ],
+  "violations": [
+    "Azure Container Registry as platform image registry — fixed monthly cost.",
+    "Automation on a reserved App Service Plan — baseline cost at idle.",
+    "Private endpoint in a landing zone — fixed hourly cost per endpoint."
+  ]
+}

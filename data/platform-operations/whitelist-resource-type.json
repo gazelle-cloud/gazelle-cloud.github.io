@@ -1,0 +1,33 @@
+{
+  "id": "whitelist-resource-type",
+  "workflow": "platform-Azure-Policy",
+  "reasoning": [
+    "allowed-resources",
+    "config-diagnostic-settings",
+    "deny-public-network-access",
+    "deny-local-authentication",
+    "deny-weak-tls",
+    "deny-cross-tenant-replication",
+    "function-centric-role",
+    "exemptions-defender-for-cloud",
+    "custom-policy-definitions",
+    "defaults-are-not-policy"
+  ],
+  "steps": [
+    "Read all design decisions in reasoning[].",
+    "Add the resource type to allowedResources.json.",
+    "Use mcp__azure__documentation microsoft_docs_search to find the built-in diagnostic settings policy — add it to diagnosticSettings.bicepparam.",
+    "For each file in oases/, use mcp__azure__documentation microsoft_docs_search to find built-in policies with the required effect — add matching entries.",
+    "For each gap where no built-in policy provides the required effect, author a custom definition in customDefinitions/ and register it in policyDefinitions.bicepparam.",
+    "Check defenderForCloudExemptions.jsonc for paid-SKU recommendations specific to this resource type — add qualifying entries.",
+    "Check accessControl.bicepparam for custom role actions needed by this resource type.",
+    "Present a complete draft of all changes before implementing."
+  ],
+  "files": [
+    "platform-management/policy/parameters/oases/",
+    "platform-management/policy/parameters/diagnosticSettings.bicepparam",
+    "platform-management/policy/parameters/customDefinitions/",
+    "platform-management/access-control/parameters/accessControl.bicepparam",
+    "landing-zones/defenderForCloudExemptions.jsonc"
+  ]
+}

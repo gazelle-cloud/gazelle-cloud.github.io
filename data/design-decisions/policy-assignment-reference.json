@@ -1,0 +1,14 @@
+{
+  "id": "policy-assignment-reference",
+  "mechanism": "The Azure Policy workflow generates policy-assignment-reference.json immediately after assignment by querying Azure Resource Graph for live assignment IDs. The file is committed to the repo and provides IntelliSense in bicepparam files — users select policy assignments via dot notation and dropdown rather than knowing any Azure internals.",
+  "scope": ["platform", "landing-zone"],
+  "why": "Without the generated file, users must query Azure Portal to find assignment IDs and hardcode them. Hardcoded IDs drift silently when an assignment is redeployed and its ARM ID changes. The generated file keeps references in sync with live assignment state and removes a manual lookup step entirely.",
+  "related": [
+    { "id": "self-service-policy-exemptions", "relationship": "constrains", "note": "Exemptions must reference this file — hardcoding an ARM assignment ID is the violation it prevents." },
+    { "id": "policy-assignment-naming-convention", "relationship": "constrains", "note": "Assignment names are the keys in the file — the naming convention determines the IntelliSense navigation structure." }
+  ],
+  "violations": [
+    "Bicepparam exemption with a hardcoded ARM assignment ID instead of a reference to policy-assignment-reference.json.",
+    "Manually editing policy-assignment-reference.json — it is generated, not hand-authored."
+  ]
+}

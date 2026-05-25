@@ -1,0 +1,24 @@
+{
+  "id": "decommission-landing-zone",
+  "inverse-of": "create-landing-zone",
+  "workflow": "lz-flow-destroy-landing-zone",
+  "reasoning": [
+    "deployment-stack-delete-all-lifecycle",
+    "bring-your-own-subscription",
+    "application-teams-own-the-cost",
+    "landing-zone-autonomy",
+    "landing-zone-workflow-prefix-contract",
+    "end-to-end-deployment"
+  ],
+  "steps": [
+    "Read all design decisions in reasoning[] to understand what is being destroyed and what constraints apply.",
+    "Collect from the user: subscription ID of the landing zone to decommission.",
+    "Verify the bicepparam file exists at landing-zones/oases-prod/{app}/{env}.bicepparam and the lz workflow at .github/workflows/lz-oases-{appName}-{env}.yml — do not proceed if either is missing.",
+    "Present to the user what will be permanently destroyed: deployment stack, resource groups, role assignments, budget, Defender settings. Confirm the subscription returns to the bank. Wait for explicit confirmation.",
+    "Trigger lz-flow-destroy-landing-zone via workflow_dispatch with the subscription ID. Do not manually delete files — the workflow resolves app name and env, creates the cleanup PR, and the merge triggers the Azure destroy sequence."
+  ],
+  "files": [
+    "landing-zones/oases-prod/",
+    ".github/workflows/"
+  ]
+}

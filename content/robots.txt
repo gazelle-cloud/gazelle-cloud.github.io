@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://gazelle.cloud/sitemap.xml

@@ -1,0 +1,12 @@
+{
+  "id": "idle-costs-nothing",
+  "priority": 1,
+  "decisions": [
+    "zero-cost-at-idle",
+    "serverless-automation-jobs",
+    "single-region-deployments",
+    "automation-docker-images-pulled-over-public-internet",
+    "application-teams-own-the-cost",
+    "cost-forecast-over-hardcoded-thresholds"
+  ]
+}

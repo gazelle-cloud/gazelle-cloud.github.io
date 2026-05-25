@@ -1,0 +1,16 @@
+{
+  "id": "deny-local-authentication",
+  "mechanism": "Azure Policy denies local authentication at the management group level. Exceptions require a policy exemption.",
+  "scope": ["platform", "landing-zone"],
+  "why": "Local auth bypasses Entra ID — access keys and connection strings grant data-plane access invisible to the RBAC model. A key holder circumvents the entire access control model.",
+  "related": [
+    { "id": "federated-auth-to-github", "relationship": "enables", "note": "OIDC federation provides credential-free auth — makes denying local auth viable for automation." },
+    { "id": "landing-zone-identity", "relationship": "enables", "note": "Managed identity provides the Entra ID path that replaces local auth for automation." },
+    { "id": "self-service-policy-exemptions", "relationship": "enables", "note": "Self-service exemptions make hard denies viable." },
+    { "id": "defaults-are-not-policy", "relationship": "constrains", "note": "A compliant default does not substitute for a Deny gate." }
+  ],
+  "violations": [
+    "Storage account with access keys enabled.",
+    "Key Vault configured with Access Policies instead of RBAC."
+  ]
+}

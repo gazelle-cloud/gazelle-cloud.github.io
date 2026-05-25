@@ -1,0 +1,19 @@
+{
+  "id": "landing-zone-resource-group",
+  "mechanism": "All platform-managed capabilities (identity, VNet, monitoring, automation) are in a single `landingzone-resources` resource group within the landing zone subscription.",
+  "scope": ["landing-zone"],
+  "why": "Multiple resource groups split management across boundaries — teardown requires coordinated operations across groups. A central platform subscription creates a remote dependency the landing zone doesn't own.",
+  "related": [
+    { "id": "landing-zone-autonomy", "relationship": "enables", "note": "deleteAll on this group is a complete teardown of platform infrastructure." },
+    { "id": "landing-zone-identity", "relationship": "enables", "note": "Identity provisioned and protected within the stack." },
+    { "id": "deployment-stack-delete-all-lifecycle", "relationship": "enables", "note": "Single resource group is the stack's deleteAll scope — unmanaged resources removed on every deployment." },
+    { "id": "landing-zone-log-analytics", "relationship": "enables", "note": "Log Analytics workspace provisioned and lifecycle-managed within the stack." },
+    { "id": "landing-zone-vnet", "relationship": "enables", "note": "VNet provisioned and lifecycle-managed within the stack." },
+    { "id": "serverless-automation-jobs", "relationship": "enables", "note": "Container App Jobs provisioned within the stack as the landing-zone-native automation runtime." }
+  ],
+  "violations": [
+    "Platform resource in the application team's resource group — outside stack scope.",
+    "Application resource inside landing-zone-resources — deleted on next stack deployment.",
+    "Platform resource created directly in Azure — survives decommission as residual state."
+  ]
+}

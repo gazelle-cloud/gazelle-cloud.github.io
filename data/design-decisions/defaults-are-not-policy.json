@@ -1,0 +1,17 @@
+{
+  "id": "defaults-are-not-policy",
+  "mechanism": "Security Deny gates are required for every applicable property on every whitelisted resource type. Whether the service default is already compliant is not evaluated.",
+  "scope": ["platform"],
+  "why": "A default is a starting condition, not a control — it can be changed after deployment with no policy signal.",
+  "related": [
+    { "id": "deny-public-network-access", "relationship": "constrains", "note": "A compliant default does not substitute for a Deny gate." },
+    { "id": "deny-local-authentication", "relationship": "constrains", "note": "A compliant default does not substitute for a Deny gate." },
+    { "id": "deny-weak-tls", "relationship": "constrains", "note": "A compliant default does not substitute for a Deny gate." },
+    { "id": "deny-cross-tenant-replication", "relationship": "constrains", "note": "A compliant default does not substitute for a Deny gate." },
+    { "id": "custom-policy-definitions", "relationship": "enables", "note": "When no built-in Deny exists, a custom definition closes the gap — the default does not." }
+  ],
+  "violations": [
+    "Deny gate omitted because the service default for that property is compliant.",
+    "Coverage gap accepted on the basis that the resource type enforces the desired state by default."
+  ]
+}

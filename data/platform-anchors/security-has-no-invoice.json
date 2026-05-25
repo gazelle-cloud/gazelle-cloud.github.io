@@ -1,0 +1,21 @@
+{
+  "id": "security-has-no-invoice",
+  "priority": 3,
+  "decisions": [
+    "deny-public-network-access",
+    "deny-local-authentication",
+    "deny-weak-tls",
+    "deny-cross-tenant-replication",
+    "allowed-resources",
+    "allowed-locations",
+    "config-diagnostic-settings",
+    "self-service-policy-exemptions",
+    "exemptions-defender-for-cloud",
+    "entra-id-groups-over-individual-assignments",
+    "function-centric-role",
+    "microsoft-graph-permissions",
+    "automation-jobs-have-access-at-control-plane-only",
+    "custom-policy-definitions",
+    "defaults-are-not-policy"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "deny-weak-tls",
+  "mechanism": "Azure Policy denies TLS versions below 1.2 at the management group level. Exceptions require a policy exemption.",
+  "scope": ["platform", "landing-zone"],
+  "why": "Without explicit denial, traffic silently downgrades to protocols with known cryptographic weaknesses. Attackers can force a downgrade without the operator being aware.",
+  "related": [
+    { "id": "deny-public-network-access", "relationship": "constrains", "note": "Without TLS enforcement, any legitimately public endpoint (via exemption) has uncontrolled transport." },
+    { "id": "exemptions-defender-for-cloud", "relationship": "constrains", "note": "Security deny policies are never in scope for Defender exemptions." },
+    { "id": "policy-assignment-naming-convention", "relationship": "constrains", "note": "Must use a Deny-prefixed assignment for TLS compliance." },
+    { "id": "self-service-policy-exemptions", "relationship": "enables", "note": "Self-service exemptions make hard denies viable." },
+    { "id": "defaults-are-not-policy", "relationship": "constrains", "note": "A compliant default does not substitute for a Deny gate." }
+  ],
+  "violations": [
+    "Storage account with minimumTlsVersion below TLS1_2.",
+    "App Service with minimum TLS version below 1.2."
+  ]
+}
