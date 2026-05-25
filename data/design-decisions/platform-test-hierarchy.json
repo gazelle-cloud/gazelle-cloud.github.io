@@ -1,0 +1,15 @@
+{
+  "id": "platform-test-hierarchy",
+  "mechanism": "Platform changes validated against oases-test (prod-identical management group hierarchy) before promotion to oases-prod. HeyAzure is the canary landing zone in both hierarchies.",
+  "scope": ["platform"],
+  "why": "Without a parallel test hierarchy, platform changes deploy directly to production — failures surface against live landing zones with no safe rollback. HeyAzure ensures deployment parity is verified, not assumed.",
+  "related": [
+    { "id": "landing-zone-environment-tier", "relationship": "constrains", "note": "Application workloads belong in oases-prod — oases-test is not an application environment." },
+    { "id": "self-contained-landing-zones", "relationship": "constrains", "note": "oases-test must mirror oases-prod structurally for meaningful validation." },
+    { "id": "branch-gated-environment-promotion", "relationship": "enables", "note": "Test hierarchy is the target the promotion gate validates against." }
+  ],
+  "violations": [
+    "Platform change merged without prior successful deployment to oases-test.",
+    "Application workload landing zone created in oases-test."
+  ]
+}

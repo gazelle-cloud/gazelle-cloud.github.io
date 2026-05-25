@@ -1,0 +1,15 @@
+{
+  "id": "github-app-as-platform-automation-identity",
+  "mechanism": "A GitHub App (APP_GITHUB_AZUREPLATFORM_ID) is the platform's GitHub-side identity. Workflows mint short-lived tokens via actions/create-github-app-token scoped to the repository owner.",
+  "scope": ["platform"],
+  "why": "PATs couple to a human and never expire gracefully. GITHUB_TOKEN cannot reach other repos or org-level resources. A GitHub App provides auditable, scoped tokens without human dependency.",
+  "related": [
+    { "id": "federated-auth-to-github", "relationship": "enables", "note": "OIDC covers GitHub→Azure. The App covers platform→GitHub." },
+    { "id": "entra-id-app-as-platform-identity", "relationship": "enables", "note": "Entra app is Azure-side; GitHub App is GitHub-side." },
+    { "id": "platform-capability-autonomy", "relationship": "enables", "note": "Each workflow mints its own token from the same App." }
+  ],
+  "violations": [
+    "Workflow using a PAT for cross-repo operations.",
+    "GITHUB_TOKEN used to write org-level variables or trigger other workflows."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "federated-auth-to-github",
+  "mechanism": "GitHub Actions authenticate to Azure via OIDC federation. Azure evaluates a short-lived token from GitHub's OIDC provider against a federated credential pinned to org/repo/environment. No secret is stored or exchanged.",
+  "scope": ["platform", "landing-zone"],
+  "why": "Static secrets remain valid after the job completes, can be extracted, and require rotation. OIDC tokens expire with the workflow run, and federation scope ensures one landing zone's credential can't be used by another.",
+  "related": [
+    { "id": "entra-id-app-as-platform-identity", "relationship": "constrains", "note": "Platform app registration must carry a federated credential scoped to platform workflows." },
+    { "id": "landing-zone-identity", "relationship": "constrains", "note": "Each landing zone identity must have a federated credential scoped to its own repo/environment." },
+    { "id": "github-app-as-platform-automation-identity", "relationship": "enables", "note": "OIDC covers GitHub→Azure; GitHub App covers platform→GitHub." }
+  ],
+  "violations": [
+    "Client secret used for Azure authentication — persists after workflow run.",
+    "Federated credential without an environment claim — any workflow in the repo can assume the identity.",
+    "Federated credential referencing another landing zone's repo/environment."
+  ]
+}

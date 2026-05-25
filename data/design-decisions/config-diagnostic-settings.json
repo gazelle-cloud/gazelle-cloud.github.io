@@ -1,0 +1,14 @@
+{
+  "id": "config-diagnostic-settings",
+  "mechanism": "The diagnostic settings policy initiative includes a DeployIfNotExists definition per approved resource type. Whitelisting a type requires adding a corresponding definition.",
+  "scope": ["platform"],
+  "why": "An approved resource type without a diagnostic settings definition has no telemetry and no remediation path — the coverage gap is silent.",
+  "related": [
+    { "id": "allowed-resources", "relationship": "constrains", "note": "Approved list and diagnostic settings initiative must stay in sync." },
+    { "id": "policy-assignment-naming-convention", "relationship": "constrains", "note": "Must use a Config-prefixed assignment for diagnostic settings." }
+  ],
+  "violations": [
+    "Resource type added to allowedResources.json without a diagnostic settings definition.",
+    "Diagnostic settings definition for a type not on the approved list — dead configuration."
+  ]
+}

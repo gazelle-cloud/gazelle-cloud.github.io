@@ -1,0 +1,15 @@
+{
+  "id": "automation-jobs-have-access-at-control-plane-only",
+  "mechanism": "Container App Jobs deploy without VNet integration — ARM API calls only. No data plane access.",
+  "scope": ["landing-zone"],
+  "why": "VNet integration carries fixed monthly cost. Control-plane-only eliminates that cost while preserving full ARM resource management.",
+  "related": [
+    { "id": "serverless-automation-jobs", "relationship": "enables", "note": "No VNet keeps jobs at zero cost at rest." },
+    { "id": "zero-cost-at-idle", "relationship": "constrains", "note": "Zero-idle-cost forces control-plane-only access." },
+    { "id": "automation-docker-images-pulled-over-public-internet", "relationship": "enables", "note": "No VNet means no private registry — public pull is a consequence." }
+  ],
+  "violations": [
+    "Automation job making data plane calls (reading blobs, querying Key Vault secrets).",
+    "Container App Environment with VNet integration for automation."
+  ]
+}

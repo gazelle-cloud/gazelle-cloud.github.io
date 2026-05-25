@@ -1,0 +1,16 @@
+{
+  "id": "landing-zone-log-analytics",
+  "mechanism": "A dedicated Log Analytics workspace per landing zone with 30-day retention.",
+  "scope": ["landing-zone"],
+  "why": "Shared workspaces co-mingle telemetry — one team can query another's data, and ingestion cost can't be attributed. Retention beyond 30 days incurs per-GB charges across all workspaces without proportional value.",
+  "related": [
+    { "id": "landing-zone-autonomy", "relationship": "enables", "note": "Log Analytics is one of the self-contained capabilities per landing zone." },
+    { "id": "application-teams-own-the-cost", "relationship": "enables", "note": "Dedicated workspace keeps ingestion cost inside the application billing scope." },
+    { "id": "zero-cost-at-idle", "relationship": "enables", "note": "30-day retention stays within the zero-cost storage tier." }
+  ],
+  "violations": [
+    "Workspace shared across landing zones — telemetry co-mingles, cost unattributable.",
+    "Diagnostic settings pointing to a workspace outside the landing zone's subscription.",
+    "retentionInDays exceeding 30 — storage cost beyond free boundary."
+  ]
+}

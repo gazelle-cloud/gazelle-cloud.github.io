@@ -1,0 +1,16 @@
+{
+  "id": "application-profile",
+  "mechanism": "A JSON file registers an application on the platform. The application profile workflow bootstraps Entra ID groups, Azure Invoice Section, and application GitHub repository.",
+  "scope": ["platform"],
+  "why": "A single registration bootstraps all application-specific platform state from one source. From that point the platform recognizes the application and enables self-service operations.",
+  "related": [
+    { "id": "action-group", "relationship": "enables", "note": "Action group sources engineer contact email from the profile." },
+    { "id": "application-teams-own-the-cost", "relationship": "enables", "note": "Profile creation provisions the Invoice Section that scopes billing to the application." },
+    { "id": "platform-managed-tags", "relationship": "enables", "note": "Profile provides owner and engineer values for the tag baseline." },
+    { "id": "landing-zone-scaffolding-via-code-generation", "relationship": "enables", "note": "Profile must exist before a landing zone can be scaffolded." },
+    { "id": "landing-zone-identity", "relationship": "enables", "note": "Profile owner and engineer contacts are consumed by the landing zone identity for tag enforcement and incident routing." }
+  ],
+  "violations": [
+    "Landing zone bicepparam with hardcoded owner/engineer email instead of readEnvironmentVariable."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "landing-zone-autonomy",
+  "mechanism": "Each landing zone is provisioned with its own VNet, identity, monitoring, and automation runtime. No platform capability is shared between landing zones.",
+  "scope": ["landing-zone"],
+  "why": "Sharing infrastructure between landing zones couples their lifecycles — one team's change or outage can block another.",
+  "related": [
+    { "id": "landing-zone-resource-group", "relationship": "enables", "note": "Single resource group contains all self-contained capabilities." },
+    { "id": "landing-zone-identity", "relationship": "enables", "note": "Each landing zone gets its own identity." },
+    { "id": "zero-cost-at-idle", "relationship": "enables", "note": "Self-contained capabilities are consumption-based — no idle cost." },
+    { "id": "bring-your-own-subscription", "relationship": "constrains", "note": "Subscription reuse requires the subscription to be empty — residual resources violate self-containment." },
+    { "id": "landing-zone-log-analytics", "relationship": "enables", "note": "Dedicated Log Analytics workspace per landing zone." },
+    { "id": "deployment-stack-delete-all-lifecycle", "relationship": "enables", "note": "deleteAll guarantees decommissioning leaves no residual state." },
+    { "id": "landing-zone-workflow-prefix-contract", "relationship": "enables", "note": "No central registry couples landing zones — discovery by prefix." }
+  ],
+  "violations": [
+    "Landing zone sharing a Key Vault or storage account with another landing zone."
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "landing-zone-stands-alone",
+  "priority": 2,
+  "decisions": [
+    "landing-zone-autonomy",
+    "landing-zone-identity",
+    "landing-zone-vnet",
+    "landing-zone-resource-group",
+    "landing-zone-log-analytics",
+    "landing-zone-automation",
+    "landing-zone-environment-tier",
+    "landing-zone-workflow-prefix-contract",
+    "bring-your-own-subscription",
+    "ipam",
+    "platform-capability-autonomy",
+    "application-profile",
+    "action-group",
+    "automation-jobs-runs-as-landing-zone-identity"
+  ]
+}

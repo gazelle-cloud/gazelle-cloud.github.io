@@ -1,0 +1,21 @@
+{
+  "id": "onboard-application",
+  "workflow": "requestNew-Application-Profile",
+  "reasoning": [
+    "application-profile",
+    "application-teams-own-the-cost",
+    "entra-id-groups-over-individual-assignments",
+    "function-centric-role",
+    "github-variables-as-configuration-source-of-truth"
+  ],
+  "steps": [
+    "Read all design decisions in reasoning[] to understand constraints before proposing any changes.",
+    "Collect from the user: application name, Entra ID group IDs for the team, and GitHub repository name.",
+    "Create the application profile at application-profiles/{AppName}.json.",
+    "Determine if githubVariables.json requires updates per the github-variables-as-configuration-source-of-truth decision.",
+    "Present a complete draft before implementing."
+  ],
+  "files": [
+    "application-profiles/"
+  ]
+}

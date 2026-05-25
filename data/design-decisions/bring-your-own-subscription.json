@@ -1,0 +1,16 @@
+{
+  "id": "bring-your-own-subscription",
+  "mechanism": "Landing zone provisioning draws from a 'subscription bank' before creating a new subscription. Subscriptions enter the bank on decommission. New subscriptions created only when the bank is empty.",
+  "scope": ["landing-zone"],
+  "why": "Microsoft Customer Agreement subscription quota is finite. Always creating new subscriptions ties quota to total provisioning count, not active count — decommissioned subscriptions still count against the ceiling.",
+  "related": [
+    { "id": "application-teams-own-the-cost", "relationship": "constrains", "note": "Reused subscription must move to the application's invoice section before provisioning completes." },
+    { "id": "landing-zone-autonomy", "relationship": "constrains", "note": "Subscription eligible for the bank only when empty — residual resources violate self-containment." },
+    { "id": "deployment-stack-delete-all-lifecycle", "relationship": "enables", "note": "deleteAll guarantees a decommissioned subscription is empty — makes reuse safe." }
+  ],
+  "violations": [
+    "New subscription created when bank had an available empty subscription.",
+    "Subscription returned to bank with residual resources.",
+    "Reused subscription under platform invoice section instead of application's."
+  ]
+}

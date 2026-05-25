@@ -1,0 +1,16 @@
+{
+  "id": "cost-forecast-over-hardcoded-thresholds",
+  "mechanism": "Budget alerts use forecasted threshold type instead of hardcoded actual-spend thresholds.",
+  "scope": ["landing-zone"],
+  "why": "Actual-spend thresholds (50%, 80%) fire on normal consumption variability — noise without decision value. A single forecast threshold detects trend deviations regardless of spend pattern.",
+  "related": [
+    { "id": "application-teams-own-the-cost", "relationship": "enables", "note": "Forecast alerts reach the team that owns the spend." },
+    { "id": "action-group", "relationship": "enables", "note": "Forecast alert wired to the landing zone action group." },
+    { "id": "zero-cost-at-idle", "relationship": "enables", "note": "Variable spend from consumption services makes forecast the only useful signal." }
+  ],
+  "violations": [
+    "Budget with actual-spend thresholds alongside forecast — noise from normal variability.",
+    "Budget with only actual-spend thresholds — alerts fire after spend, not before deviation.",
+    "Multiple forecast thresholds at different percentages — lower thresholds fire on normal trajectories."
+  ]
+}
