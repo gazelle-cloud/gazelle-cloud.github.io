@@ -8,10 +8,11 @@
     #filters {
       position: absolute;
       top: 14px; left: 14px;
-      display: flex; gap: 8px; align-items: center;
+      display: flex; gap: 8px; align-items: flex-start;
       z-index: 10;
     }
-    #nav-link {
+    .nav-stack { display: flex; flex-direction: column; gap: 8px; }
+    .nav-link {
       font: 12px sans-serif;
       color: rgba(255,255,255,0.35);
       text-decoration: none;
@@ -20,7 +21,8 @@
       border-radius: 20px;
       transition: color 0.15s, border-color 0.15s;
     }
-    #nav-link:hover { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.35); }
+    .nav-link:hover { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.35); }
+    .nav-active { color: rgba(255,255,255,0.75) !important; border-color: rgba(255,255,255,0.35) !important; pointer-events: none; }
     .chip {
       display: flex; align-items: center; gap: 6px;
       padding: 5px 12px; border-radius: 20px; border: 1.5px solid;
@@ -85,14 +87,14 @@
     import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
     import React from 'react';
     import { createRoot } from 'react-dom/client';
-    import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
+    import { forceCollide, forceX, forceY } from 'https://esm.sh/d3-force';
 
     // ─── constants ───────────────────────────────────────────────────────────
 
     const COLORS = {
-      workflow:       '#c084fc',
-      'bicep-entry':  '#f59e0b',
-      'bicep-module': '#38bdf8',
+      workflow:       '#3dba7f',
+      'bicep-entry':  '#f0a500',
+      'bicep-module': '#4e8ef7',
     };
 
     const NODE_TYPES = ['workflow', 'bicep-entry', 'bicep-module'];
@@ -119,6 +121,67 @@
       return 2 + node.__weight * 5;
     };
 
+    // ─── jobs formatter ──────────────────────────────────────────────────────
+
+    function highlightJobs(raw) {
+      return raw.split('\n').map(line => {
+        if (line.startsWith('job:')) {
+          const label = esc(line.slice(4).trim());
+          return `<span style="color:#3dba7f;font-weight:600">job</span><span style="color:#94a3b8">:</span> <span style="color:#e2e8f0">${label}</span>`;
+        }
+        return `<span style="color:#64748b">${esc(line)}</span>`;
+      }).join('\n');
+    }
+
+    // ─── bicep syntax highlighter ────────────────────────────────────────────
+
+    const BICEP_KEYWORDS = new Set([
+      'module','resource','param','var','output','for','in','if','existing',
+      'scope','params','targetScope','name','type','import','using','dependsOn',
+    ]);
+    const BICEP_TYPES = new Set(['string','int','bool','object','array']);
+
+    function esc(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function highlightBicep(raw) {
+      const code = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      let out = '', i = 0;
+      while (i < code.length) {
+        // single-line comment
+        if (code[i] === '/' && code[i + 1] === '/') {
+          const end = code.indexOf('\n', i);
+          const chunk = end === -1 ? code.slice(i) : code.slice(i, end);
+          out += `<span style="color:#4b5563">${esc(chunk)}</span>`;
+          i += chunk.length; continue;
+        }
+        // single-quoted string
+        if (code[i] === "'") {
+          let j = i + 1;
+          while (j < code.length && code[j] !== "'") j++;
+          j++;
+          out += `<span style="color:#86efac">${esc(code.slice(i, j))}</span>`;
+          i = j; continue;
+        }
+        // identifier → keyword / type / plain
+        if (/[a-zA-Z_]/.test(code[i])) {
+          let j = i;
+          while (j < code.length && /\w/.test(code[j])) j++;
+          const word = code.slice(i, j);
+          if (BICEP_KEYWORDS.has(word))
+            out += `<span style="color:#f0a500;font-weight:600">${esc(word)}</span>`;
+          else if (BICEP_TYPES.has(word))
+            out += `<span style="color:#38bdf8">${esc(word)}</span>`;
+          else
+            out += esc(word);
+          i = j; continue;
+        }
+        out += esc(code[i]); i++;
+      }
+      return out;
+    }
+
     // ─── data prep ───────────────────────────────────────────────────────────
 
     fetch('./codebase.json').then(r => r.json()).then(raw => {
@@ -131,20 +194,49 @@
       const maxDeg = Math.max(1, ...Object.values(inDeg));
       raw.nodes.forEach(n => { n.__weight = (inDeg[n.id] ?? 0) / maxDeg; });
 
-      // pre-position nodes on their target rings so forces just maintain rather than find
-      const ringRadius = { workflow: 30, entry: 180, module: 180 };
-      const byRing = {};
-      raw.nodes.forEach(n => {
-        const key = n.type === 'bicep' ? n.role : n.type;
-        (byRing[key] = byRing[key] ?? []).push(n);
+      // fixed left-to-right workflow order
+      const WF_ORDER = [
+        'template-Management-Groups',
+        'template-access-control',
+        'template-Azure-Policy',
+        'template-landing-zones',
+      ];
+      const wfSpacing = 130;
+      const wfOffset  = (WF_ORDER.length - 1) / 2 * wfSpacing;
+      WF_ORDER.forEach((id, i) => {
+        const node = raw.nodes.find(n => n.id === id);
+        if (node) node.__xTarget = i * wfSpacing - wfOffset;
       });
-      Object.entries(byRing).forEach(([key, nodes]) => {
-        const r = ringRadius[key] ?? 150;
-        nodes.forEach((n, i) => {
-          const angle = (i / nodes.length) * 2 * Math.PI;
-          n.x = r * Math.cos(angle);
-          n.y = r * Math.sin(angle);
+
+      // propagate X target from workflow → entry bicep (straight stem, small offset for siblings)
+      const wfChildren = {};
+      raw.links.forEach(l => {
+        const srcId = l.source?.id ?? l.source;
+        const tgtId = l.target?.id ?? l.target;
+        const src = raw.nodes.find(n => n.id === srcId);
+        const tgt = raw.nodes.find(n => n.id === tgtId);
+        if (src?.type === 'workflow' && tgt?.role === 'entry')
+          (wfChildren[srcId] = wfChildren[srcId] ?? []).push(tgt);
+      });
+      Object.entries(wfChildren).forEach(([wfId, entries]) => {
+        const wf = raw.nodes.find(n => n.id === wfId);
+        const baseX = wf?.__xTarget ?? 0;
+        entries.forEach((n, i) => {
+          const offset = entries.length > 1 ? (i - (entries.length - 1) / 2) * 35 : 0;
+          n.__xTarget = baseX + offset;
         });
+      });
+
+      // pre-position + pin workflows (same logic as main page rim nodes)
+      raw.nodes.forEach(n => {
+        if (n.type === 'workflow') {
+          n.x = n.__xTarget ?? 0; n.y = 220;
+          n.fx = n.x; n.fy = n.y;          // pinned — bounding box stable from tick 0
+        } else if (n.role === 'entry') {
+          n.x = n.__xTarget ?? 0; n.y = 60;
+        } else {
+          n.x = (Math.random() - 0.5) * 380; n.y = -220;
+        }
       });
 
       // ─── component ─────────────────────────────────────────────────────────
@@ -163,6 +255,7 @@
         const [visible,   setVisible]   = React.useState(new Set(NODE_TYPES));
         const [hoveredId, setHoveredId] = React.useState(null);
         const [focusedId, setFocusedId] = React.useState(null);
+        const hoverTimer = React.useRef(null);
 
         const activeId = focusedId ?? hoveredId;
 
@@ -197,24 +290,30 @@
         React.useEffect(() => {
           const fg = fgRef.current;
           if (!fg) return;
-          fg.d3Force('charge').strength(-160);
-          // moderate link force — topology creates natural clusters
+          fg.d3Force('charge').strength(-200);
           fg.d3Force('link')
             .distance(l => {
-              const s = l.source?.type ?? l.source;
-              return s === 'workflow' ? 30 : 60;
+              const s = l.source?.type ?? '';
+              return s === 'workflow' ? 40 : 70;
             })
-            .strength(0.5);
+            .strength(0.4);
           fg.d3Force('collision', forceCollide(n => dotRadius(n) + 5));
-          // workflows firmly at center
-          fg.d3Force('radial-center', forceRadial(30, 0, 0)
-            .strength(n => n.type === 'workflow' ? 0.9 : 0));
-          // gentle pull on entry bicep only — modules follow links freely
-          fg.d3Force('radial-edge', forceRadial(120, 0, 0)
-            .strength(n => n.type === 'bicep' && n.role === 'entry' ? 0.3 : 0));
+          // fountain: lock each tier to its vertical band
+          fg.d3Force('y-tier', forceY(n => {
+            if (n.type === 'workflow') return 220;
+            if (n.role === 'entry')   return 0;
+            return -220;
+          }).strength(n => {
+            if (n.type === 'workflow') return 0.8;
+            if (n.role === 'entry')   return 0.5;
+            return 0.25;
+          }));
+          // workflows + entry bicep pulled to their X target (straight stem)
+          fg.d3Force('x-stem', forceX(n => n.__xTarget ?? 0)
+            .strength(n => n.type === 'workflow' ? 0.8 : n.role === 'entry' ? 0.6 : 0));
           fg.d3ReheatSimulation();
           setTimeout(() => fg.zoomToFit(400, 40), 100);
-          setTimeout(() => fg.zoomToFit(400, 40), 4500);
+          setTimeout(() => fg.zoomToFit(400, 40), 1500);
         }, [graph]);
 
         const linkColor = React.useCallback(l => {
@@ -245,17 +344,25 @@
 
           const showLabel = node.type === 'workflow' || isActive || isNeighbour;
           if (showLabel) {
-            const fs  = 11 / globalScale;
+            const fs  = node.type === 'workflow' ? 11 / globalScale : 11 / globalScale;
             ctx.font  = `${fs}px Sans-Serif`;
             const tw  = ctx.measureText(node.id).width;
             const p   = 4 / globalScale;
-            const gap = r + 6 / globalScale;
+            const gap = r + 5 / globalScale;
 
-            const lx    = node.x + gap;
-            const ly    = node.y;
-            const align = 'left';
+            let lx, ly, align;
+            if (node.type === 'workflow') {
+              // grounded below the dot, centred
+              lx    = node.x;
+              ly    = node.y + gap + fs;
+              align = 'center';
+            } else {
+              lx    = node.x + gap;
+              ly    = node.y;
+              align = 'left';
+            }
 
-            const bgX = align === 'left' ? lx - p : lx - tw - p;
+            const bgX = align === 'center' ? lx - tw / 2 - p : lx - p;
             ctx.fillStyle = 'rgba(26,27,38,0.9)';
             ctx.fillRect(bgX, ly - fs / 2 - p, tw + p * 2, fs + p * 2);
             ctx.fillStyle    = isActive ? '#fff' : COLORS[vtype(node)] ?? '#ccc';
@@ -281,7 +388,10 @@
 
         return <>
           <div id="filters">
-            <a id="nav-link" href="./index.html">← knowledge graph</a>
+            <div className="nav-stack">
+              <a className="nav-link" href="./index.html">Home</a>
+              <span className="nav-link nav-active">Azure deployments</span>
+            </div>
             {NODE_TYPES.map(type => (
               <div key={type}
                 className={`chip${visible.has(type) ? '' : ' off'}`}
@@ -294,7 +404,7 @@
             ))}
           </div>
 
-          {focusedId && activeNode && (
+          {activeNode && (
             <div id="info-panel">
               <div className="info-id">{TYPE_LABELS[vtype(activeNode)]}</div>
               <p className="info-text" style={{ color: '#fff', margin: '0 0 8px', fontWeight: 600 }}>{activeNode.id}</p>
@@ -304,11 +414,18 @@
                 <p className="info-text">{activeNode.description}</p>
               </>}
 
-              {activeNode.trigger && <>
-                <div className="info-label">Trigger</div>
-                <span className="info-badge" style={{ background: badgeColor(activeNode) }}>
-                  {activeNode.trigger}
-                </span>
+              {activeNode.jobs && <>
+                <div className="info-label">Jobs</div>
+                <pre style={{
+                  margin: '4px 0 0', padding: '10px 12px',
+                  background: 'rgba(0,0,0,0.35)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: 6,
+                  fontFamily: 'monospace', fontSize: 10, lineHeight: 1.6,
+                  color: '#e2e8f0', whiteSpace: 'pre', overflowX: 'auto',
+                }}
+                  dangerouslySetInnerHTML={{ __html: highlightJobs(activeNode.jobs) }}
+                />
               </>}
 
               {activeNode.path && <>
@@ -318,30 +435,32 @@
                 </p>
               </>}
 
+              {activeNode.snippet && <>
+                <div className="info-label">Snippet</div>
+                <pre style={{
+                  margin: '4px 0 0', padding: '10px 12px',
+                  background: 'rgba(0,0,0,0.35)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: 6,
+                  fontFamily: 'monospace', fontSize: 10, lineHeight: 1.6,
+                  color: '#e2e8f0', whiteSpace: 'pre', overflowX: 'auto',
+                }}
+                  dangerouslySetInnerHTML={{ __html: highlightBicep(activeNode.snippet) }}
+                />
+              </>}
+
               {activeNode.inputs && <>
-                <div className="info-label">Inputs ({Object.keys(activeNode.inputs).length})</div>
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 4 }}>
-                  <tbody>
-                    {Object.entries(activeNode.inputs).map(([name, value]) => {
-                      const isGhVar = value.startsWith('→');
-                      return (
-                        <tr key={name} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <td style={{ padding: '3px 6px 3px 0', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 11 }}>{name}</td>
-                          <td style={{ padding: '3px 0', textAlign: 'right' }}>
-                            <span style={{
-                              background: isGhVar ? 'rgba(192,132,252,0.15)' : 'rgba(245,158,11,0.15)',
-                              color:      isGhVar ? '#c084fc'                : '#f59e0b',
-                              padding: '1px 6px', borderRadius: 3, fontSize: 10, fontFamily: 'monospace',
-                              wordBreak: 'break-all',
-                            }}>
-                              {isGhVar ? value.slice(2) : value}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div className="info-label">Inputs</div>
+                <pre style={{
+                  margin: '4px 0 0', padding: '10px 12px',
+                  background: 'rgba(0,0,0,0.35)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: 6,
+                  fontFamily: 'monospace', fontSize: 10, lineHeight: 1.6,
+                  color: '#e2e8f0', whiteSpace: 'pre', overflowX: 'auto',
+                }}
+                  dangerouslySetInnerHTML={{ __html: highlightBicep(activeNode.inputs) }}
+                />
               </>}
             </div>
           )}
@@ -362,9 +481,16 @@
             linkDirectionalArrowLength={4}
             linkDirectionalArrowRelPos={1}
             linkDirectionalArrowColor={linkColor}
-            cooldownTime={4000}
+            cooldownTime={1500}
             onEngineStop={() => fgRef.current?.zoomToFit(400, 40)}
-            onNodeHover={node => setHoveredId(node?.id ?? null)}
+            onNodeHover={node => {
+              clearTimeout(hoverTimer.current);
+              if (node) {
+                setHoveredId(node.id);
+              } else {
+                hoverTimer.current = setTimeout(() => setHoveredId(null), 300);
+              }
+            }}
             onNodeClick={node => setFocusedId(p => p === node.id ? null : node.id)}
             onBackgroundClick={() => setFocusedId(null)}
             nodeCanvasObject={paintNode}
