@@ -1,0 +1,410 @@
+{
+  "nodes": [
+    {
+      "id": "template-Azure-Policy",
+      "type": "workflow",
+      "trigger": "workflow_call",
+      "jobs": "job: definitions\n  Checkout\n  validate branch and environment\n  get github token\n  Azure login\n  custom definitions\n  setDefinitions - diagnostic settings\njob: assignments\n  Checkout\n  Azure login\n  get github token\n  policy assignments\n  wait while policy data propagates to graph\n  generate Azure policy reference JSON\n  push JSON to repo\n  create PR if main"
+    },
+    {
+      "id": "template-Management-Groups",
+      "type": "workflow",
+      "trigger": "workflow_call",
+      "jobs": "job: hierarchy\n  Checkout\n  validate branch and environment\n  get github token\n  Azure login\n  management group hierarchy"
+    },
+    {
+      "id": "template-access-control",
+      "type": "workflow",
+      "trigger": "workflow_call",
+      "jobs": "job: accessControl\n  Checkout\n  validate branch and environment\n  get github token\n  Azure login\n  access control at management group level"
+    },
+    {
+      "id": "template-landing-zones",
+      "type": "workflow",
+      "trigger": "workflow_call",
+      "jobs": "job: create-landingzone\n  checkout local\n  get github token\n  Convert .bicepparam to JSON\n  fetch JSON values\n  fetch application repo variables\n  echo landing zone variables\n  Azure login\n  Bring Your Own Subscription - rename\n  Bring Your Own Subscription - change invoice section\n  create subscription\n  move subscription to management group\n  create GitHub environment\n  create landingzone\n  Entra ID Roles (classic deployment)\n  Github runners network configuration"
+    },
+    {
+      "id": "lz-main",
+      "type": "bicep",
+      "role": "entry",
+      "path": "landing-zones/bicep/main.bicep",
+      "inputs": "param appName = 'HeyAzure'\r\nparam environment = 'prod'\r\nparam budget = 10\r\nparam vnetAddressSpace = [\r\n  '10.10.1.0/24'\r\n]\r\nparam subscriptionId = '2e94cd4d-4966-42c2-a622-75ad6bb66038'\r\nparam subscriptionLevelTags = {\r\n  engineerEmail: engineerEmail\r\n  ownerEmail: ownerEmail\r\n}\r\nparam resourceLevelTags = {\r\n  engineerEmail: engineerEmail\r\n}\r\nparam defenderRecommendationExemptions = true\r\nparam exemptions = []\r"
+    },
+    {
+      "id": "lz-entra",
+      "type": "bicep",
+      "role": "entry",
+      "path": "landing-zones/bicep/entra.bicep"
+    },
+    {
+      "id": "policy-customDefs",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/policy/bicep/customPolicyDefinitions.bicep",
+      "inputs": "param customDefinitions = [\r\n  loadJsonContent('st_allowCrossTenantReplication.json')\r\n  loadJsonContent('st_virtualNetworkRules.json')\r\n  loadJsonContent('cae_publicNetworkAccess.json')\r\n  loadJsonContent('anotherCoolPolicy.json')\r\n]\r"
+    },
+    {
+      "id": "policy-configDiag",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/policy/bicep/configDiagnosticSettings.bicep",
+      "inputs": "param policyDefinitions = [\r\n  {\r\n    policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/6a664864-e2b5-413e-b930-f11caa132f16'\r\n    policyDefinitionReferenceId: 'managed-environments'\r\n    parameters: policyParameters\r\n  }\r\n  {\r\n    policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/3234ff41-8bec-40a3-b5cb-109c95f1c8ce'\r\n    policyDefinitionReferenceId: 'virtual-network'\r\n    parameters: policyParameters\r\n  }\r\n  {\r\n    policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/baa4c6de-b7cf-4b12-b436-6e40ef44c8cb'\r\n    policyDefinitionReferenceId: 'network-security-group'\r\n    parameters: policyParameters\r\n  }\r\n  {\r\n    policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/818719e5-1338-4776-9a9d-3c31e4df5986'\r\n    policyDefinitionReferenceId: 'log-analytics'\r\n    parameters: policyParameters\r\n  }\r\n  {\r\n    policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/b4fe1a3b-0715-4c6c-a5ea-ffc33cf823cb'\r\n    policyDefinitionReferenceId: 'storage-blob'\r\n    parameters: storageParameters\r\n  }\r\n  {\r\n    policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/7bd000e3-37c7-4928-9f31-86c4b77c5c45'\r\n    policyDefinitionReferenceId: 'storage-queue'\r\n    parameters: storageParameters\r\n  }\r\n  {\r\n    policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/2fb86bf3-d221-43d1-96d1-2434af34eaa0'\r\n    policyDefinitionReferenceId: 'storage-table'\r\n    parameters: storageParameters\r\n  }\r\n  {\r\n    policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/25a70cc8-2bd4-47f1-90b6-1478e4662c96'\r\n    policyDefinitionReferenceId: 'storage-file'\r\n    parameters: storageParameters\r\n  }\r\n]\r"
+    },
+    {
+      "id": "policy-oases",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/policy/bicep/oases.bicep"
+    },
+    {
+      "id": "mgmt-managementGroups",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/management-groups/bicep/managementGroups.bicep"
+    },
+    {
+      "id": "rbac-accessControl",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/access-control/bicep/accessControl.bicep",
+      "inputs": "param accessControl = [\r\n  {\r\n    roleName: 'Platform Engineer'\r\n    actions: [\r\n      '*/read'\r\n      'Microsoft.App/jobs/*/action'\r\n      'Microsoft.Insights/actiongroups/*/action'\r\n      'microsoft.policyinsights/remediations/write'\r\n      'Microsoft.Insights/alertRules/*'\r\n      'Microsoft.Resources/deployments/*'\r\n      'Microsoft.Resources/deploymentStacks/*'\r\n    ]\r\n    principalId: azurePlatformEngineerGroupId\r\n    scope: topLevelManagementGroupName\r\n  }\r\n  {\r\n    roleName: 'Platform Owner'\r\n    actions: [\r\n      '*'\r\n    ]\r\n    principalId: azurePlatformOwnerGroupId\r\n    scope: topLevelManagementGroupName\r\n  }\r\n]\r"
+    },
+    {
+      "id": "lz-identity",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/identity.bicep",
+      "snippet": "module identity 'br/public:avm/res/managed-identity/user-assigned-identity:0.2.1' = {\r\n  scope: az.resourceGroup(landingzoneResourceGroupName)\r\n  name: 'lz-serviceConnection'\r\n  params: {\r\n    name: 'id-${appName}-${environment}'\r\n    location: location\r\n    federatedIdentityCredentials: [\r\n      {\r\n        name: 'landingzoneOwner'\r\n        audiences: [\r\n          'api://AzureADTokenExchange'\r\n        ]\r\n        issuer: 'https://token.actions.githubusercontent.com'\r\n        subject: 'repo:${githubOrganizationName}/${githubRepoName}:environment:${environment}'\r\n      }\r\n    ]\r\n  }\r\n}\r\n\nmodule rbacLandingzoneOwner 'base/roleAssignments-subscription.bicep' = {\r\n  name: 'lz-rbac-serviceConnection'\r\n  params: {\r\n    principalId: identity.outputs.principalId\r\n    roleDefinitionId: AzureRoles.Owner\r\n    principleType: 'ServicePrincipal'\r\n  }\r\n}\r\n\nmodule rbacApplicationReader 'base/roleAssignments-subscription.bicep' = {\r\n  name: 'lz-rbac-applicationReader'\r\n  params: {\r\n    principalId: applicationReaderEntraGroupId\r\n    roleDefinitionId: AzureRoles.Reader\r\n    principleType: 'Group'\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-virtualNetwork",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/virtualNetwork.bicep",
+      "snippet": "resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {\r\n  name: 'vnet-${appName}-${environment}'\r\n  location: location\r\n  properties: {\r\n    addressSpace: {\r\n      addressPrefixes: vnetAddressSpace\r\n    }\r\n  }\r\n}\r\n\nresource GithubRunnersSubnet 'Microsoft.Network/virtualNetworks/subnets@2025-05-01' = {\r\n  name: 'github-runners'\r\n  parent: vnet\r\n  properties: {\r\n    addressPrefixes: [\r\n      GitHubRunnersSubnet\r\n    ]\r\n    delegations: [\r\n      {\r\n        name: 'github-runners'\r\n        properties: {\r\n          serviceName: 'GitHub.Network/networkSettings'\r\n        }\r\n      }\r\n    ]\r\n  }\r\n}\r\n\nresource GitHubRunnersNetwork 'GitHub.Network/networkSettings@2024-04-02' = {\r\n  name: '${appName}-${environment}'\r\n  location: location\r\n  properties: {\r\n    subnetId: GithubRunnersSubnet.id\r\n    businessId: GitHubOrganizationDatabaseId\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-azurePolicy",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/azurePolicy.bicep",
+      "snippet": "module configDiagnosticSettings 'base/policyAssignment.bicep' = {\r\n  name: 'lz-config-diagnosticSettings'\r\n  params: {\r\n    name: 'config-diagnosticSettings'\r\n    location: location\r\n    displayName: 'Config Diagnostic Settings'\r\n    identityResourceId: identityResourceId\r\n    policyDefinitionId: diagnosticSettingsPolicyResourceId\r\n    parameters: {\r\n      logAnalytics: {\r\n        value: logAnalyticsResourceId\r\n      }\r\n    }\r\n  }\r\n}\r\n\nmodule resourceTagsPolicy 'base/policyAssignment.bicep' = [\r\n  for item in items(resourceLevelTags): {\r\n    name: 'lz-resourceLevelTag-${item.key}'\r\n    params: {\r\n      name: 'Config-ResourceLevelTag-${item.key}'\r\n      location: location\r\n      displayName: 'Config Resource Level Tag: ${item.key}'\r\n      identityResourceId: identityResourceId\r\n      policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/4f9dc7db-30c1-420c-b61a-e1d640128d26'\r\n      parameters: {\r\n        tagName: {\r\n          value: item.key\r\n        }\r\n        tagValue: {\r\n          value: item.value\r\n        }\r\n      }\r\n    }\r\n  }\r\n]\r\n\nmodule subscriptionTagsPolicy 'base/policyAssignment.bicep' = [\r\n  for item in items(subscriptionLevelTags): {\r\n    name: 'lz-subscriptionLevelTag-${item.key}'\r\n    params: {\r\n      name: 'Config-SubscriptionLevelTag-${item.key}'\r\n      location: location\r\n      displayName: 'Config Subscription Level Tag: ${item.key}'\r\n      identityResourceId: identityResourceId\r\n      policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/61a4d60b-7326-440e-8051-9f94394d4dd1'\r\n      parameters: {\r\n        tagName: {\r\n          value: item.key\r\n        }\r\n        tagValue: {\r\n          value: item.value\r\n        }\r\n      }\r\n    }\r\n  }\r\n]\r\n\nmodule customExemption 'base/policyExemption.bicep' = [\r\n  for item in exemptions: {\r\n    params: {\r\n      description: item.clarifications\r\n      policyAssignmentId: item.policyToExclude\r\n      policyDefinitionReferenceIds: item.referenceId\r\n      policyExemptionName: 'lzparam-${split(item.policyToExclude, '/')[8]}'\r\n    }\r\n  }\r\n]\r\n\nmodule defenderForCloud 'base/policyExemption.bicep' = if (defenderRecommendationExemptions) {\r\n  name: 'lz-policyExemption-defenderForCloud'\r\n  params: {\r\n    policyExemptionName: 'not applicable reccomendations'\r\n    description: ''\r\n    policyAssignmentId: '${subscription().id}/providers/Microsoft.Authorization/policyAssignments/SecurityCenterBuiltIn'\r\n    policyDefinitionReferenceIds: defenderForCloudExemptions\r\n  }\r\n}\r\n\nmodule diagSettingsPolicyExemption 'base/policyExemption.bicep' = if (diagSettingsExemption) {\r\n  name: 'lz-policyExemption-diagSettings'\r\n  dependsOn: [configDiagnosticSettings]\r\n  params: {\r\n    policyExemptionName: 'default'\r\n    description: 'Opted out of automatic diagnostic settings configuration.'\r\n    policyAssignmentId: '${subscription().id}/providers/Microsoft.Authorization/policyAssignments/config-diagnosticSettings'\r\n    policyDefinitionReferenceIds: []\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-automation",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/landingzone-automation.bicep",
+      "snippet": "module containerAppEnvironment 'base/managedEnvironments.bicep' = {\r\n  params: {\r\n    appName: appName\r\n    environment: environment\r\n    location: location\r\n  }\r\n}\r\n\nmodule automationJobs 'base/jobs-cron.bicep' = [\r\n  for item in items(PowerShellJobs): {\r\n    name: 'cron-${item.key}'\r\n    params: {\r\n      environment: environment!\r\n      location: location\r\n      environmentId: containerAppEnvironment.outputs.environmentResourceId\r\n      userAssignedIdentityResourceId: identityResourceId\r\n      jobName: item.key\r\n      userAssignedIdentityClientId: identityClientId\r\n      containerEnvironmentVariables: item.value.variables\r\n      GitHubOrganizationName: GitHubOrganizationName!\r\n    }\r\n  }\r\n]\r"
+    },
+    {
+      "id": "lz-monitor",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/monitor.bicep",
+      "snippet": "module actionGroup 'base/actionGroup.bicep' = {\r\n  name: 'lz-actionGroup-notify'\r\n  params: {\r\n    email: engineerEmail\r\n  }\r\n}\r\n\nmodule healthAlert 'base/ActivityLogAlerts.bicep' = {\r\n  name: 'lz-health-alert'\r\n  params: {\r\n    actionGroupId: actionGroup.outputs.resourceId\r\n  }\r\n}\r\n\nmodule logAnalytics 'base/logAnalyticsWorkspace.bicep' = {\r\n  name: 'lz-logAnalytics'\r\n  params: {\r\n    appName: appName\r\n    environment: environment\r\n    location: location\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-budget",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/budget.bicep",
+      "snippet": "resource budget 'Microsoft.Consumption/budgets@2024-08-01' = {\r\n  #disable-next-line use-stable-resource-identifiers\r\n  name: 'set-by-create-landingzone-${startDate}'\r\n  properties: {\r\n    amount: budgetAmount\r\n    category: 'Cost'\r\n    timeGrain: 'Monthly'\r\n    timePeriod: {\r\n      startDate: startDate\r\n    }\r\n    notifications: {\r\n      abc: {\r\n        contactEmails: []\r\n        enabled: true\r\n        operator: 'GreaterThanOrEqualTo'\r\n        threshold: 100\r\n        thresholdType: 'Forecasted'\r\n        locale: 'en-gb'\r\n        contactGroups: [\r\n          actionGroupResourceId\r\n        ]\r\n      }\r\n    }\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-securityContacts",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/securityContacts.bicep",
+      "snippet": "resource notifications 'Microsoft.Security/securityContacts@2023-12-01-preview' = {\r\n  name: 'default'\r\n  properties: {\r\n    isEnabled: true\r\n    notificationsSources: [\r\n      {\r\n        sourceType: 'Alert'\r\n        minimalSeverity: 'Low'\r\n      }\r\n    ]\r\n    notificationsByRole: {\r\n      state: 'On'\r\n      roles: [\r\n        'Owner'\r\n        'Contributor'\r\n      ]\r\n    }\r\n    emails: engineerEmail\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-appRoleAssignedTo",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/appRoleAssignedTo.bicep",
+      "snippet": "resource GraphAggregatorService 'Microsoft.Graph/servicePrincipals@v1.0' existing = {\r\n  appId: '00000003-0000-0000-c000-000000000000'\r\n}\r\n\nresource appRole 'Microsoft.Graph/appRoleAssignedTo@v1.0' = {\r\n  appRoleId: appRoleId\r\n  principalId: principalId\r\n  resourceId: GraphAggregatorService.id\r\n}\r"
+    },
+    {
+      "id": "policy-policyDefs",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/policy/bicep/modules/policyDefinitions.bicep",
+      "snippet": "resource policyDefinition 'Microsoft.Authorization/policyDefinitions@2025-03-01' = {\r\n  name: policyName\r\n  properties: policyProperties\r\n}\r"
+    },
+    {
+      "id": "policy-assignment",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/policy/bicep/modules/assignment.bicep",
+      "snippet": "resource initiative 'Microsoft.Authorization/policySetDefinitions@2025-03-01' = {\r\n  name: shortenPolicyName\r\n  properties: {\r\n    displayName: displayName\r\n    policyDefinitions: setDefinitions\r\n  }\r\n}\r\n\nresource assignment 'Microsoft.Authorization/policyAssignments@2024-04-01' = {\r\n  name: shortenPolicyName\r\n  location: location\r\n  properties: {\r\n    policyDefinitionId: initiative.id\r\n    displayName: displayName\r\n  }\r\n}\r"
+    },
+    {
+      "id": "mgmt-groups-module",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/management-groups/bicep/modules/managementGroups.bicep",
+      "snippet": "resource managementGroup 'Microsoft.Management/managementGroups@2024-02-01-preview' = {\r\n  name: managementGroupName\r\n  scope: tenant()\r\n  properties: {\r\n    displayName: managementGroupName\r\n    details: {\r\n      parent: {\r\n        id: parentManagementGroupId\r\n      }\r\n    }\r\n  }\r\n}\r"
+    },
+    {
+      "id": "mgmt-settings",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/management-groups/bicep/modules/managementGroupSettings.bicep",
+      "snippet": "resource managementGroup 'Microsoft.Management/managementGroups/settings@2024-02-01-preview' = {\r\n  name: '${tenant().tenantId}/default'\r\n  scope: tenant()\r\n  properties: {\r\n    defaultManagementGroup: '/providers/Microsoft.Management/managementGroups/${defaultManagementGroup}'\r\n    requireAuthorizationForGroupCreation: requireAuthorizationForGroupCreation\r\n  }\r\n}\r"
+    },
+    {
+      "id": "rbac-customRoles",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/access-control/bicep/modules/customRoleDefinitions.bicep",
+      "snippet": "resource customRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' = {\r\n  name: guid(roleName, environment)\r\n  properties: {\r\n    roleName: '${roleName} - ${environment}'\r\n    assignableScopes: [\r\n      managementGroup().id\r\n    ]\r\n    permissions: [\r\n      {\r\n        actions: actions\r\n      }\r\n    ]\r\n  }\r\n}\r"
+    },
+    {
+      "id": "rbac-roleAssignment",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/access-control/bicep/modules/roleAssignment.bicep",
+      "snippet": "resource rbacAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {\r\n  name: guid(roleDefinitionId, managementGroup().id, principalId)\r\n  properties: {\r\n    principalId: principalId\r\n    roleDefinitionId: roleDefinitionId\r\n    principalType: principalType\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-roleAssignment-sub",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/roleAssignments-subscription.bicep",
+      "snippet": "resource rbacAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {\r\n  name: guid(roleDefinitionId, principalId, subscription().id)\r\n  properties: {\r\n    principalId: principalId\r\n    roleDefinitionId: roleDefinitionId\r\n    principalType: principleType\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-actionGroup",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/actionGroup.bicep",
+      "snippet": "resource notifyEngineer 'Microsoft.Insights/actionGroups@2024-10-01-preview' = {\r\n  name: 'ag-notify-engineer'\r\n  location: 'global'\r\n  properties: {\r\n    enabled: true\r\n    groupShortName: 'engineer'\r\n    emailReceivers: [\r\n      {\r\n        name: 'landing zone engineer'\r\n        emailAddress: email\r\n      }\r\n    ]\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-activityLogAlerts",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/ActivityLogAlerts.bicep",
+      "snippet": "resource ActivityLogAlert 'Microsoft.Insights/activityLogAlerts@2020-10-01' = {\r\n  name: 'alert-Azure-health'\r\n  location: 'global'\r\n  properties: {\r\n    enabled: true\r\n    scopes: [\r\n      subscription().id\r\n    ]\r\n    actions: {\r\n      actionGroups: [\r\n        {\r\n          actionGroupId: actionGroupId\r\n        }\r\n      ]\r\n    }\r\n    condition: {\r\n      allOf: [\r\n        {\r\n          field: 'category'\r\n          equals: 'Recommendation'\r\n        }\r\n        {\r\n          field: 'operationName'\r\n          equals: 'Microsoft.Advisor/recommendations/available/action'\r\n        }\r\n        {\r\n          field: 'properties.recommendationType'\r\n          equals: '242639fd-cd73-4be2-8f55-70478db8d1a5'\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-logAnalytics",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/logAnalyticsWorkspace.bicep",
+      "snippet": "resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {\r\n  name: 'la-${appName}-${environment}'\r\n  location: location\r\n  properties: {\r\n    retentionInDays: 30\r\n    sku: {\r\n      name: 'PerGB2018'\r\n    }\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-managedEnvironments",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/managedEnvironments.bicep",
+      "snippet": "resource appEnv 'Microsoft.App/managedEnvironments@2025-10-02-preview' = {\r\n  name: 'cae-${appName}-${environment}'\r\n  location: location\r\n  properties: {\r\n    publicNetworkAccess: 'Disabled'\r\n    workloadProfiles: [\r\n      {\r\n        name: 'Consumption'\r\n        workloadProfileType: 'Consumption'\r\n      }\r\n    ]\r\n    appLogsConfiguration: {\r\n      destination: 'azure-monitor'\r\n    }\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-jobsCron",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/jobs-cron.bicep",
+      "snippet": "resource job 'Microsoft.App/jobs@2025-10-02-preview' = {\r\n  name: 'cron-${automationJob}'\r\n  location: location\r\n  identity: {\r\n    type: 'UserAssigned'\r\n    userAssignedIdentities: {\r\n      '${userAssignedIdentityResourceId}': {}\r\n    }\r\n  }\r\n  properties: {\r\n    environmentId: environmentId\r\n    workloadProfileName: 'Consumption'\r\n    configuration: {\r\n      replicaTimeout: 300\r\n      triggerType: 'Schedule'\r\n      scheduleTriggerConfig: {\r\n        cronExpression: cronExpression\r\n        parallelism: 1\r\n        replicaCompletionCount: 1\r\n      }\r\n    }\r\n    template: {\r\n      containers: [\r\n        {\r\n          image: image\r\n          imageType: 'ContainerImage'\r\n          name: automationJob\r\n          args: [\r\n            '${jobName}.ps1'\r\n          ]\r\n          resources: {\r\n            cpu: json('0.5')\r\n            memory: '1Gi'\r\n          }\r\n          env: vars\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-policyAssignment",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/policyAssignment.bicep",
+      "snippet": "resource policyAssignment 'Microsoft.Authorization/policyAssignments@2025-03-01' = {\r\n  name: name\r\n  location: location\r\n  identity: {\r\n    type: 'UserAssigned'\r\n    userAssignedIdentities: {\r\n      '${identityResourceId}': {}\r\n    }\r\n  }\r\n  properties: {\r\n    displayName: displayName\r\n    parameters: parameters\r\n    policyDefinitionId: policyDefinitionId\r\n  }\r\n}\r"
+    },
+    {
+      "id": "lz-policyExemption",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/policyExemption.bicep",
+      "snippet": "resource policyExemption 'Microsoft.Authorization/policyExemptions@2024-12-01-preview' = {\r\n  name: policyExemptionName\r\n  properties: {\r\n    exemptionCategory: 'Waiver'\r\n    policyAssignmentId: policyAssignmentId\r\n    policyDefinitionReferenceIds: policyDefinitionReferenceIds\r\n    description: description\r\n  }\r\n}\r"
+    }
+  ],
+  "links": [
+    {
+      "source": "template-landing-zones",
+      "target": "lz-main",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-landing-zones",
+      "target": "lz-entra",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Azure-Policy",
+      "target": "policy-customDefs",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Azure-Policy",
+      "target": "policy-configDiag",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Azure-Policy",
+      "target": "policy-oases",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Management-Groups",
+      "target": "mgmt-managementGroups",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-access-control",
+      "target": "rbac-accessControl",
+      "relationship": "deploys"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-identity",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-virtualNetwork",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-azurePolicy",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-automation",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-monitor",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-budget",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-securityContacts",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-entra",
+      "target": "lz-appRoleAssignedTo",
+      "relationship": "uses"
+    },
+    {
+      "source": "policy-customDefs",
+      "target": "policy-policyDefs",
+      "relationship": "uses"
+    },
+    {
+      "source": "policy-oases",
+      "target": "policy-assignment",
+      "relationship": "uses"
+    },
+    {
+      "source": "mgmt-managementGroups",
+      "target": "mgmt-groups-module",
+      "relationship": "uses"
+    },
+    {
+      "source": "mgmt-managementGroups",
+      "target": "mgmt-settings",
+      "relationship": "uses"
+    },
+    {
+      "source": "rbac-accessControl",
+      "target": "rbac-customRoles",
+      "relationship": "uses"
+    },
+    {
+      "source": "rbac-accessControl",
+      "target": "rbac-roleAssignment",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-roleAssignment-sub",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-actionGroup",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-activityLogAlerts",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-logAnalytics",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-managedEnvironments",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-jobsCron",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-policyAssignment",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-policyExemption",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-azurePolicy",
+      "target": "lz-policyAssignment",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-azurePolicy",
+      "target": "lz-policyExemption",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-automation",
+      "target": "lz-managedEnvironments",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-automation",
+      "target": "lz-jobsCron",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-monitor",
+      "target": "lz-actionGroup",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-monitor",
+      "target": "lz-activityLogAlerts",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-monitor",
+      "target": "lz-logAnalytics",
+      "relationship": "uses"
+    }
+  ]
+}
