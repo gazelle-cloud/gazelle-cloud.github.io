@@ -1,0 +1,102 @@
+/* ── reset ──────────────────────────────────────────────────────────────── */
+html, body { margin: 0; height: 100%; }
+body { background: #1a1b26; }
+#graph { width: 100vw; height: 100vh; }
+
+/* ── overlay container ──────────────────────────────────────────────────── */
+#filters {
+  position: absolute;
+  top: 14px; left: 14px;
+  display: flex; gap: 8px; align-items: flex-start;
+  z-index: 10;
+}
+
+/* ── nav ────────────────────────────────────────────────────────────────── */
+.nav-stack { display: flex; flex-direction: column; gap: 8px; }
+.nav-link {
+  font: 12px sans-serif;
+  color: rgba(255,255,255,0.35);
+  text-decoration: none;
+  padding: 5px 12px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.nav-link:hover { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.35); }
+.nav-active {
+  color: rgba(255,255,255,0.75) !important;
+  border-color: rgba(255,255,255,0.35) !important;
+  pointer-events: none;
+}
+
+/* ── filter chips ───────────────────────────────────────────────────────── */
+.chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px; border: 1.5px solid;
+  font: 12px sans-serif; cursor: pointer; user-select: none;
+  transition: opacity 0.15s;
+}
+.chip.off { opacity: 0.3; }
+.chip-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ── legend (static, non-interactive) ──────────────────────────────────── */
+.legend { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font: 11px sans-serif;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid;
+  user-select: none;
+}
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── info panel ─────────────────────────────────────────────────────────── */
+#info-panel {
+  position: fixed;
+  top: 14px; right: 14px;
+  width: 280px;
+  background: rgba(26,27,38,0.92);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 14px 16px;
+  z-index: 10;
+  pointer-events: none;
+  font: 13px/1.6 sans-serif;
+}
+.info-id {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #555;
+  margin-bottom: 10px;
+}
+.info-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #555;
+  margin: 10px 0 3px;
+}
+.info-text { margin: 0; color: #bbb; }
+
+/* ── code block (syntax-highlighted <pre> in info panel) ───────────────── */
+.code-block {
+  margin: 4px 0 0; padding: 10px 12px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  font-family: monospace; font-size: 10px; line-height: 1.6;
+  color: #e2e8f0; white-space: pre; overflow-x: auto;
+}
+
+/* ── info panel extras ──────────────────────────────────────────────────── */
+.info-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  color: #1a1b26;
+  margin-top: 2px;
+}

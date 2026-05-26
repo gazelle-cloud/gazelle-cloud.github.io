@@ -1,65 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <style>
-    html, body { margin: 0; height: 100%; }
-    body { background: #1a1b26; }
-    #graph { width: 100vw; height: 100vh; }
-    #filters {
-      position: absolute;
-      top: 14px; left: 14px;
-      display: flex; gap: 8px; align-items: flex-start;
-      z-index: 10;
-    }
-    .nav-stack { display: flex; flex-direction: column; gap: 8px; }
-    .nav-link {
-      font: 12px sans-serif;
-      color: rgba(255,255,255,0.35);
-      text-decoration: none;
-      padding: 5px 12px;
-      border: 1.5px solid rgba(255,255,255,0.12);
-      border-radius: 20px;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .nav-link:hover { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.35); }
-    .nav-active { color: rgba(255,255,255,0.75) !important; border-color: rgba(255,255,255,0.35) !important; pointer-events: none; }
-    .chip {
-      display: flex; align-items: center; gap: 6px;
-      padding: 5px 12px; border-radius: 20px; border: 1.5px solid;
-      font: 12px sans-serif; cursor: pointer; user-select: none;
-      transition: opacity 0.15s;
-    }
-    .chip.off { opacity: 0.3; }
-    .chip-dot { width: 8px; height: 8px; border-radius: 50%; }
-    #info-panel {
-      position: fixed;
-      top: 14px; right: 14px;
-      width: 280px;
-      background: rgba(26,27,38,0.92);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      padding: 14px 16px;
-      z-index: 10;
-      pointer-events: none;
-      font: 13px/1.6 sans-serif;
-    }
-    .info-id {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #555;
-      margin-bottom: 10px;
-    }
-    .info-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: #555;
-      margin: 10px 0 3px;
-    }
-    .info-text { margin: 0; color: #bbb; }
-  </style>
-
+  <link rel="stylesheet" href="./shell.css">
   <script type="importmap">{ "imports": {
     "react": "https://esm.sh/react",
     "react-dom": "https://esm.sh/react-dom",
@@ -77,6 +19,7 @@
     import React from 'react';
     import { createRoot } from 'react-dom/client';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
+    import { NavBar, useGraphResize, normalizeNodeWeights, drawLabel, linkEnds, useGraphState } from './shell.js';
 
     // ─── constants ───────────────────────────────────────────────────────────
 
@@ -99,229 +42,151 @@
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    fetch('./graph.json').then(r => r.json()).then(raw => {
-      // drop ghost nodes
-      raw.nodes = raw.nodes.filter(n => n.type !== 'unknown');
-      const ids = new Set(raw.nodes.map(n => n.id));
-      raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
+    const raw = await fetch('./index.json').then(r => r.json());
 
-      // in-degree → weight (0..1), used to size and position decisions
-      const inDeg = Object.fromEntries(raw.nodes.map(n => [n.id, 0]));
-      raw.links.forEach(l => inDeg[l.target] = (inDeg[l.target] ?? 0) + 1);
-      const maxDeg = Math.max(1, ...Object.values(inDeg));
-      raw.nodes.forEach(n => {
-        n.__weight = (inDeg[n.id] ?? 0) / maxDeg;
-      });
+    raw.nodes = raw.nodes.filter(n => n.type !== 'unknown');
+    const ids = new Set(raw.nodes.map(n => n.id));
+    raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
 
-      // pin anchors and operations evenly on a circle (interleaved)
-      const byType = t => raw.nodes.filter(n => n.type === t);
-      const rim = [];
-      const principles = byType('principle'), ops = byType('operation');
-      for (let i = 0; i < Math.max(principles.length, ops.length); i++) {
-        if (principles[i]) rim.push(principles[i]);
-        if (ops[i])        rim.push(ops[i]);
-      }
-      rim.forEach((n, i) => {
-        const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
-        n.fx = Math.cos(angle) * 280;
-        n.fy = Math.sin(angle) * 280;
-      });
+    normalizeNodeWeights(raw);
 
-      // ─── component ─────────────────────────────────────────────────────────
-
-      function Graph({ raw }) {
-        const fgRef = React.useRef();
-
-        const [size, setSize] = React.useState({ width: window.innerWidth, height: window.innerHeight });
-        React.useEffect(() => {
-          const handle = () => setSize({ width: window.innerWidth, height: window.innerHeight });
-          window.addEventListener('resize', handle);
-          return () => window.removeEventListener('resize', handle);
-        }, []);
-        React.useEffect(() => { fgRef.current?.zoomToFit(400, 40); }, [size]);
-
-        const [visible,   setVisible]   = React.useState(new Set(NODE_TYPES));
-        const [hoveredId, setHoveredId] = React.useState(null);
-        const [focusedId, setFocusedId] = React.useState(null);
-
-        const activeId = focusedId ?? hoveredId;
-
-        // filter graph by visible types
-        const graph = React.useMemo(() => {
-          const visIds = new Set(raw.nodes.filter(n => visible.has(n.type)).map(n => n.id));
-          return {
-            nodes: raw.nodes.filter(n => visible.has(n.type)),
-            links: raw.links.filter(l => {
-              const s = l.source?.id ?? l.source;
-              const t = l.target?.id ?? l.target;
-              return visIds.has(s) && visIds.has(t);
-            }),
-          };
-        }, [visible]);
-
-        const activeNode = React.useMemo(() =>
-          activeId ? graph.nodes.find(n => n.id === activeId) : null,
-        [activeId, graph.nodes]);
-
-        // direct neighbours of the active node
-        const neighbours = React.useMemo(() => {
-          if (!activeId) return null;
-          const set = new Set([activeId]);
-          graph.links.forEach(l => {
-            const s = l.source?.id ?? l.source;
-            const t = l.target?.id ?? l.target;
-            if (s === activeId) set.add(t);
-            if (t === activeId) set.add(s);
-          });
-          return set;
-        }, [activeId, graph.links]);
-
-        // configure d3 forces whenever the graph changes
-        React.useEffect(() => {
-          const fg = fgRef.current;
-          if (!fg) return;
-          fg.d3Force('charge').strength(-180);
-          fg.d3Force('link').distance(60);
-          fg.d3Force('collision', forceCollide(n => dotRadius(n) + 3));
-          // pull decisions toward center; heavier ones pulled harder
-          fg.d3Force('radial', forceRadial(0, 0, 0)
-            .strength(n => n.type === 'decision' ? 0.04 + n.__weight * 0.25 : 0));
-          fg.d3ReheatSimulation();
-          setTimeout(() => fg.zoomToFit(400, 40), 100);
-          setTimeout(() => fg.zoomToFit(400, 40), 4500);
-        }, [graph]);
-
-        // edge colour: faint always, bright only for active node's edges
-        const linkColor = React.useCallback(l => {
-          if (!activeId) return 'rgba(180,180,180,0.12)';
-          const s = l.source?.id ?? l.source;
-          const t = l.target?.id ?? l.target;
-          return (s === activeId || t === activeId)
-            ? 'rgba(255,255,255,0.85)'
-            : 'rgba(180,180,180,0.04)';
-        }, [activeId]);
-
-        // draw each node as a dot; show name label when active
-        const paintNode = React.useCallback((node, ctx, globalScale) => {
-          const isActive    = node.id === activeId;
-          const isNeighbour = neighbours?.has(node.id);
-          const dimmed      = activeId && !isActive && !isNeighbour;
-          const r           = dotRadius(node) / globalScale;
-
-          ctx.globalAlpha = dimmed ? 0.1 : 1;
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
-          ctx.fillStyle = isActive ? '#fff' : COLORS[node.type];
-          ctx.fill();
-
-          const isRim      = node.type === 'principle' || node.type === 'operation';
-          const showLabel  = isRim || isActive || isNeighbour;
-          if (showLabel) {
-            const fs  = 12 / globalScale;
-            ctx.font  = `${fs}px Sans-Serif`;
-            const tw  = ctx.measureText(node.id).width;
-            const p   = 4 / globalScale;
-            const gap = r + 6 / globalScale;
-
-            // rim nodes: push label outward from center along the node's angle
-            // other nodes: label to the right
-            let lx, ly, align;
-            if (isRim) {
-              const angle = Math.atan2(node.y, node.x);
-              lx    = node.x + Math.cos(angle) * gap;
-              ly    = node.y + Math.sin(angle) * gap;
-              align = Math.cos(angle) >= 0 ? 'left' : 'right';
-            } else {
-              lx    = node.x + gap;
-              ly    = node.y;
-              align = 'left';
-            }
-
-            const bgX = align === 'left' ? lx - p : lx - tw - p;
-            ctx.fillStyle = 'rgba(26,27,38,0.9)';
-            ctx.fillRect(bgX, ly - fs / 2 - p, tw + p * 2, fs + p * 2);
-            ctx.fillStyle    = isActive ? '#fff' : COLORS[node.type] ?? '#ccc';
-            ctx.textAlign    = align;
-            ctx.textBaseline = 'middle';
-            ctx.fillText(node.id, lx, ly);
-          }
-
-          ctx.globalAlpha = 1;
-          node.__r = r;
-        }, [activeId, neighbours]);
-
-        const toggleType = type => {
-          setFocusedId(null);
-          setVisible(prev => {
-            const next = new Set(prev);
-            next.has(type) ? next.delete(type) : next.add(type);
-            return next;
-          });
-        };
-
-        return <>
-          <div id="filters">
-            <div className="nav-stack">
-              <span className="nav-link nav-active">Home</span>
-              <a className="nav-link" href="./codebase.html">Azure deployments</a>
-            </div>
-            {NODE_TYPES.map(type => (
-              <div key={type}
-                className={`chip${visible.has(type) ? '' : ' off'}`}
-                style={{ borderColor: COLORS[type], color: COLORS[type] }}
-                onClick={() => toggleType(type)}
-              >
-                <div className="chip-dot" style={{ background: COLORS[type] }} />
-                {TYPE_LABELS[type]}
-              </div>
-            ))}
-          </div>
-
-          {(activeNode?.mechanism || activeNode?.why || activeNode?.description) && (
-            <div id="info-panel">
-              <div className="info-id">{activeNode.id}</div>
-              {activeNode.description && <>
-                <div className="info-label">Description</div>
-                <p className="info-text">{activeNode.description}</p>
-              </>}
-              {activeNode.mechanism && <>
-                <div className="info-label">Mechanism</div>
-                <p className="info-text">{activeNode.mechanism}</p>
-              </>}
-              {activeNode.why && <>
-                <div className="info-label">Why</div>
-                <p className="info-text">{activeNode.why}</p>
-              </>}
-            </div>
-          )}
-
-          <ForceGraph2D
-            ref={fgRef}
-            width={size.width}
-            height={size.height}
-            graphData={graph}
-            backgroundColor="#1a1b26"
-            linkColor={linkColor}
-            linkWidth={0.5}
-            linkDirectionalArrowLength={0}
-            cooldownTime={4000}
-            onEngineStop={() => fgRef.current?.zoomToFit(400, 40)}
-            onNodeHover={node => setHoveredId(node?.id ?? null)}
-            onNodeClick={node => setFocusedId(p => p === node.id ? null : node.id)}
-            onBackgroundClick={() => setFocusedId(null)}
-            nodeCanvasObject={paintNode}
-            nodePointerAreaPaint={(node, color, ctx) => {
-              ctx.fillStyle = color;
-              ctx.beginPath();
-              ctx.arc(node.x, node.y, (node.__r ?? 4) + 3, 0, 2 * Math.PI);
-              ctx.fill();
-            }}
-          />
-        </>;
-      }
-
-      createRoot(document.getElementById('graph')).render(<Graph raw={raw} />);
+    const byType = t => raw.nodes.filter(n => n.type === t);
+    const rim = [];
+    const principles = byType('principle'), ops = byType('operation');
+    for (let i = 0; i < Math.max(principles.length, ops.length); i++) {
+      if (principles[i]) rim.push(principles[i]);
+      if (ops[i])        rim.push(ops[i]);
+    }
+    rim.forEach((n, i) => {
+      const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
+      n.fx = Math.cos(angle) * 280;
+      n.fy = Math.sin(angle) * 280;
     });
+
+    // ─── component ───────────────────────────────────────────────────────────
+
+    function Graph() {
+      const fgRef = React.useRef();
+
+      const size = useGraphResize(fgRef);
+
+      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId } = useGraphState(raw, NODE_TYPES);
+
+      React.useEffect(() => {
+        const fg = fgRef.current;
+        if (!fg) return;
+        fg.d3Force('charge').strength(-180);
+        fg.d3Force('link').distance(60);
+        fg.d3Force('collision', forceCollide(n => dotRadius(n) + 3));
+        fg.d3Force('radial', forceRadial(0, 0, 0)
+          .strength(n => n.type === 'decision' ? 0.04 + n.__weight * 0.25 : 0));
+        fg.d3ReheatSimulation();
+        setTimeout(() => fg.zoomToFit(400, 40), 100);
+        setTimeout(() => fg.zoomToFit(400, 40), 4500);
+      }, [graph]);
+
+      const linkColor = React.useCallback(l => {
+        if (!activeId) return 'rgba(180,180,180,0.12)';
+        const [s, t] = linkEnds(l);
+        return (s === activeId || t === activeId)
+          ? 'rgba(255,255,255,0.85)'
+          : 'rgba(180,180,180,0.04)';
+      }, [activeId]);
+
+      const paintNode = React.useCallback((node, ctx, globalScale) => {
+        const isActive    = node.id === activeId;
+        const isNeighbour = neighbours?.has(node.id);
+        const dimmed      = activeId && !isActive && !isNeighbour;
+        const r           = dotRadius(node) / globalScale;
+
+        ctx.globalAlpha = dimmed ? 0.1 : 1;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
+        ctx.fillStyle = isActive ? '#fff' : COLORS[node.type];
+        ctx.fill();
+
+        const isRim     = node.type === 'principle' || node.type === 'operation';
+        const showLabel = isRim || isActive || isNeighbour;
+        if (showLabel) {
+          const gap = r + 6 / globalScale;
+          let lx, ly, align;
+          if (isRim) {
+            const angle = Math.atan2(node.y, node.x);
+            lx    = node.x + Math.cos(angle) * gap;
+            ly    = node.y + Math.sin(angle) * gap;
+            align = Math.cos(angle) >= 0 ? 'left' : 'right';
+          } else {
+            lx    = node.x + gap;
+            ly    = node.y;
+            align = 'left';
+          }
+          drawLabel(ctx, node.id, lx, ly, align, 12, globalScale,
+            isActive ? '#fff' : COLORS[node.type] ?? '#ccc');
+        }
+
+        ctx.globalAlpha = 1;
+        node.__r = r; // expose to nodePointerAreaPaint for hit-testing
+      }, [activeId, neighbours]);
+
+      return <>
+        <NavBar activeHref="./index.html">
+          {NODE_TYPES.map(type => (
+            <div key={type}
+              className={`chip${visible.has(type) ? '' : ' off'}`}
+              style={{ borderColor: COLORS[type], color: COLORS[type] }}
+              onClick={() => toggleType(type)}
+            >
+              <div className="chip-dot" style={{ background: COLORS[type] }} />
+              {TYPE_LABELS[type]}
+            </div>
+          ))}
+        </NavBar>
+
+        {(activeNode?.mechanism || activeNode?.why || activeNode?.description) && (
+          <div id="info-panel">
+            <div className="info-id">{activeNode.id}</div>
+            {activeNode.description && <>
+              <div className="info-label">Description</div>
+              <p className="info-text">{activeNode.description}</p>
+            </>}
+            {activeNode.mechanism && <>
+              <div className="info-label">Mechanism</div>
+              <p className="info-text">{activeNode.mechanism}</p>
+            </>}
+            {activeNode.why && <>
+              <div className="info-label">Why</div>
+              <p className="info-text">{activeNode.why}</p>
+            </>}
+          </div>
+        )}
+
+        <ForceGraph2D
+          ref={fgRef}
+          width={size.width}
+          height={size.height}
+          graphData={graph}
+          backgroundColor="#1a1b26"
+          linkColor={linkColor}
+          linkWidth={0.5}
+            cooldownTime={4000}
+          onEngineStop={() => fgRef.current?.zoomToFit(400, 40)}
+          onNodeHover={node => setHoveredId(node?.id ?? null)}
+          onNodeClick={node => setFocusedId(p => p === node.id ? null : node.id)}
+          onBackgroundClick={() => setFocusedId(null)}
+          nodeCanvasObject={paintNode}
+          nodePointerAreaPaint={(node, color, ctx) => {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, (node.__r ?? 4) + 3, 0, 2 * Math.PI);
+            ctx.fill();
+          }}
+        />
+      </>;
+    }
+
+    // ─── mount ───────────────────────────────────────────────────────────────
+
+    createRoot(document.getElementById('graph')).render(<Graph />);
   </script>
   <script defer src="https://cloud.umami.is/script.js" data-website-id="8d6f8fcd-8e1a-4eb4-8c64-1b32c60e82cd"></script>
 </body>

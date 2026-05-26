@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="./shell.css">
+  <style>
+    /* page-specific overrides */
+    #info-panel { width: 300px; max-height: calc(100vh - 28px); overflow-y: auto; pointer-events: auto; }
+  </style>
+  <script type="importmap">{ "imports": {
+    "react": "https://esm.sh/react",
+    "react-dom": "https://esm.sh/react-dom",
+    "react-dom/client": "https://esm.sh/react-dom/client"
+  }}</script>
+</head>
+
+<body>
+  <div id="filters"></div>
+  <div id="graph"></div>
+
+  <script src="//cdn.jsdelivr.net/npm/@babel/standalone"></script>
+  <script type="text/jsx" data-type="module">
+    import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { forceCollide, forceX, forceY } from 'https://esm.sh/d3-force';
+    import { NavBar, useGraphResize, normalizeNodeWeights, drawLabel, linkEnds, useGraphState } from './shell.js';
+
+    // ─── constants ───────────────────────────────────────────────────────────
+
+    const COLORS = {
+      workflow:       '#3dba7f',
+      'bicep-entry':  '#f0a500',
+      'bicep-module': '#4e8ef7',
+    };
+
+    const NODE_TYPES = ['workflow', 'bicep-entry', 'bicep-module'];
+
+    const TYPE_LABELS = {
+      workflow:       'github-workflows',
+      'bicep-entry':  'main-bicep',
+      'bicep-module': 'bicep-modules',
+    };
+
+    const REL_COLORS = {
+      implements: 'rgba(61,186,127,0.7)',
+      calls:      'rgba(192,132,252,0.7)',
+      deploys:    'rgba(240,165,0,0.7)',
+      uses:       'rgba(78,142,247,0.7)',
+    };
+
+    const dotRadius = node => {
+      if (node.type === 'workflow')                     return 5;
+      if (node.type === 'bicep-entry')                  return 4 + node.__weight * 5;
+      return 2 + node.__weight * 5;
+    };
+
+    // ─── syntax highlighters ─────────────────────────────────────────────────
+
+    function esc(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function highlightJobs(src) {
+      return src.split('\n').map(line => {
+        if (line.startsWith('job:')) {
+          const label = esc(line.slice(4).trim());
+          return `<span style="color:#3dba7f;font-weight:600">job</span><span style="color:#94a3b8">:</span> <span style="color:#e2e8f0">${label}</span>`;
+        }
+        return `<span style="color:#64748b">${esc(line)}</span>`;
+      }).join('\n');
+    }
+
+    const BICEP_KEYWORDS = new Set([
+      'module','resource','param','var','output','for','in','if','existing',
+      'scope','params','targetScope','name','type','import','using','dependsOn',
+    ]);
+    const BICEP_TYPES = new Set(['string','int','bool','object','array']);
+
+    function highlightBicep(src) {
+      const code = src.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      let out = '', i = 0;
+      while (i < code.length) {
+        if (code[i] === '/' && code[i + 1] === '/') {
+          const end = code.indexOf('\n', i);
+          const chunk = end === -1 ? code.slice(i) : code.slice(i, end);
+          out += `<span style="color:#4b5563">${esc(chunk)}</span>`;
+          i += chunk.length; continue;
+        }
+        if (code[i] === "'") {
+          let j = i + 1;
+          while (j < code.length && code[j] !== "'") j++;
+          j++;
+          out += `<span style="color:#86efac">${esc(code.slice(i, j))}</span>`;
+          i = j; continue;
+        }
+        if (/[a-zA-Z_]/.test(code[i])) {
+          let j = i;
+          while (j < code.length && /\w/.test(code[j])) j++;
+          const word = code.slice(i, j);
+          if (BICEP_KEYWORDS.has(word))
+            out += `<span style="color:#f0a500;font-weight:600">${esc(word)}</span>`;
+          else if (BICEP_TYPES.has(word))
+            out += `<span style="color:#38bdf8">${esc(word)}</span>`;
+          else
+            out += esc(word);
+          i = j; continue;
+        }
+        out += esc(code[i]); i++;
+      }
+      return out;
+    }
+
+    // ─── data prep ───────────────────────────────────────────────────────────
+
+    const raw = await fetch('./azure-deployments.json').then(r => r.json());
+
+    const ids = new Set(raw.nodes.map(n => n.id));
+    raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
+
+    // Normalise bicep type+role into a single type string
+    raw.nodes.forEach(n => {
+      if (n.type === 'bicep') n.type = `bicep-${n.role}`;
+    });
+
+    normalizeNodeWeights(raw);
+
+    const WF_ORDER = [
+      'template-Management-Groups',
+      'template-access-control',
+      'template-Azure-Policy',
+      'template-landing-zones',
+    ];
+    const wfSpacing = 130;
+    const wfOffset  = (WF_ORDER.length - 1) / 2 * wfSpacing;
+    WF_ORDER.forEach((id, i) => {
+      const node = raw.nodes.find(n => n.id === id);
+      if (node) node.__xTarget = i * wfSpacing - wfOffset;
+    });
+
+    const wfChildren = {};
+    raw.links.forEach(l => {
+      const [s, t] = linkEnds(l);
+      const src = raw.nodes.find(n => n.id === s);
+      const tgt = raw.nodes.find(n => n.id === t);
+      if (src?.type === 'workflow' && tgt?.type === 'bicep-entry')
+        (wfChildren[src.id] = wfChildren[src.id] ?? []).push(tgt);
+    });
+    Object.entries(wfChildren).forEach(([wfId, entries]) => {
+      const wf = raw.nodes.find(n => n.id === wfId);
+      const baseX = wf?.__xTarget ?? 0;
+      entries.forEach((n, i) => {
+        const offset = entries.length > 1 ? (i - (entries.length - 1) / 2) * 35 : 0;
+        n.__xTarget = baseX + offset;
+      });
+    });
+
+    raw.nodes.forEach(n => {
+      if (n.type === 'workflow') {
+        n.x = n.__xTarget ?? 0; n.y = 220;
+        n.fx = n.x; n.fy = n.y;
+      } else if (n.type === 'bicep-entry') {
+        n.x = n.__xTarget ?? 0; n.y = 60;
+      } else {
+        n.x = (Math.random() - 0.5) * 380; n.y = -220;
+      }
+    });
+
+    // ─── component ───────────────────────────────────────────────────────────
+
+    function Graph() {
+      const fgRef = React.useRef();
+
+      const size = useGraphResize(fgRef);
+
+      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId } = useGraphState(raw, NODE_TYPES);
+      const hoverTimer = React.useRef(null);
+
+      React.useEffect(() => {
+        const fg = fgRef.current;
+        if (!fg) return;
+        fg.d3Force('charge').strength(-200);
+        fg.d3Force('link')
+          .distance(l => l.source?.type === 'workflow' ? 40 : 70)
+          .strength(0.4);
+        fg.d3Force('collision', forceCollide(n => dotRadius(n) + 5));
+        fg.d3Force('y-tier', forceY(n => {
+          if (n.type === 'workflow')    return 220;
+          if (n.type === 'bicep-entry') return 0;
+          return -220;
+        }).strength(n => {
+          if (n.type === 'workflow')    return 0.8;
+          if (n.type === 'bicep-entry') return 0.5;
+          return 0.25;
+        }));
+        fg.d3Force('x-stem', forceX(n => n.__xTarget ?? 0)
+          .strength(n => n.type === 'workflow' ? 0.8 : n.type === 'bicep-entry' ? 0.6 : 0));
+        fg.d3ReheatSimulation();
+        setTimeout(() => fg.zoomToFit(400, 40), 100);
+      }, [graph]);
+
+      const linkColor = React.useCallback(l => {
+        if (!activeId) {
+          const base = REL_COLORS[l.relationship];
+          return base ? base.replace('0.7', '0.15') : 'rgba(180,180,180,0.1)';
+        }
+        const [s, t] = linkEnds(l);
+        return (s === activeId || t === activeId)
+          ? REL_COLORS[l.relationship] ?? 'rgba(255,255,255,0.85)'
+          : 'rgba(180,180,180,0.04)';
+      }, [activeId]);
+
+      const paintNode = React.useCallback((node, ctx, globalScale) => {
+        const isActive    = node.id === activeId;
+        const isNeighbour = neighbours?.has(node.id);
+        const dimmed      = activeId && !isActive && !isNeighbour;
+        const r           = dotRadius(node) / globalScale;
+
+        ctx.globalAlpha = dimmed ? 0.08 : 1;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
+        ctx.fillStyle = isActive ? '#fff' : COLORS[node.type];
+        ctx.fill();
+
+        const showLabel = node.type === 'workflow' || isActive || isNeighbour;
+        if (showLabel) {
+          const gap = r + 5 / globalScale;
+          let lx, ly, align;
+          if (node.type === 'workflow') {
+            lx    = node.x;
+            ly    = node.y + gap + 11 / globalScale;
+            align = 'center';
+          } else {
+            lx    = node.x + gap;
+            ly    = node.y;
+            align = 'left';
+          }
+          drawLabel(ctx, node.id, lx, ly, align, 11, globalScale,
+            isActive ? '#fff' : COLORS[node.type] ?? '#ccc');
+        }
+
+        ctx.globalAlpha = 1;
+        node.__r = r; // expose to nodePointerAreaPaint for hit-testing
+      }, [activeId, neighbours]);
+
+      return <>
+        <NavBar activeHref="./azure-deployments.html">
+          {NODE_TYPES.map(type => (
+            <div key={type}
+              className={`chip${visible.has(type) ? '' : ' off'}`}
+              style={{ borderColor: COLORS[type], color: COLORS[type] }}
+              onClick={() => toggleType(type)}
+            >
+              <div className="chip-dot" style={{ background: COLORS[type] }} />
+              {TYPE_LABELS[type]}
+            </div>
+          ))}
+        </NavBar>
+
+        {activeNode && (
+          <div id="info-panel">
+            <div className="info-id">{TYPE_LABELS[activeNode.type]}</div>
+            <p className="info-text" style={{ color: '#fff', margin: '0 0 8px', fontWeight: 600 }}>{activeNode.id}</p>
+
+            {activeNode.description && <>
+              <div className="info-label">Description</div>
+              <p className="info-text">{activeNode.description}</p>
+            </>}
+
+            {activeNode.jobs && <>
+              <div className="info-label">Jobs</div>
+              <pre className="code-block"
+                dangerouslySetInnerHTML={{ __html: highlightJobs(activeNode.jobs) }}
+              />
+            </>}
+
+            {activeNode.path && <>
+              <div className="info-label">Path</div>
+              <p className="info-text" style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>
+                {activeNode.path}
+              </p>
+            </>}
+
+            {activeNode.snippet && <>
+              <div className="info-label">Snippet</div>
+              <pre className="code-block"
+                dangerouslySetInnerHTML={{ __html: highlightBicep(activeNode.snippet) }}
+              />
+            </>}
+
+            {activeNode.inputs && <>
+              <div className="info-label">Inputs</div>
+              <pre className="code-block"
+                dangerouslySetInnerHTML={{ __html: highlightBicep(activeNode.inputs) }}
+              />
+            </>}
+          </div>
+        )}
+
+        <ForceGraph2D
+          ref={fgRef}
+          width={size.width}
+          height={size.height}
+          graphData={graph}
+          backgroundColor="#1a1b26"
+          linkColor={linkColor}
+          linkWidth={l => {
+            if (!activeId) return 0.5;
+            const [s, t] = linkEnds(l);
+            return (s === activeId || t === activeId) ? 1.5 : 0.5;
+          }}
+          linkDirectionalArrowLength={4}
+          linkDirectionalArrowRelPos={1}
+          linkDirectionalArrowColor={linkColor}
+          cooldownTime={1500}
+          onNodeHover={node => {
+            clearTimeout(hoverTimer.current);
+            if (node) {
+              setHoveredId(node.id);
+            } else {
+              hoverTimer.current = setTimeout(() => setHoveredId(null), 300);
+            }
+          }}
+          onNodeClick={node => setFocusedId(p => p === node.id ? null : node.id)}
+          onBackgroundClick={() => setFocusedId(null)}
+          nodeCanvasObject={paintNode}
+          nodePointerAreaPaint={(node, color, ctx) => {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, (node.__r ?? 4) + 4, 0, 2 * Math.PI);
+            ctx.fill();
+          }}
+        />
+      </>;
+    }
+
+    // ─── mount ───────────────────────────────────────────────────────────────
+
+    createRoot(document.getElementById('graph')).render(<Graph />);
+  </script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="8d6f8fcd-8e1a-4eb4-8c64-1b32c60e82cd"></script>
+</body>
+</html>

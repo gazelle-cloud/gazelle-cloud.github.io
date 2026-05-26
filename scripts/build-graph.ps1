@@ -1,5 +1,5 @@
 $dataDir   = Join-Path $PSScriptRoot '..' 'data'
-$outFile   = Join-Path $PSScriptRoot '..' 'app' 'public' 'graph.json'
+$outFile   = Join-Path $PSScriptRoot '..' 'app' 'public' 'index.json'
 
 $nodes  = [System.Collections.Generic.List[hashtable]]::new()
 $links  = [System.Collections.Generic.List[hashtable]]::new()
@@ -51,7 +51,7 @@ foreach ($link in $links) {
 $graph = @{ nodes = $nodes.ToArray(); links = $links.ToArray() }
 $graph | ConvertTo-Json -Depth 5 | Set-Content $outFile -Encoding UTF8
 
-Write-Host "graph.json written"
+Write-Host "index.json written"
 Write-Host "  nodes : $($nodes.Count)"
 Write-Host "  links : $($links.Count)"
 Write-Host "  breakdown:"
