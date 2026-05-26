@@ -21,7 +21,7 @@
         - name: Checkout
           uses: actions/checkout@v4
 
-        - name: Build graph.json
+        - name: Build index.json
           run: pwsh -File scripts/build-graph.ps1
 
         - name: Setup Pages

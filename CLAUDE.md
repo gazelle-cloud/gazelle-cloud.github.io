@@ -10,13 +10,13 @@ data/
   platform-anchors/     # one JSON per anchor
   platform-operations/  # one JSON per operation
 scripts/
-  build-graph.ps1       # reads data/, writes app/public/graph.json
+  build-graph.ps1       # reads data/, writes app/public/index.json
 app/public/
   index.html            # single-file React app (JSX via Babel standalone)
-  graph.json            # generated — do not edit by hand
+  index.json            # generated — do not edit by hand
 ```
 
-Run `pwsh -File scripts/build-graph.ps1` after any data change to regenerate `graph.json`.
+Run `pwsh -File scripts/build-graph.ps1` after any data change to regenerate `index.json`.
 
 ## Data schemas
 
