@@ -1,0 +1,453 @@
+{
+  "nodes": [
+    {
+      "id": "template-Azure-Policy",
+      "type": "workflow",
+      "trigger": "workflow_call",
+      "description": "Reusable: deploys Azure Policy to a target environment"
+    },
+    {
+      "id": "template-Management-Groups",
+      "type": "workflow",
+      "trigger": "workflow_call",
+      "description": "Reusable: deploys the management group hierarchy to a target environment"
+    },
+    {
+      "id": "template-access-control",
+      "type": "workflow",
+      "trigger": "workflow_call",
+      "description": "Reusable: deploys access control assignments to a target environment"
+    },
+    {
+      "id": "template-landing-zones",
+      "type": "workflow",
+      "trigger": "workflow_call",
+      "description": "Reusable: deploys a landing zone's Bicep deployment stack"
+    },
+    {
+      "id": "lz-main",
+      "type": "bicep",
+      "role": "entry",
+      "path": "landing-zones/bicep/main.bicep",
+      "description": "Deploys a complete landing zone: identity, networking, policy, automation, monitoring, and budget",
+      "inputs": {
+        "appName": "string",
+        "environment": "string",
+        "budget": "int",
+        "vnetAddressSpace": "array",
+        "subscriptionId": "string",
+        "subscriptionLevelTags": "object",
+        "resourceLevelTags": "object",
+        "defenderRecommendationExemptions": "bool",
+        "diagSettingsExemption": "bool",
+        "exemptions": "array",
+        "applicationReaderEntraGroupId": "→ ENTRAID_READER_GROUP_ID",
+        "diagnosticSettingsPolicyResourceId": "→ POLICY_CONFIG_DIAGNOSTICSETTINGS_RESOURCE_ID",
+        "engineerEmail": "→ ENGINEER_CONTACT",
+        "ownerEmail": "→ OWNER_CONTACT",
+        "GitHubOrganizationDatabaseId": "→ GH_ORGANIZATION_DATABASE_ID"
+      }
+    },
+    {
+      "id": "lz-entra",
+      "type": "bicep",
+      "role": "entry",
+      "path": "landing-zones/bicep/entra.bicep",
+      "description": "Assigns an Entra ID app role to the landing zone managed identity",
+      "inputs": {
+        "principalId": "→ landingzone_principal_id"
+      }
+    },
+    {
+      "id": "policy-customDefs",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/policy/bicep/customPolicyDefinitions.bicep",
+      "description": "Deploys custom Azure Policy definitions to the management group",
+      "inputs": {
+        "customDefinitions": "array"
+      }
+    },
+    {
+      "id": "policy-configDiag",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/policy/bicep/configDiagnosticSettings.bicep",
+      "description": "Assigns diagnostic settings policies across all management group scopes",
+      "inputs": {
+        "policyDefinitions": "array"
+      }
+    },
+    {
+      "id": "policy-oases",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/policy/bicep/oases.bicep",
+      "description": "Assigns deny policies (resources, locations, authentication, network) to landing zone management groups",
+      "inputs": {
+        "environment": "→ managementGroupHierarchy",
+        "location": "→ AZURE_DEFAULT_LOCATION"
+      }
+    },
+    {
+      "id": "mgmt-managementGroups",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/management-groups/bicep/managementGroups.bicep",
+      "description": "Deploys and configures the management group hierarchy",
+      "inputs": {
+        "topLevelManagementGroupName": "→ TOP_LEVEL_MANAGEMENT_GROUP_NAME",
+        "environment": "→ managementGroupHierarchy"
+      }
+    },
+    {
+      "id": "rbac-accessControl",
+      "type": "bicep",
+      "role": "entry",
+      "path": "platform-management/access-control/bicep/accessControl.bicep",
+      "description": "Deploys custom role definitions and assigns roles at management group scope",
+      "inputs": {
+        "topLevelManagementGroupName": "→ TOP_LEVEL_MANAGEMENT_GROUP_NAME",
+        "azurePlatformEngineerGroupId": "→ AZURE_PLATFORM_ENGINEER_GROUP_ID",
+        "azurePlatformOwnerGroupId": "→ AZURE_PLATFORM_OWNER_GROUP_ID",
+        "accessControl": "array"
+      }
+    },
+    {
+      "id": "lz-identity",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/identity.bicep",
+      "description": "Creates the managed identity, RBAC, log analytics, container app environment, automation jobs, and policy assignments"
+    },
+    {
+      "id": "lz-virtualNetwork",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/virtualNetwork.bicep",
+      "description": "Provisions the landing zone VNet with the allocated address space"
+    },
+    {
+      "id": "lz-azurePolicy",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/azurePolicy.bicep",
+      "description": "Applies landing zone-scoped policy assignments and exemptions"
+    },
+    {
+      "id": "lz-automation",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/landingzone-automation.bicep",
+      "description": "Deploys container app automation jobs for the landing zone"
+    },
+    {
+      "id": "lz-monitor",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/monitor.bicep",
+      "description": "Deploys the action group, health alerts, and log analytics workspace"
+    },
+    {
+      "id": "lz-budget",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/budget.bicep",
+      "description": "Creates the subscription budget with forecast-based alerts"
+    },
+    {
+      "id": "lz-securityContacts",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/securityContacts.bicep",
+      "description": "Configures Defender for Cloud security contact details"
+    },
+    {
+      "id": "lz-appRoleAssignedTo",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/appRoleAssignedTo.bicep",
+      "description": "Grants an Entra ID application role to a principal"
+    },
+    {
+      "id": "policy-policyDefs",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/policy/bicep/modules/policyDefinitions.bicep",
+      "description": "Deploys a batch of custom policy definitions to the management group"
+    },
+    {
+      "id": "policy-assignment",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/policy/bicep/modules/assignment.bicep",
+      "description": "Wraps a single policy assignment scoped to a management group"
+    },
+    {
+      "id": "mgmt-groups-module",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/management-groups/bicep/modules/managementGroups.bicep",
+      "description": "Recursively deploys child management groups"
+    },
+    {
+      "id": "mgmt-settings",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/management-groups/bicep/modules/managementGroupSettings.bicep",
+      "description": "Configures default management group settings (production only)"
+    },
+    {
+      "id": "rbac-customRoles",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/access-control/bicep/modules/customRoleDefinitions.bicep",
+      "description": "Creates custom RBAC role definitions at management group scope"
+    },
+    {
+      "id": "rbac-roleAssignment",
+      "type": "bicep",
+      "role": "module",
+      "path": "platform-management/access-control/bicep/modules/roleAssignment.bicep",
+      "description": "Assigns a role to a principal at management group scope"
+    },
+    {
+      "id": "lz-roleAssignment-sub",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/roleAssignments-subscription.bicep",
+      "description": "Assigns an RBAC role at subscription scope"
+    },
+    {
+      "id": "lz-actionGroup",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/actionGroup.bicep",
+      "description": "Creates an Azure Monitor action group for alert routing"
+    },
+    {
+      "id": "lz-activityLogAlerts",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/ActivityLogAlerts.bicep",
+      "description": "Creates activity log alert rules for resource health events"
+    },
+    {
+      "id": "lz-logAnalytics",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/logAnalyticsWorkspace.bicep",
+      "description": "Provisions a Log Analytics workspace for diagnostic data collection"
+    },
+    {
+      "id": "lz-managedEnvironments",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/managedEnvironments.bicep",
+      "description": "Creates a Container Apps managed environment for automation jobs"
+    },
+    {
+      "id": "lz-jobsCron",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/jobs-cron.bicep",
+      "description": "Deploys a cron-triggered Container Apps job"
+    },
+    {
+      "id": "lz-policyAssignment",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/policyAssignment.bicep",
+      "description": "Assigns an Azure Policy at subscription scope"
+    },
+    {
+      "id": "lz-policyExemption",
+      "type": "bicep",
+      "role": "module",
+      "path": "landing-zones/bicep/modules/base/policyExemption.bicep",
+      "description": "Creates a policy exemption for a specific resource"
+    }
+  ],
+  "links": [
+    {
+      "source": "template-landing-zones",
+      "target": "lz-main",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-landing-zones",
+      "target": "lz-entra",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Azure-Policy",
+      "target": "policy-customDefs",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Azure-Policy",
+      "target": "policy-configDiag",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Azure-Policy",
+      "target": "policy-oases",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Management-Groups",
+      "target": "mgmt-managementGroups",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-access-control",
+      "target": "rbac-accessControl",
+      "relationship": "deploys"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-identity",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-virtualNetwork",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-azurePolicy",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-automation",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-monitor",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-budget",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-main",
+      "target": "lz-securityContacts",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-entra",
+      "target": "lz-appRoleAssignedTo",
+      "relationship": "uses"
+    },
+    {
+      "source": "policy-customDefs",
+      "target": "policy-policyDefs",
+      "relationship": "uses"
+    },
+    {
+      "source": "policy-oases",
+      "target": "policy-assignment",
+      "relationship": "uses"
+    },
+    {
+      "source": "mgmt-managementGroups",
+      "target": "mgmt-groups-module",
+      "relationship": "uses"
+    },
+    {
+      "source": "mgmt-managementGroups",
+      "target": "mgmt-settings",
+      "relationship": "uses"
+    },
+    {
+      "source": "rbac-accessControl",
+      "target": "rbac-customRoles",
+      "relationship": "uses"
+    },
+    {
+      "source": "rbac-accessControl",
+      "target": "rbac-roleAssignment",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-roleAssignment-sub",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-actionGroup",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-activityLogAlerts",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-logAnalytics",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-managedEnvironments",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-jobsCron",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-policyAssignment",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-identity",
+      "target": "lz-policyExemption",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-azurePolicy",
+      "target": "lz-policyAssignment",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-azurePolicy",
+      "target": "lz-policyExemption",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-automation",
+      "target": "lz-managedEnvironments",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-automation",
+      "target": "lz-jobsCron",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-monitor",
+      "target": "lz-actionGroup",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-monitor",
+      "target": "lz-activityLogAlerts",
+      "relationship": "uses"
+    },
+    {
+      "source": "lz-monitor",
+      "target": "lz-logAnalytics",
+      "relationship": "uses"
+    }
+  ]
+}

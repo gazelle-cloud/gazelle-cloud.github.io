@@ -32,13 +32,15 @@
     #info-panel {
       position: fixed;
       top: 14px; right: 14px;
-      width: 280px;
+      width: 300px;
+      max-height: calc(100vh - 28px);
+      overflow-y: auto;
       background: rgba(26,27,38,0.92);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 8px;
       padding: 14px 16px;
       z-index: 10;
-      pointer-events: none;
+      pointer-events: auto;
       font: 13px/1.6 sans-serif;
     }
     .info-id {
@@ -56,6 +58,15 @@
       margin: 10px 0 3px;
     }
     .info-text { margin: 0; color: #bbb; }
+    .info-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #1a1b26;
+      margin-top: 2px;
+    }
   </style>
 
   <script type="importmap">{ "imports": {
@@ -79,50 +90,61 @@
     // ─── constants ───────────────────────────────────────────────────────────
 
     const COLORS = {
-      principle: '#f0a500',
-      operation: '#3dba7f',
-      decision:  '#4e8ef7',
+      workflow:       '#c084fc',
+      'bicep-entry':  '#f59e0b',
+      'bicep-module': '#38bdf8',
     };
 
-    const NODE_TYPES = ['principle', 'operation', 'decision'];
+    const NODE_TYPES = ['workflow', 'bicep-entry', 'bicep-module'];
 
     const TYPE_LABELS = {
-      principle: 'design-principles',
-      operation: 'platform-operations',
-      decision:  'design-decisions',
+      workflow:       'github-workflows',
+      'bicep-entry':  'main-bicep',
+      'bicep-module': 'bicep-modules',
     };
 
-    const dotRadius = node =>
-      node.type === 'decision' ? 2 + node.__weight * 7 : 5;
+    const vtype = n => n.type === 'bicep' ? `bicep-${n.role}` : n.type;
+
+    // Relationship → arrow colour
+    const REL_COLORS = {
+      implements: 'rgba(61,186,127,0.7)',
+      calls:      'rgba(192,132,252,0.7)',
+      deploys:    'rgba(240,165,0,0.7)',
+      uses:       'rgba(78,142,247,0.7)',
+    };
+
+    const dotRadius = node => {
+      if (node.type === 'workflow') return 5;
+      if (node.type === 'bicep' && node.role === 'entry') return 4 + node.__weight * 5;
+      return 2 + node.__weight * 5;
+    };
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    fetch('./graph.json').then(r => r.json()).then(raw => {
-      // drop ghost nodes
-      raw.nodes = raw.nodes.filter(n => n.type !== 'unknown');
+    fetch('./codebase.json').then(r => r.json()).then(raw => {
       const ids = new Set(raw.nodes.map(n => n.id));
       raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
 
-      // in-degree → weight (0..1), used to size and position decisions
+      // in-degree → weight (0..1)
       const inDeg = Object.fromEntries(raw.nodes.map(n => [n.id, 0]));
-      raw.links.forEach(l => inDeg[l.target] = (inDeg[l.target] ?? 0) + 1);
+      raw.links.forEach(l => { inDeg[l.target] = (inDeg[l.target] ?? 0) + 1; });
       const maxDeg = Math.max(1, ...Object.values(inDeg));
-      raw.nodes.forEach(n => {
-        n.__weight = (inDeg[n.id] ?? 0) / maxDeg;
-      });
+      raw.nodes.forEach(n => { n.__weight = (inDeg[n.id] ?? 0) / maxDeg; });
 
-      // pin anchors and operations evenly on a circle (interleaved)
-      const byType = t => raw.nodes.filter(n => n.type === t);
-      const rim = [];
-      const principles = byType('principle'), ops = byType('operation');
-      for (let i = 0; i < Math.max(principles.length, ops.length); i++) {
-        if (principles[i]) rim.push(principles[i]);
-        if (ops[i])        rim.push(ops[i]);
-      }
-      rim.forEach((n, i) => {
-        const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
-        n.fx = Math.cos(angle) * 280;
-        n.fy = Math.sin(angle) * 280;
+      // pre-position nodes on their target rings so forces just maintain rather than find
+      const ringRadius = { workflow: 30, entry: 180, module: 180 };
+      const byRing = {};
+      raw.nodes.forEach(n => {
+        const key = n.type === 'bicep' ? n.role : n.type;
+        (byRing[key] = byRing[key] ?? []).push(n);
+      });
+      Object.entries(byRing).forEach(([key, nodes]) => {
+        const r = ringRadius[key] ?? 150;
+        nodes.forEach((n, i) => {
+          const angle = (i / nodes.length) * 2 * Math.PI;
+          n.x = r * Math.cos(angle);
+          n.y = r * Math.sin(angle);
+        });
       });
 
       // ─── component ─────────────────────────────────────────────────────────
@@ -144,11 +166,10 @@
 
         const activeId = focusedId ?? hoveredId;
 
-        // filter graph by visible types
         const graph = React.useMemo(() => {
-          const visIds = new Set(raw.nodes.filter(n => visible.has(n.type)).map(n => n.id));
+          const visIds = new Set(raw.nodes.filter(n => visible.has(vtype(n))).map(n => n.id));
           return {
-            nodes: raw.nodes.filter(n => visible.has(n.type)),
+            nodes: raw.nodes.filter(n => visible.has(vtype(n))),
             links: raw.links.filter(l => {
               const s = l.source?.id ?? l.source;
               const t = l.target?.id ?? l.target;
@@ -161,7 +182,6 @@
           activeId ? graph.nodes.find(n => n.id === activeId) : null,
         [activeId, graph.nodes]);
 
-        // direct neighbours of the active node
         const neighbours = React.useMemo(() => {
           if (!activeId) return null;
           const set = new Set([activeId]);
@@ -174,71 +194,71 @@
           return set;
         }, [activeId, graph.links]);
 
-        // configure d3 forces whenever the graph changes
         React.useEffect(() => {
           const fg = fgRef.current;
           if (!fg) return;
-          fg.d3Force('charge').strength(-180);
-          fg.d3Force('link').distance(60);
-          fg.d3Force('collision', forceCollide(n => dotRadius(n) + 3));
-          // pull decisions toward center; heavier ones pulled harder
-          fg.d3Force('radial', forceRadial(0, 0, 0)
-            .strength(n => n.type === 'decision' ? 0.04 + n.__weight * 0.25 : 0));
+          fg.d3Force('charge').strength(-160);
+          // moderate link force — topology creates natural clusters
+          fg.d3Force('link')
+            .distance(l => {
+              const s = l.source?.type ?? l.source;
+              return s === 'workflow' ? 30 : 60;
+            })
+            .strength(0.5);
+          fg.d3Force('collision', forceCollide(n => dotRadius(n) + 5));
+          // workflows firmly at center
+          fg.d3Force('radial-center', forceRadial(30, 0, 0)
+            .strength(n => n.type === 'workflow' ? 0.9 : 0));
+          // gentle pull on entry bicep only — modules follow links freely
+          fg.d3Force('radial-edge', forceRadial(120, 0, 0)
+            .strength(n => n.type === 'bicep' && n.role === 'entry' ? 0.3 : 0));
           fg.d3ReheatSimulation();
           setTimeout(() => fg.zoomToFit(400, 40), 100);
           setTimeout(() => fg.zoomToFit(400, 40), 4500);
         }, [graph]);
 
-        // edge colour: faint always, bright only for active node's edges
         const linkColor = React.useCallback(l => {
-          if (!activeId) return 'rgba(180,180,180,0.12)';
+          if (!activeId) {
+            const rel = l.relationship;
+            return REL_COLORS[rel]?.replace('0.7', '0.15') ?? 'rgba(180,180,180,0.1)';
+          }
           const s = l.source?.id ?? l.source;
           const t = l.target?.id ?? l.target;
-          return (s === activeId || t === activeId)
-            ? 'rgba(255,255,255,0.85)'
-            : 'rgba(180,180,180,0.04)';
+          if (s === activeId || t === activeId) {
+            const rel = l.relationship;
+            return REL_COLORS[rel] ?? 'rgba(255,255,255,0.85)';
+          }
+          return 'rgba(180,180,180,0.04)';
         }, [activeId]);
 
-        // draw each node as a dot; show name label when active
         const paintNode = React.useCallback((node, ctx, globalScale) => {
           const isActive    = node.id === activeId;
           const isNeighbour = neighbours?.has(node.id);
           const dimmed      = activeId && !isActive && !isNeighbour;
           const r           = dotRadius(node) / globalScale;
 
-          ctx.globalAlpha = dimmed ? 0.1 : 1;
+          ctx.globalAlpha = dimmed ? 0.08 : 1;
           ctx.beginPath();
           ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
-          ctx.fillStyle = isActive ? '#fff' : COLORS[node.type];
+          ctx.fillStyle = isActive ? '#fff' : COLORS[vtype(node)];
           ctx.fill();
 
-          const isRim      = node.type === 'principle' || node.type === 'operation';
-          const showLabel  = isRim || isActive || isNeighbour;
+          const showLabel = node.type === 'workflow' || isActive || isNeighbour;
           if (showLabel) {
-            const fs  = 12 / globalScale;
+            const fs  = 11 / globalScale;
             ctx.font  = `${fs}px Sans-Serif`;
             const tw  = ctx.measureText(node.id).width;
             const p   = 4 / globalScale;
             const gap = r + 6 / globalScale;
 
-            // rim nodes: push label outward from center along the node's angle
-            // other nodes: label to the right
-            let lx, ly, align;
-            if (isRim) {
-              const angle = Math.atan2(node.y, node.x);
-              lx    = node.x + Math.cos(angle) * gap;
-              ly    = node.y + Math.sin(angle) * gap;
-              align = Math.cos(angle) >= 0 ? 'left' : 'right';
-            } else {
-              lx    = node.x + gap;
-              ly    = node.y;
-              align = 'left';
-            }
+            const lx    = node.x + gap;
+            const ly    = node.y;
+            const align = 'left';
 
             const bgX = align === 'left' ? lx - p : lx - tw - p;
             ctx.fillStyle = 'rgba(26,27,38,0.9)';
             ctx.fillRect(bgX, ly - fs / 2 - p, tw + p * 2, fs + p * 2);
-            ctx.fillStyle    = isActive ? '#fff' : COLORS[node.type] ?? '#ccc';
+            ctx.fillStyle    = isActive ? '#fff' : COLORS[vtype(node)] ?? '#ccc';
             ctx.textAlign    = align;
             ctx.textBaseline = 'middle';
             ctx.fillText(node.id, lx, ly);
@@ -257,9 +277,11 @@
           });
         };
 
+        const badgeColor = node => COLORS[vtype(node)] ?? '#888';
+
         return <>
           <div id="filters">
-            <a id="nav-link" href="./codebase.html">codebase →</a>
+            <a id="nav-link" href="./index.html">← knowledge graph</a>
             {NODE_TYPES.map(type => (
               <div key={type}
                 className={`chip${visible.has(type) ? '' : ' off'}`}
@@ -272,20 +294,54 @@
             ))}
           </div>
 
-          {(activeNode?.mechanism || activeNode?.why || activeNode?.description) && (
+          {focusedId && activeNode && (
             <div id="info-panel">
-              <div className="info-id">{activeNode.id}</div>
+              <div className="info-id">{TYPE_LABELS[vtype(activeNode)]}</div>
+              <p className="info-text" style={{ color: '#fff', margin: '0 0 8px', fontWeight: 600 }}>{activeNode.id}</p>
+
               {activeNode.description && <>
                 <div className="info-label">Description</div>
                 <p className="info-text">{activeNode.description}</p>
               </>}
-              {activeNode.mechanism && <>
-                <div className="info-label">Mechanism</div>
-                <p className="info-text">{activeNode.mechanism}</p>
+
+              {activeNode.trigger && <>
+                <div className="info-label">Trigger</div>
+                <span className="info-badge" style={{ background: badgeColor(activeNode) }}>
+                  {activeNode.trigger}
+                </span>
               </>}
-              {activeNode.why && <>
-                <div className="info-label">Why</div>
-                <p className="info-text">{activeNode.why}</p>
+
+              {activeNode.path && <>
+                <div className="info-label">Path</div>
+                <p className="info-text" style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>
+                  {activeNode.path}
+                </p>
+              </>}
+
+              {activeNode.inputs && <>
+                <div className="info-label">Inputs ({Object.keys(activeNode.inputs).length})</div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 4 }}>
+                  <tbody>
+                    {Object.entries(activeNode.inputs).map(([name, value]) => {
+                      const isGhVar = value.startsWith('→');
+                      return (
+                        <tr key={name} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '3px 6px 3px 0', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 11 }}>{name}</td>
+                          <td style={{ padding: '3px 0', textAlign: 'right' }}>
+                            <span style={{
+                              background: isGhVar ? 'rgba(192,132,252,0.15)' : 'rgba(245,158,11,0.15)',
+                              color:      isGhVar ? '#c084fc'                : '#f59e0b',
+                              padding: '1px 6px', borderRadius: 3, fontSize: 10, fontFamily: 'monospace',
+                              wordBreak: 'break-all',
+                            }}>
+                              {isGhVar ? value.slice(2) : value}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </>}
             </div>
           )}
@@ -297,8 +353,15 @@
             graphData={graph}
             backgroundColor="#1a1b26"
             linkColor={linkColor}
-            linkWidth={0.5}
-            linkDirectionalArrowLength={0}
+            linkWidth={l => {
+              if (!activeId) return 0.5;
+              const s = l.source?.id ?? l.source;
+              const t = l.target?.id ?? l.target;
+              return (s === activeId || t === activeId) ? 1.5 : 0.5;
+            }}
+            linkDirectionalArrowLength={4}
+            linkDirectionalArrowRelPos={1}
+            linkDirectionalArrowColor={linkColor}
             cooldownTime={4000}
             onEngineStop={() => fgRef.current?.zoomToFit(400, 40)}
             onNodeHover={node => setHoveredId(node?.id ?? null)}
@@ -308,7 +371,7 @@
             nodePointerAreaPaint={(node, color, ctx) => {
               ctx.fillStyle = color;
               ctx.beginPath();
-              ctx.arc(node.x, node.y, (node.__r ?? 4) + 3, 0, 2 * Math.PI);
+              ctx.arc(node.x, node.y, (node.__r ?? 4) + 4, 0, 2 * Math.PI);
               ctx.fill();
             }}
           />
