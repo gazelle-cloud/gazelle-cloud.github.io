@@ -44,7 +44,7 @@
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    const raw = await fetch('./index.json').then(r => r.json());
+    const raw = await fetch('./design-decisions.json').then(r => r.json());
 
     raw.nodes = raw.nodes.filter(n => n.type !== 'unknown');
     const ids = new Set(raw.nodes.map(n => n.id));
