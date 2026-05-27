@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./shell.css">
   <script type="importmap">{ "imports": {
     "react": "https://esm.sh/react",
@@ -10,16 +11,17 @@
 </head>
 
 <body>
-  <div id="filters"></div>
-  <div id="graph"></div>
 
   <script src="//cdn.jsdelivr.net/npm/@babel/standalone"></script>
   <script type="text/jsx" data-type="module">
     import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
     import React from 'react';
     import { createRoot } from 'react-dom/client';
+    import { createPortal } from 'react-dom';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { NavBar, useGraphResize, normalizeNodeWeights, drawLabel, linkEnds, useGraphState } from './shell.js';
+    import { NavBar, FilterChips, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, normalizeNodeWeights, drawLabel, linkEnds, useGraphState } from './shell.js';
+
+    setupLayout();
 
     // ─── constants ───────────────────────────────────────────────────────────
 
@@ -68,22 +70,16 @@
     function Graph() {
       const fgRef = React.useRef();
 
-      const size = useGraphResize(fgRef);
+      const size = useVizPaneSize(fgRef);
 
-      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId } = useGraphState(raw, NODE_TYPES);
+      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, onNodeClick, onBackgroundClick } = useGraphState(raw, NODE_TYPES);
 
-      React.useEffect(() => {
-        const fg = fgRef.current;
-        if (!fg) return;
-        fg.d3Force('charge').strength(-180);
+      const physicsProps = useGraphPhysics(fgRef, graph, fg => {
         fg.d3Force('link').distance(60);
         fg.d3Force('collision', forceCollide(n => dotRadius(n) + 3));
         fg.d3Force('radial', forceRadial(0, 0, 0)
           .strength(n => n.type === 'decision' ? 0.04 + n.__weight * 0.25 : 0));
-        fg.d3ReheatSimulation();
-        setTimeout(() => fg.zoomToFit(400, 40), 100);
-        setTimeout(() => fg.zoomToFit(400, 40), 4500);
-      }, [graph]);
+      });
 
       const linkColor = React.useCallback(l => {
         if (!activeId) return 'rgba(180,180,180,0.12)';
@@ -99,7 +95,7 @@
         const dimmed      = activeId && !isActive && !isNeighbour;
         const r           = dotRadius(node) / globalScale;
 
-        ctx.globalAlpha = dimmed ? 0.1 : 1;
+        ctx.globalAlpha = dimmed ? RENDER.dimmedAlpha : 1;
         ctx.beginPath();
         ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
         ctx.fillStyle = isActive ? '#fff' : COLORS[node.type];
@@ -108,7 +104,7 @@
         const isRim     = node.type === 'principle' || node.type === 'operation';
         const showLabel = isRim || isActive || isNeighbour;
         if (showLabel) {
-          const gap = r + 6 / globalScale;
+          const gap = r + RENDER.labelGap / globalScale;
           let lx, ly, align;
           if (isRim) {
             const angle = Math.atan2(node.y, node.x);
@@ -120,7 +116,7 @@
             ly    = node.y;
             align = 'left';
           }
-          drawLabel(ctx, node.id, lx, ly, align, 12, globalScale,
+          drawLabel(ctx, node.id, lx, ly, align, RENDER.labelFontSize, globalScale,
             isActive ? '#fff' : COLORS[node.type] ?? '#ccc');
         }
 
@@ -130,34 +126,31 @@
 
       return <>
         <NavBar activeHref="./index.html">
-          {NODE_TYPES.map(type => (
-            <div key={type}
-              className={`chip${visible.has(type) ? '' : ' off'}`}
-              style={{ borderColor: COLORS[type], color: COLORS[type] }}
-              onClick={() => toggleType(type)}
-            >
-              <div className="chip-dot" style={{ background: COLORS[type] }} />
-              {TYPE_LABELS[type]}
-            </div>
-          ))}
+          <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
+                       colors={COLORS} visible={visible} toggleType={toggleType} />
         </NavBar>
 
-        {(activeNode?.mechanism || activeNode?.why || activeNode?.description) && (
-          <div id="info-panel">
-            <div className="info-id">{activeNode.id}</div>
-            {activeNode.description && <>
-              <div className="info-label">Description</div>
-              <p className="info-text">{activeNode.description}</p>
-            </>}
-            {activeNode.mechanism && <>
-              <div className="info-label">Mechanism</div>
-              <p className="info-text">{activeNode.mechanism}</p>
-            </>}
-            {activeNode.why && <>
-              <div className="info-label">Why</div>
-              <p className="info-text">{activeNode.why}</p>
-            </>}
-          </div>
+        {createPortal(
+          activeNode
+            ? <>
+                <div className="info-id">{activeNode.id}</div>
+                {activeNode.description && <>
+                  <div className="info-label">Description</div>
+                  <p className="info-text">{activeNode.description}</p>
+                </>}
+                {activeNode.mechanism && <>
+                  <div className="info-label">Mechanism</div>
+                  <p className="info-text">{activeNode.mechanism}</p>
+                </>}
+                {activeNode.why && <>
+                  <div className="info-label">Why</div>
+                  <p className="info-text">{activeNode.why}</p>
+                </>}
+              </>
+            : <div className="detail-empty">
+                Hover or click a node<br />to explore its design context.
+              </div>,
+          document.getElementById('detail-pane')
         )}
 
         <ForceGraph2D
@@ -165,19 +158,16 @@
           width={size.width}
           height={size.height}
           graphData={graph}
-          backgroundColor="#1a1b26"
           linkColor={linkColor}
-          linkWidth={0.5}
-            cooldownTime={4000}
-          onEngineStop={() => fgRef.current?.zoomToFit(400, 40)}
+          {...physicsProps}
           onNodeHover={node => setHoveredId(node?.id ?? null)}
-          onNodeClick={node => setFocusedId(p => p === node.id ? null : node.id)}
-          onBackgroundClick={() => setFocusedId(null)}
+          onNodeClick={onNodeClick}
+          onBackgroundClick={onBackgroundClick}
           nodeCanvasObject={paintNode}
           nodePointerAreaPaint={(node, color, ctx) => {
             ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.arc(node.x, node.y, (node.__r ?? 4) + 3, 0, 2 * Math.PI);
+            ctx.arc(node.x, node.y, (node.__r ?? 4) + RENDER.hitTestPadding, 0, 2 * Math.PI);
             ctx.fill();
           }}
         />

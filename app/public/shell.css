@@ -1,7 +1,41 @@
 /* ── reset ──────────────────────────────────────────────────────────────── */
-html, body { margin: 0; height: 100%; }
-body { background: #1a1b26; }
-#graph { width: 100vw; height: 100vh; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+:root {
+  --bg-color:       #1a1b26;
+  --viz-pane-width: 70%;
+  --viz-padding:    20px;
+}
+body { background: var(--bg-color); }
+
+/* ── split layout ───────────────────────────────────────────────────────── */
+#layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+#viz-pane {
+  flex: 0 0 var(--viz-pane-width);
+  position: relative;
+  overflow: hidden;
+  padding: var(--viz-padding);
+  box-sizing: border-box;
+}
+#detail-pane {
+  flex: 1;
+  overflow-y: auto;
+  padding: 72px 28px 32px;
+  color: #bbb;
+  font: 13px/1.7 sans-serif;
+}
+.detail-empty {
+  color: rgba(255,255,255,0.18);
+  font-size: 13px;
+  text-align: center;
+  margin-top: 48px;
+  line-height: 1.8;
+}
+
+#graph { width: 100%; height: 100%; }
 
 /* ── overlay container ──────────────────────────────────────────────────── */
 #filters {
@@ -29,6 +63,18 @@ body { background: #1a1b26; }
   pointer-events: none;
 }
 
+/* ── chips group (label + chips row) ────────────────────────────────────── */
+.chips-group { display: flex; flex-direction: column; gap: 5px; }
+.chips-label {
+  font: 10px sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.2);
+  padding-left: 12px;
+  user-select: none;
+}
+.chips-row { display: flex; gap: 8px; }
+
 /* ── filter chips ───────────────────────────────────────────────────────── */
 .chip {
   display: flex; align-items: center; gap: 6px;
@@ -51,7 +97,7 @@ body { background: #1a1b26; }
 }
 .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-/* ── info panel ─────────────────────────────────────────────────────────── */
+/* ── info panel (azure-deployments overlay; index.html uses #detail-pane) ── */
 #info-panel {
   position: fixed;
   top: 14px; right: 14px;
@@ -99,4 +145,53 @@ body { background: #1a1b26; }
   font-family: monospace;
   color: #1a1b26;
   margin-top: 2px;
+}
+
+/* ── detail pane toggle (mobile only) ──────────────────────────────────── */
+#detail-toggle { display: none; }
+
+/* ── mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* stack panes vertically */
+  #layout { flex-direction: column; }
+
+  /* graph takes the top portion; animates when panel collapses */
+  #viz-pane {
+    flex: 0 0 80vh;
+    transition: flex-basis 0.3s ease;
+  }
+
+  /* detail pane always visible below the graph */
+  #detail-pane {
+    flex: 1;
+    padding: 16px 20px 32px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    overflow-y: auto;
+  }
+
+  /* collapse toggle button */
+  #detail-toggle {
+    display: block;
+    width: 100%;
+    height: 36px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.3);
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: color 0.15s;
+  }
+  #detail-toggle:hover { color: rgba(255,255,255,0.7); }
+
+  /* collapsed: viz pane grows, detail pane shrinks to just the button */
+  #layout[data-collapsed] #viz-pane { flex-basis: calc(100vh - 36px); }
+  #layout[data-collapsed] #detail-pane { overflow: hidden; }
+
+  /* filters wrap and stay readable */
+  #filters { flex-wrap: wrap; max-width: calc(100vw - 28px); }
+
+  /* larger tap targets */
+  .chip, .nav-link { padding: 8px 14px; font-size: 13px; }
 }
