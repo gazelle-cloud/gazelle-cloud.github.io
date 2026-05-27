@@ -26,17 +26,17 @@
     // ─── constants ───────────────────────────────────────────────────────────
 
     const COLORS = {
-      workflow:       '#3dba7f',
-      'bicep-entry':  '#f0a500',
-      'bicep-module': '#4e8ef7',
+      'github-workflow': '#3dba7f',
+      'main-bicep':      '#f0a500',
+      'bicep-module':    '#4e8ef7',
     };
 
-    const NODE_TYPES = ['workflow', 'bicep-entry', 'bicep-module'];
+    const NODE_TYPES = ['github-workflow', 'main-bicep', 'bicep-module'];
 
     const TYPE_LABELS = {
-      workflow:       'github-workflows',
-      'bicep-entry':  'main-bicep',
-      'bicep-module': 'bicep-modules',
+      'github-workflow': 'github-workflows',
+      'main-bicep':      'main-bicep',
+      'bicep-module':    'bicep-modules',
     };
 
     const REL_COLORS = {
@@ -47,8 +47,8 @@
     };
 
     const dotRadius = node => {
-      if (node.type === 'workflow')                     return 5;
-      if (node.type === 'bicep-entry')                  return 4 + node.__weight * 5;
+      if (node.type === 'github-workflow') return 5;
+      if (node.type === 'main-bicep')      return 4 + node.__weight * 5;
       return 2 + node.__weight * 5;
     };
 
@@ -115,11 +115,6 @@
     const ids = new Set(raw.nodes.map(n => n.id));
     raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
 
-    // Normalise bicep type+role into a single type string
-    raw.nodes.forEach(n => {
-      if (n.type === 'bicep') n.type = `bicep-${n.role}`;
-    });
-
     normalizeNodeWeights(raw);
 
     const WF_ORDER = [
@@ -140,7 +135,7 @@
       const [s, t] = linkEnds(l);
       const src = raw.nodes.find(n => n.id === s);
       const tgt = raw.nodes.find(n => n.id === t);
-      if (src?.type === 'workflow' && tgt?.type === 'bicep-entry')
+      if (src?.type === 'github-workflow' && tgt?.type === 'main-bicep')
         (wfChildren[src.id] = wfChildren[src.id] ?? []).push(tgt);
     });
     Object.entries(wfChildren).forEach(([wfId, entries]) => {
@@ -153,10 +148,10 @@
     });
 
     raw.nodes.forEach(n => {
-      if (n.type === 'workflow') {
+      if (n.type === 'github-workflow') {
         n.fx = n.__xTarget ?? 0; n.fy = 220;
       }
-      // bicep-entry and bicep-module start near the origin;
+      // main-bicep and bicep-module start near the origin;
       // forceY and forceX animate them out to their tier positions.
     });
 
@@ -173,20 +168,20 @@
 
       const physicsProps = useGraphPhysics(fgRef, graph, fg => {
         fg.d3Force('link')
-          .distance(l => l.source?.type === 'workflow' ? 40 : 70)
+          .distance(l => l.source?.type === 'github-workflow' ? 25 : 70)
           .strength(0.4);
         fg.d3Force('collision', forceCollide(n => dotRadius(n) + 5));
         fg.d3Force('y-tier', forceY(n => {
-          if (n.type === 'workflow')    return 220;
-          if (n.type === 'bicep-entry') return 0;
+          if (n.type === 'github-workflow') return 220;
+          if (n.type === 'main-bicep')      return 140;
           return -220;
         }).strength(n => {
-          if (n.type === 'workflow')    return 0.8;
-          if (n.type === 'bicep-entry') return 0.5;
+          if (n.type === 'github-workflow') return 0.8;
+          if (n.type === 'main-bicep')      return 0.5;
           return 0.25;
         }));
         fg.d3Force('x-stem', forceX(n => n.__xTarget ?? 0)
-          .strength(n => n.type === 'workflow' ? 0.8 : n.type === 'bicep-entry' ? 0.6 : 0));
+          .strength(n => n.type === 'github-workflow' ? 0.8 : n.type === 'main-bicep' ? 0.6 : 0));
       });
 
       const linkColor = React.useCallback(l => {
@@ -212,11 +207,11 @@
         ctx.fillStyle = isActive ? '#fff' : COLORS[node.type];
         ctx.fill();
 
-        const showLabel = node.type === 'workflow' || isActive || isNeighbour;
+        const showLabel = node.type === 'github-workflow' || isActive || isNeighbour;
         if (showLabel) {
           const gap = r + RENDER.labelGap / globalScale;
           let lx, ly, align;
-          if (node.type === 'workflow') {
+          if (node.type === 'github-workflow') {
             lx    = node.x;
             ly    = node.y + gap + 11 / globalScale;
             align = 'center';

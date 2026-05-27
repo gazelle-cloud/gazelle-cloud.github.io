@@ -17,13 +17,12 @@ body { background: var(--bg-color); }
   flex: 0 0 var(--viz-pane-width);
   position: relative;
   overflow: hidden;
-  padding: var(--viz-padding);
   box-sizing: border-box;
 }
 #detail-pane {
   flex: 1;
   overflow-y: auto;
-  padding: 72px 28px 32px;
+  padding: 72px 28px 32px 0;
   color: #bbb;
   font: 13px/1.7 sans-serif;
 }
@@ -35,7 +34,7 @@ body { background: var(--bg-color); }
   line-height: 1.8;
 }
 
-#graph { width: 100%; height: 100%; }
+#graph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 
 /* ── overlay container ──────────────────────────────────────────────────── */
 #filters {
@@ -43,7 +42,9 @@ body { background: var(--bg-color); }
   top: 14px; left: 14px;
   display: flex; gap: 8px; align-items: flex-start;
   z-index: 10;
+  pointer-events: none; /* pass clicks through to the canvas behind */
 }
+.nav-link:not(.nav-active), .chip, #menu-btn, .nav-menu { pointer-events: auto; }
 
 /* ── nav ────────────────────────────────────────────────────────────────── */
 .nav-stack { display: flex; flex-direction: column; gap: 8px; }
