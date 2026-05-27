@@ -412,6 +412,22 @@ export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId }) 
   );
 }
 
+// ── DetailHeader ─────────────────────────────────────────────────────────────
+// Renders the standard two-line header inside the detail pane:
+//   - a small-caps type label  (info-id)
+//   - a bold node ID           (info-text, high-contrast)
+// Usage:
+//   <DetailHeader typeLabel={TYPE_LABELS[activeNode.type]} nodeId={activeNode.id} theme={theme} />
+export function DetailHeader({ typeLabel, nodeId, theme }) {
+  return React.createElement(React.Fragment, null,
+    React.createElement('div', { className: 'info-id' }, typeLabel),
+    React.createElement('p', {
+      className: 'info-text',
+      style: { color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px', fontWeight: 600 },
+    }, nodeId),
+  );
+}
+
 // ── FilterChips ──────────────────────────────────────────────────────────────
 // Renders the type-filter chips inside NavBar.
 // Usage:

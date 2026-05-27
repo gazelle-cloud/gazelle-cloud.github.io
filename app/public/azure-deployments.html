@@ -19,7 +19,7 @@
     import { createRoot } from 'react-dom/client';
     import { createPortal } from 'react-dom';
     import { forceCollide, forceX, forceY } from 'https://esm.sh/d3-force';
-    import { NavBar, FilterChips, SearchBox, ThemeToggle, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
+    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
 
     setupLayout();
 
@@ -247,8 +247,7 @@
         {createPortal(
           activeNode
             ? <>
-                <div className="info-id">{TYPE_LABELS[activeNode.type]}</div>
-                <p className="info-text" style={{ color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px', fontWeight: 600 }}>{activeNode.id}</p>
+                <DetailHeader typeLabel={TYPE_LABELS[activeNode.type]} nodeId={activeNode.id} theme={theme} />
 
                 {activeNode.description && <>
                   <div className="info-label">Description</div>

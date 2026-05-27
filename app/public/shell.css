@@ -121,7 +121,7 @@ body { background: var(--bg-color); }
 /* ── code block (syntax-highlighted <pre> in info panel) ───────────────── */
 .code-block {
   margin: 4px 0 0; padding: 10px 12px;
-  background: rgba(0,0,0,0.35);
+  background: var(--bg-color);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 6px;
   font-family: monospace; font-size: 12px; line-height: 1.6;
@@ -269,6 +269,11 @@ body { background: var(--bg-color); }
 }
 #detail-collapse-btn::before { content: '›'; }
 #layout[data-detail-hidden] #detail-collapse-btn::before { content: '‹'; }
+
+[data-theme="light"] .code-block {
+  border-color: rgba(30,30,50,0.1);
+  color: #1a1b26;
+}
 
 [data-theme="light"] #detail-collapse-btn {
   background: rgba(30,30,50,0.06);
