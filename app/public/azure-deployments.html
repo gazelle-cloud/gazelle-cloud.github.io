@@ -19,16 +19,16 @@
     import { createRoot } from 'react-dom/client';
     import { createPortal } from 'react-dom';
     import { forceCollide, forceX, forceY } from 'https://esm.sh/d3-force';
-    import { NavBar, FilterChips, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
+    import { NavBar, FilterChips, SearchBox, ThemeToggle, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
 
     setupLayout();
 
     // ─── constants ───────────────────────────────────────────────────────────
 
     const COLORS = {
-      'github-workflow': '#3dba7f',
-      'main-bicep':      '#f0a500',
-      'bicep-module':    '#4e8ef7',
+      'github-workflow': PALETTE.ENTRY,
+      'main-bicep':      PALETTE.CONNECTOR,
+      'bicep-module':    PALETTE.LEAF,
     };
 
     const NODE_TYPES = ['github-workflow', 'main-bicep', 'bicep-module'];
@@ -159,10 +159,11 @@
 
     function Graph() {
       const fgRef = React.useRef();
+      const { theme, toggleTheme, bgColor } = useTheme();
 
       const size = useVizPaneSize(fgRef);
 
-      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick } = useGraphState(raw, NODE_TYPES);
+      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
       const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
       const hoverTimer = React.useRef(null);
 
@@ -198,16 +199,22 @@
       const paintNode = React.useCallback((node, ctx, globalScale) => {
         const isActive    = node.id === activeId;
         const isNeighbour = neighbours?.has(node.id);
-        const dimmed      = activeId && !isActive && !isNeighbour;
+        const isMatch     = searchMatchIds.has(node.id);
+        const dimmed      = activeId
+          ? !isActive && !isNeighbour
+          : searchMatchIds.size > 0 && !isMatch;
         const r           = dotRadius(node) / globalScale;
+
+        const activeColor = theme === 'dark' ? '#fff' : '#1a1b26';
+        const backdrop    = theme === 'dark' ? 'rgba(26,27,38,0.9)' : 'rgba(245,241,232,0.9)';
 
         ctx.globalAlpha = dimmed ? RENDER.dimmedAlpha : 1;
         ctx.beginPath();
         ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
-        ctx.fillStyle = isActive ? '#fff' : COLORS[node.type];
+        ctx.fillStyle = isActive ? activeColor : COLORS[node.type];
         ctx.fill();
 
-        const showLabel = node.type === 'github-workflow' || isActive || isNeighbour;
+        const showLabel = node.type === 'github-workflow' || isActive || isNeighbour || isMatch;
         if (showLabel) {
           const gap = r + RENDER.labelGap / globalScale;
           let lx, ly, align;
@@ -221,24 +228,27 @@
             align = 'left';
           }
           drawLabel(ctx, node.id, lx, ly, align, RENDER.labelFontSize, globalScale,
-            isActive ? '#fff' : COLORS[node.type] ?? '#ccc');
+            isActive ? activeColor : COLORS[node.type] ?? '#ccc', backdrop);
         }
 
         ctx.globalAlpha = 1;
-        node.__r = r; // expose to nodePointerAreaPaint for hit-testing
-      }, [activeId, neighbours]);
+        node.__r = r;
+      }, [activeId, neighbours, searchMatchIds, theme]);
 
       return <>
         <NavBar activeHref="./azure-deployments.html">
           <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
                        colors={COLORS} visible={visible} toggleType={toggleType} />
+          <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
+                     setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
+          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </NavBar>
 
         {createPortal(
           activeNode
             ? <>
                 <div className="info-id">{TYPE_LABELS[activeNode.type]}</div>
-                <p className="info-text" style={{ color: '#fff', margin: '0 0 8px', fontWeight: 600 }}>{activeNode.id}</p>
+                <p className="info-text" style={{ color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px', fontWeight: 600 }}>{activeNode.id}</p>
 
                 {activeNode.description && <>
                   <div className="info-label">Description</div>
@@ -289,6 +299,7 @@
           linkDirectionalArrowRelPos={1}
           linkDirectionalArrowColor={linkColor}
           {...physicsProps}
+          backgroundColor={bgColor}
           onNodeHover={node => {
             clearTimeout(hoverTimer.current);
             if (node) {

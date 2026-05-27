@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./shell.css">
+  <script type="importmap">{ "imports": {
+    "react": "https://esm.sh/react",
+    "react-dom": "https://esm.sh/react-dom",
+    "react-dom/client": "https://esm.sh/react-dom/client"
+  }}</script>
+</head>
+
+<body>
+
+  <script src="//cdn.jsdelivr.net/npm/@babel/standalone"></script>
+  <script type="text/jsx" data-type="module">
+    import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { createPortal } from 'react-dom';
+    import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
+    import { NavBar, FilterChips, SearchBox, ThemeToggle, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
+
+    setupLayout();
+
+    // ─── constants ───────────────────────────────────────────────────────────
+
+    const COLORS = {
+      principle: PALETTE.ENTRY,
+      operation: PALETTE.CONNECTOR,
+      decision:  PALETTE.LEAF,
+    };
+
+    const NODE_TYPES = ['principle', 'operation', 'decision'];
+
+    const TYPE_LABELS = {
+      principle: 'design-principles',
+      operation: 'platform-operations',
+      decision:  'design-decisions',
+    };
+
+    const dotRadius = node =>
+      node.type === 'decision' ? 2 + node.__weight * 7 : 5;
+
+    // ─── data prep ───────────────────────────────────────────────────────────
+
+    const raw = await fetch('./index.json').then(r => r.json());
+
+    raw.nodes = raw.nodes.filter(n => n.type !== 'unknown');
+    const ids = new Set(raw.nodes.map(n => n.id));
+    raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
+
+    normalizeNodeWeights(raw);
+
+    const byType = t => raw.nodes.filter(n => n.type === t);
+    const rim = [];
+    const principles = byType('principle'), ops = byType('operation');
+    for (let i = 0; i < Math.max(principles.length, ops.length); i++) {
+      if (principles[i]) rim.push(principles[i]);
+      if (ops[i])        rim.push(ops[i]);
+    }
+    rim.forEach((n, i) => {
+      const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
+      n.fx = Math.cos(angle) * 280;
+      n.fy = Math.sin(angle) * 280;
+    });
+
+    // ─── component ───────────────────────────────────────────────────────────
+
+    function Graph() {
+      const fgRef = React.useRef();
+      const { theme, toggleTheme, bgColor } = useTheme();
+
+      const size = useVizPaneSize(fgRef);
+
+      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
+      const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
+
+      const physicsProps = useGraphPhysics(fgRef, graph, fg => {
+        fg.d3Force('link').distance(60);
+        fg.d3Force('collision', forceCollide(n => dotRadius(n) + 3));
+        fg.d3Force('radial', forceRadial(0, 0, 0)
+          .strength(n => n.type === 'decision' ? 0.04 + n.__weight * 0.25 : 0));
+      });
+
+      const linkColor = React.useCallback(l => {
+        const dim    = theme === 'dark' ? 'rgba(180,180,180,0.12)' : 'rgba(80,80,100,0.15)';
+        const active = theme === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(30,30,50,0.75)';
+        const faded  = theme === 'dark' ? 'rgba(180,180,180,0.04)' : 'rgba(80,80,100,0.04)';
+        if (!activeId) return dim;
+        const [s, t] = linkEnds(l);
+        return (s === activeId || t === activeId) ? active : faded;
+      }, [activeId, theme]);
+
+      const paintNode = React.useCallback((node, ctx, globalScale) => {
+        const isActive    = node.id === activeId;
+        const isNeighbour = neighbours?.has(node.id);
+        const isMatch     = searchMatchIds.has(node.id);
+        const dimmed      = activeId
+          ? !isActive && !isNeighbour
+          : searchMatchIds.size > 0 && !isMatch;
+        const r           = dotRadius(node) / globalScale;
+
+        const activeColor = theme === 'dark' ? '#fff' : '#1a1b26';
+        const backdrop    = theme === 'dark' ? 'rgba(26,27,38,0.9)' : 'rgba(245,241,232,0.9)';
+
+        ctx.globalAlpha = dimmed ? RENDER.dimmedAlpha : 1;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
+        ctx.fillStyle = isActive ? activeColor : COLORS[node.type];
+        ctx.fill();
+
+        const isRim     = node.type === 'principle' || node.type === 'operation';
+        const showLabel = isRim || isActive || isNeighbour || isMatch;
+        if (showLabel) {
+          const gap = r + RENDER.labelGap / globalScale;
+          let lx, ly, align;
+          if (isRim) {
+            const angle = Math.atan2(node.y, node.x);
+            lx    = node.x + Math.cos(angle) * gap;
+            ly    = node.y + Math.sin(angle) * gap;
+            align = Math.cos(angle) >= 0 ? 'left' : 'right';
+          } else {
+            lx    = node.x + gap;
+            ly    = node.y;
+            align = 'left';
+          }
+          drawLabel(ctx, node.id, lx, ly, align, RENDER.labelFontSize, globalScale,
+            isActive ? activeColor : COLORS[node.type] ?? '#ccc', backdrop);
+        }
+
+        ctx.globalAlpha = 1;
+        node.__r = r; // expose to nodePointerAreaPaint for hit-testing
+      }, [activeId, neighbours, searchMatchIds, theme]);
+
+      return <>
+        <NavBar activeHref="./design-decisions.html">
+          <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
+                       colors={COLORS} visible={visible} toggleType={toggleType} />
+          <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
+                     setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
+          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+        </NavBar>
+
+        {createPortal(
+          activeNode
+            ? <>
+                <div className="info-id">{activeNode.id}</div>
+                {activeNode.description && <>
+                  <div className="info-label">Description</div>
+                  <p className="info-text">{activeNode.description}</p>
+                </>}
+                {activeNode.mechanism && <>
+                  <div className="info-label">Mechanism</div>
+                  <p className="info-text">{activeNode.mechanism}</p>
+                </>}
+                {activeNode.why && <>
+                  <div className="info-label">Why</div>
+                  <p className="info-text">{activeNode.why}</p>
+                </>}
+              </>
+            : <div className="detail-empty">
+                Hover or click a node<br />to explore its design context.
+              </div>,
+          document.getElementById('detail-pane')
+        )}
+
+        <ForceGraph2D
+          ref={fgRef}
+          width={size.width}
+          height={size.height}
+          graphData={graph}
+          linkColor={linkColor}
+          {...physicsProps}
+          backgroundColor={bgColor}
+          onNodeHover={node => setHoveredId(node?.id ?? null)}
+          onNodeClick={onNodeClick}
+          onBackgroundClick={handleBackgroundClick}
+          nodeCanvasObject={paintNode}
+          nodePointerAreaPaint={(node, color, ctx) => {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, (node.__r ?? 4) + RENDER.hitTestPadding, 0, 2 * Math.PI);
+            ctx.fill();
+          }}
+        />
+      </>;
+    }
+
+    // ─── mount ───────────────────────────────────────────────────────────────
+
+    createRoot(document.getElementById('graph')).render(<Graph />);
+  </script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="8d6f8fcd-8e1a-4eb4-8c64-1b32c60e82cd"></script>
+</body>
+</html>

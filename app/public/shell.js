@@ -3,8 +3,9 @@ import React from 'react';
 // ── navigation entries ───────────────────────────────────────────────────────
 // Add one object here whenever you create a new page. That's it.
 export const NAV = [
-  { label: 'Home',              href: './index.html'    },
+  { label: 'Design decisions',  href: './design-decisions.html' },
   { label: 'Azure deployments', href: './azure-deployments.html' },
+  { label: 'Landing Zone',      href: './landing-zone.html' },
   { label: 'GitHub',            href: 'https://github.com/orgs/gazelle-cloud/', external: true },
 ];
 
@@ -28,7 +29,7 @@ export function normalizeNodeWeights(raw) {
 // The caller computes the position; this handles font, backdrop, and text.
 //
 // align: 'left' | 'right' | 'center'
-export function drawLabel(ctx, text, lx, ly, align, fontSize, globalScale, color) {
+export function drawLabel(ctx, text, lx, ly, align, fontSize, globalScale, color, backdrop = BACKDROP) {
   const fs = fontSize / globalScale;
   ctx.font = `${fs}px Sans-Serif`;
   const tw = ctx.measureText(text).width;
@@ -37,13 +38,22 @@ export function drawLabel(ctx, text, lx, ly, align, fontSize, globalScale, color
   const bgX = align === 'center' ? lx - tw / 2 - p
              : align === 'right'  ? lx - tw - p
              :                      lx - p;
-  ctx.fillStyle = BACKDROP;
+  ctx.fillStyle = backdrop;
   ctx.fillRect(bgX, ly - fs / 2 - p, tw + p * 2, fs + p * 2);
   ctx.fillStyle    = color;
   ctx.textAlign    = align;
   ctx.textBaseline = 'middle';
   ctx.fillText(text, lx, ly);
 }
+
+// ── PALETTE ──────────────────────────────────────────────────────────────────
+// Canonical colour roles shared by every graph page.
+// Pages assign their node types to these roles — never to raw hex values.
+export const PALETTE = {
+  ENTRY:     '#f0a500',  // yellow — entry points (top-level triggers / anchors)
+  CONNECTOR: '#3dba7f',  // green  — links between (orchestrators / operations)
+  LEAF:      '#4e8ef7',  // blue   — most nodes   (decisions / modules)
+};
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
 // Shared rendering constants used by every graph page's paintNode and
@@ -75,9 +85,21 @@ export function setupLayout() {
   const layout = document.createElement('div');
   layout.id = 'layout';
   layout.innerHTML =
-    '<div id="viz-pane"><div id="graph"></div></div>' +
+    '<div id="viz-pane"><div id="graph"></div><button id="detail-collapse-btn" aria-label="Toggle detail panel"></button></div>' +
     '<div id="detail-pane"><button id="detail-toggle" aria-label="Dismiss panel"></button></div>';
   document.body.appendChild(layout);
+
+  // Desktop only: collapse/expand the detail pane, persisted across pages.
+  // Skipped on mobile so the bottom sheet is never accidentally hidden.
+  const isDesktop = () => window.innerWidth > 768;
+
+  if (isDesktop() && localStorage.getItem('detail-hidden') === '1')
+    layout.setAttribute('data-detail-hidden', '');
+
+  document.getElementById('detail-collapse-btn').addEventListener('click', () => {
+    const hidden = layout.toggleAttribute('data-detail-hidden');
+    if (isDesktop()) localStorage.setItem('detail-hidden', hidden ? '1' : '0');
+  });
 
   // Mobile: tapping the close button dismisses the bottom sheet.
   // Node clicks (handled in useGraphState) clear this attribute to re-open it.
@@ -173,6 +195,8 @@ export function useGraphState(raw, nodeTypes) {
     if (focusedId) document.getElementById('layout')?.removeAttribute('data-panel-dismissed');
   }, [focusedId]);
 
+  const [searchQuery, setSearchQuery] = React.useState('');
+
   const graph = React.useMemo(() => {
     const visIds = new Set(raw.nodes.filter(n => visible.has(n.type)).map(n => n.id));
     return {
@@ -183,6 +207,12 @@ export function useGraphState(raw, nodeTypes) {
       }),
     };
   }, [visible]);
+
+  const searchMatchIds = React.useMemo(() => {
+    if (!searchQuery) return new Set();
+    const q = searchQuery.toLowerCase();
+    return new Set(graph.nodes.filter(n => n.id.toLowerCase().includes(q)).map(n => n.id));
+  }, [searchQuery, graph.nodes]);
 
   const activeNode = React.useMemo(() =>
     activeId ? graph.nodes.find(n => n.id === activeId) : null,
@@ -210,6 +240,7 @@ export function useGraphState(raw, nodeTypes) {
 
   return {
     visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId,
+    searchQuery, setSearchQuery, searchMatchIds,
     onNodeClick:       node => {
       // Close the hamburger menu when interacting with the graph.
       // The detail panel will open naturally via the focusedId effect.
@@ -306,23 +337,100 @@ export function NavBar({ activeHref, children }) {
   );
 }
 
+// ── useTheme ──────────────────────────────────────────────────────────────────
+// Manages dark/light theme state. Toggles data-theme on <html> and re-reads
+// --bg-color so the ForceGraph2D backgroundColor prop stays in sync.
+// Returns { theme, toggleTheme, bgColor }.
+export function useTheme() {
+  const [theme, setTheme] = React.useState('dark');
+  const [bgColor, setBgColor] = React.useState(
+    () => getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim()
+  );
+
+  const toggleTheme = React.useCallback(() => {
+    setTheme(t => {
+      const next = t === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next === 'light' ? 'light' : '';
+      setBgColor(getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim());
+      return next;
+    });
+  }, []);
+
+  return { theme, toggleTheme, bgColor };
+}
+
+// ── ThemeToggle ───────────────────────────────────────────────────────────────
+// A ☀/☾ pill button to be placed inside NavBar after SearchBox.
+// Usage:
+//   const { theme, toggleTheme, bgColor } = useTheme();
+//   <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+export function ThemeToggle({ theme, toggleTheme }) {
+  return React.createElement('button', {
+    className:  'theme-toggle',
+    onClick:    toggleTheme,
+    'aria-label': theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
+  }, theme === 'dark' ? '☀' : '☾');
+}
+
+// ── SearchBox ─────────────────────────────────────────────────────────────────
+// Renders a search input + live dropdown of matching node IDs.
+// Clicking a result focuses the node and clears the query.
+// Usage:
+//   <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
+//              setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
+export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId }) {
+  const [open, setOpen] = React.useState(false);
+  const q       = searchQuery.toLowerCase();
+  const matches = q.length > 0 ? nodes.filter(n => n.id.toLowerCase().includes(q)) : nodes;
+
+  return React.createElement('div', { className: 'search-box' },
+    React.createElement('input', {
+      className:   'search-input',
+      type:        'text',
+      placeholder: 'Search…',
+      value:       searchQuery,
+      onChange:    e => setSearchQuery(e.target.value),
+      onFocus:     () => setOpen(true),
+      onBlur:      () => setOpen(false),
+      onKeyDown:   e => { if (e.key === 'Escape') { setSearchQuery(''); setOpen(false); } },
+    }),
+    open && matches.length > 0 && React.createElement('div', { className: 'search-dropdown' },
+      ...matches.map(n =>
+        React.createElement('div', {
+          key:         n.id,
+          className:   'search-result',
+          onMouseDown: e => {
+            e.preventDefault(); // prevent blur firing before click
+            window.__closeNavMenu?.();
+            setFocusedId(n.id);
+            setSearchQuery('');
+            setOpen(false);
+          },
+        }, n.id)
+      )
+    ),
+  );
+}
+
 // ── FilterChips ──────────────────────────────────────────────────────────────
 // Renders the type-filter chips inside NavBar.
 // Usage:
 //   <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
 //                colors={COLORS} visible={visible} toggleType={toggleType} />
 export function FilterChips({ nodeTypes, typeLabels, colors, visible, toggleType }) {
-  return nodeTypes.map(type =>
-    React.createElement(
-      'div',
-      {
-        key:       type,
-        className: `chip${visible.has(type) ? '' : ' off'}`,
-        style:     { borderColor: colors[type], color: colors[type] },
-        onClick:   () => toggleType(type),
-      },
-      React.createElement('div', { className: 'chip-dot', style: { background: colors[type] } }),
-      typeLabels[type],
+  return React.createElement('div', { className: 'chips-col' },
+    ...nodeTypes.map(type =>
+      React.createElement(
+        'div',
+        {
+          key:       type,
+          className: `chip${visible.has(type) ? '' : ' off'}`,
+          style:     { borderColor: colors[type], color: colors[type] },
+          onClick:   () => toggleType(type),
+        },
+        React.createElement('div', { className: 'chip-dot', style: { background: colors[type] } }),
+        typeLabels[type],
+      )
     )
   );
 }

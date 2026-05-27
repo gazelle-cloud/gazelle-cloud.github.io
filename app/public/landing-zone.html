@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./shell.css">
+  <script type="importmap">{ "imports": {
+    "react": "https://esm.sh/react",
+    "react-dom": "https://esm.sh/react-dom",
+    "react-dom/client": "https://esm.sh/react-dom/client"
+  }}</script>
+</head>
+
+<body>
+
+  <script src="//cdn.jsdelivr.net/npm/@babel/standalone"></script>
+  <script type="text/jsx" data-type="module">
+    import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { createPortal } from 'react-dom';
+    import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
+    import { NavBar, FilterChips, SearchBox, ThemeToggle, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
+
+    setupLayout();
+
+    // ─── constants ───────────────────────────────────────────────────────────
+
+    const COLORS = {
+      'decision':          PALETTE.LEAF,       // blue
+      'workflow-artifact': PALETTE.CONNECTOR,  // green
+      'azure-resource':    PALETTE.ENTRY,      // gold
+    };
+
+    const NODE_TYPES = ['decision', 'workflow-artifact', 'azure-resource'];
+
+    const TYPE_LABELS = {
+      'decision':          'decisions',
+      'workflow-artifact': 'workflow artifacts',
+      'azure-resource':    'azure resources',
+    };
+
+    const REL_COLORS = {
+      'enables':      'rgba(61,186,127,0.75)',   // green
+      'constrains':   'rgba(240,165,0,0.75)',     // gold
+      'enforced-by':  'rgba(78,142,247,0.75)',    // blue
+      'calls':        'rgba(192,132,252,0.75)',   // purple
+      'generates':    'rgba(251,146,60,0.75)',    // orange
+      'deploys':      'rgba(248,113,113,0.75)',   // red
+      'contains':     'rgba(100,116,139,0.3)',    // gray (structural, dimmed)
+    };
+
+    const KIND_RADIUS = {
+      'factory-workflow':  6,
+      'reusable-workflow': 5,
+      'trigger-workflow':  5,
+      'bicep':             4,
+      'bicepparam':        3,
+    };
+
+    const dotRadius = node => {
+      if (node.type === 'decision')          return 3 + node.__weight * 5;
+      if (node.type === 'workflow-artifact') return KIND_RADIUS[node.kind] ?? 4;
+      return 2.5; // azure-resource — uniform small
+    };
+
+    // ─── data prep ───────────────────────────────────────────────────────────
+
+    const raw = await fetch('./landing-zone-graph.json').then(r => r.json());
+
+    const ids = new Set(raw.nodes.map(n => n.id));
+    raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
+
+    normalizeNodeWeights(raw);
+
+    // Pin workflow-artifact nodes evenly on a rim circle.
+    const RIM_R = 290;
+    const rimNodes = raw.nodes.filter(n => n.type === 'workflow-artifact');
+    rimNodes.forEach((n, i) => {
+      const angle = (2 * Math.PI * i) / rimNodes.length - Math.PI / 2;
+      n.fx = Math.cos(angle) * RIM_R;
+      n.fy = Math.sin(angle) * RIM_R;
+    });
+
+    // ─── component ───────────────────────────────────────────────────────────
+
+    function Graph() {
+      const fgRef = React.useRef();
+      const { theme, toggleTheme, bgColor } = useTheme();
+
+      const size = useVizPaneSize(fgRef);
+
+      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
+      const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
+      const hoverTimer = React.useRef(null);
+
+      const physicsProps = useGraphPhysics(fgRef, graph, fg => {
+        fg.d3Force('link')
+          .distance(l => {
+            if (l.relationship === 'enables' || l.relationship === 'constrains') return 50;
+            if (l.relationship === 'enforced-by') return 80;
+            if (l.relationship === 'contains') return 25;
+            return 60;
+          })
+          .strength(l => {
+            if (l.relationship === 'contains') return 0.5;
+            return 0.25;
+          });
+        fg.d3Force('collision', forceCollide(n => dotRadius(n) + 4));
+        // Pull azure-resources and decisions toward the centre; rim nodes are pinned.
+        fg.d3Force('radial', forceRadial(0, 0, 0)
+          .strength(n => {
+            if (n.type === 'azure-resource') return 0.25;
+            if (n.type === 'decision')       return 0.04 + n.__weight * 0.15;
+            return 0; // workflow-artifact: pinned via fx/fy
+          }));
+      });
+
+      const linkColor = React.useCallback(l => {
+        const base = REL_COLORS[l.relationship] ?? 'rgba(180,180,180,0.15)';
+        if (!activeId) {
+          return base.replace(/[\d.]+\)$/, m => {
+            const alpha = parseFloat(m);
+            return `${Math.min(alpha, 0.12)})`;
+          });
+        }
+        const [s, t] = linkEnds(l);
+        return (s === activeId || t === activeId)
+          ? base
+          : 'rgba(180,180,180,0.04)';
+      }, [activeId]);
+
+      const paintNode = React.useCallback((node, ctx, globalScale) => {
+        const isActive    = node.id === activeId;
+        const isNeighbour = neighbours?.has(node.id);
+        const isMatch     = searchMatchIds.has(node.id);
+        const dimmed      = activeId
+          ? !isActive && !isNeighbour
+          : searchMatchIds.size > 0 && !isMatch;
+        const r           = dotRadius(node) / globalScale;
+
+        const activeColor = theme === 'dark' ? '#fff' : '#1a1b26';
+        const backdrop    = theme === 'dark' ? 'rgba(26,27,38,0.9)' : 'rgba(245,241,232,0.9)';
+
+        ctx.globalAlpha = dimmed ? RENDER.dimmedAlpha : 1;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
+        ctx.fillStyle = isActive ? activeColor : COLORS[node.type];
+        ctx.fill();
+
+        const isRim     = node.type === 'workflow-artifact';
+        const showLabel = isRim || isActive || isNeighbour || isMatch;
+        if (showLabel) {
+          const gap = r + RENDER.labelGap / globalScale;
+          let lx, ly, align;
+          if (isRim) {
+            const angle = Math.atan2(node.y, node.x);
+            lx    = node.x + Math.cos(angle) * gap;
+            ly    = node.y + Math.sin(angle) * gap;
+            align = Math.cos(angle) >= 0 ? 'left' : 'right';
+          } else {
+            lx    = node.x + gap;
+            ly    = node.y;
+            align = 'left';
+          }
+          drawLabel(ctx, node.id, lx, ly, align, RENDER.labelFontSize, globalScale,
+            isActive ? activeColor : COLORS[node.type] ?? '#ccc', backdrop);
+        }
+
+        ctx.globalAlpha = 1;
+        node.__r = r;
+      }, [activeId, neighbours, searchMatchIds, theme]);
+
+      // ─── detail pane content ─────────────────────────────────────────────
+
+      function NodeDetail({ node }) {
+        if (node.type === 'decision') {
+          return <>
+            <div className="info-id">{TYPE_LABELS['decision']}</div>
+            <p className="info-text" style={{ color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px', fontWeight: 600 }}>{node.id}</p>
+            {node.mechanism && <>
+              <div className="info-label">Mechanism</div>
+              <p className="info-text">{node.mechanism}</p>
+            </>}
+            {node.why && <>
+              <div className="info-label">Why</div>
+              <p className="info-text">{node.why}</p>
+            </>}
+          </>;
+        }
+
+        if (node.type === 'workflow-artifact') {
+          return <>
+            <div className="info-id">{node.kind ?? TYPE_LABELS['workflow-artifact']}</div>
+            <p className="info-text" style={{ color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px', fontWeight: 600 }}>{node.id}</p>
+            {node.path && <>
+              <div className="info-label">Path</div>
+              <p className="info-text" style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>
+                {node.path}
+              </p>
+            </>}
+          </>;
+        }
+
+        if (node.type === 'azure-resource') {
+          return <>
+            <div className="info-id">{node.instance ? `${node.instance} environment` : TYPE_LABELS['azure-resource']}</div>
+            <p className="info-text" style={{ color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px', fontWeight: 600 }}>{node.id}</p>
+            {node.azureType && <>
+              <div className="info-label">Azure type</div>
+              <p className="info-text" style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>
+                {node.azureType}
+              </p>
+            </>}
+          </>;
+        }
+
+        return null;
+      }
+
+      return <>
+        <NavBar activeHref="./landing-zone.html">
+          <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
+                       colors={COLORS} visible={visible} toggleType={toggleType} />
+          <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
+                     setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
+          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+        </NavBar>
+
+        {createPortal(
+          activeNode
+            ? <NodeDetail node={activeNode} />
+            : <div className="detail-empty">
+                Hover or click a node<br />to explore its details.
+              </div>,
+          document.getElementById('detail-pane')
+        )}
+
+        <ForceGraph2D
+          ref={fgRef}
+          width={size.width}
+          height={size.height}
+          graphData={graph}
+          linkColor={linkColor}
+          linkDirectionalArrowLength={4}
+          linkDirectionalArrowRelPos={1}
+          linkDirectionalArrowColor={linkColor}
+          {...physicsProps}
+          backgroundColor={bgColor}
+          onNodeHover={node => {
+            clearTimeout(hoverTimer.current);
+            if (node) {
+              setHoveredId(node.id);
+            } else {
+              hoverTimer.current = setTimeout(() => setHoveredId(null), 300);
+            }
+          }}
+          onNodeClick={onNodeClick}
+          onBackgroundClick={handleBackgroundClick}
+          nodeCanvasObject={paintNode}
+          nodePointerAreaPaint={(node, color, ctx) => {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, (node.__r ?? 4) + RENDER.hitTestPadding, 0, 2 * Math.PI);
+            ctx.fill();
+          }}
+        />
+      </>;
+    }
+
+    // ─── mount ───────────────────────────────────────────────────────────────
+
+    createRoot(document.getElementById('graph')).render(<Graph />);
+  </script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="8d6f8fcd-8e1a-4eb4-8c64-1b32c60e82cd"></script>
+</body>
+</html>
