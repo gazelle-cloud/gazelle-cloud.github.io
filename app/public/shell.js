@@ -79,10 +79,10 @@ export function setupLayout() {
     '<div id="detail-pane"><button id="detail-toggle" aria-label="Dismiss panel"></button></div>';
   document.body.appendChild(layout);
 
-  // Mobile: tapping the drag handle dismisses the bottom sheet.
+  // Mobile: tapping the close button dismisses the bottom sheet.
   // Node clicks (handled in useGraphState) clear this attribute to re-open it.
   document.getElementById('detail-toggle').addEventListener('click', () => {
-    layout.toggleAttribute('data-panel-dismissed');
+    layout.setAttribute('data-panel-dismissed', '');
   });
 }
 
@@ -210,8 +210,18 @@ export function useGraphState(raw, nodeTypes) {
 
   return {
     visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId,
-    onNodeClick:       node => setFocusedId(p => p === node.id ? null : node.id),
-    onBackgroundClick: ()   => setFocusedId(null),
+    onNodeClick:       node => {
+      // Close the hamburger menu when interacting with the graph.
+      // The detail panel will open naturally via the focusedId effect.
+      window.__closeNavMenu?.();
+      setFocusedId(p => p === node.id ? null : node.id);
+    },
+    onBackgroundClick: ()   => {
+      // Close both the hamburger menu and dismiss the detail panel.
+      window.__closeNavMenu?.();
+      document.getElementById('layout')?.setAttribute('data-panel-dismissed', '');
+      setFocusedId(null);
+    },
   };
 }
 
@@ -257,6 +267,12 @@ export function useBraveClickFix(fgRef, graphNodes, dotRadiusFn, setFocusedId, o
 //   </NavBar>
 export function NavBar({ activeHref, children }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
+
+  // Expose a global closer so graph interactions can dismiss the menu.
+  React.useEffect(() => {
+    window.__closeNavMenu = () => setMenuOpen(false);
+    return () => { delete window.__closeNavMenu; };
+  }, []);
 
   // Close the dropdown when the user taps outside it on mobile.
   React.useEffect(() => {
