@@ -76,12 +76,13 @@ export function setupLayout() {
   layout.id = 'layout';
   layout.innerHTML =
     '<div id="viz-pane"><div id="graph"></div></div>' +
-    '<div id="detail-pane"><button id="detail-toggle">▾</button></div>';
+    '<div id="detail-pane"><button id="detail-toggle" aria-label="Dismiss panel"></button></div>';
   document.body.appendChild(layout);
 
+  // Mobile: tapping the drag handle dismisses the bottom sheet.
+  // Node clicks (handled in useGraphState) clear this attribute to re-open it.
   document.getElementById('detail-toggle').addEventListener('click', () => {
-    const collapsed = layout.toggleAttribute('data-collapsed');
-    document.getElementById('detail-toggle').textContent = collapsed ? '▴' : '▾';
+    layout.toggleAttribute('data-panel-dismissed');
   });
 }
 
@@ -167,6 +168,11 @@ export function useGraphState(raw, nodeTypes) {
     if (pane) pane.dataset.active = activeId ? 'true' : '';
   }, [activeId]);
 
+  // Mobile: re-open the bottom sheet whenever a node is focused via a tap.
+  React.useEffect(() => {
+    if (focusedId) document.getElementById('layout')?.removeAttribute('data-panel-dismissed');
+  }, [focusedId]);
+
   const graph = React.useMemo(() => {
     const visIds = new Set(raw.nodes.filter(n => visible.has(n.type)).map(n => n.id));
     return {
@@ -209,6 +215,38 @@ export function useGraphState(raw, nodeTypes) {
   };
 }
 
+// ── useBraveClickFix ─────────────────────────────────────────────────────────
+// Brave Shields blocks canvas getImageData which react-force-graph uses for
+// hit-testing via nodePointerAreaPaint. Wraps onBackgroundClick with a
+// geometric fallback so node clicks still register in Brave (and any other
+// browser that restricts canvas pixel reads).
+//
+// Usage inside a page's Graph component:
+//   const handleBackgroundClick = useBraveClickFix(
+//     fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
+//   // then: <ForceGraph2D onBackgroundClick={handleBackgroundClick} … />
+export function useBraveClickFix(fgRef, graphNodes, dotRadiusFn, setFocusedId, onBackgroundClick) {
+  return React.useCallback(evt => {
+    const fg = fgRef.current;
+    if (fg && evt) {
+      const canvas = document.querySelector('#graph canvas');
+      const rect   = canvas?.getBoundingClientRect();
+      if (rect) {
+        const cx = (evt.clientX ?? evt.changedTouches?.[0]?.clientX ?? 0) - rect.left;
+        const cy = (evt.clientY ?? evt.changedTouches?.[0]?.clientY ?? 0) - rect.top;
+        const { x, y } = fg.screen2GraphCoords(cx, cy);
+        const zoom = fg.zoom();
+        const hit = graphNodes.find(n => {
+          const r = dotRadiusFn(n) / zoom + RENDER.hitTestPadding;
+          return Math.hypot(n.x - x, n.y - y) <= r;
+        });
+        if (hit) { setFocusedId(prev => prev === hit.id ? null : hit.id); return; }
+      }
+    }
+    onBackgroundClick();
+  }, [graphNodes, dotRadiusFn, setFocusedId, onBackgroundClick]);
+}
+
 // ── NavBar ───────────────────────────────────────────────────────────────────
 // Renders the #filters overlay: nav links on the left, then `children` (chips
 // wrapped with a dim "show" label) flowing to the right.
@@ -218,19 +256,37 @@ export function useGraphState(raw, nodeTypes) {
 //     {optionalFilterChipsOrLegend}
 //   </NavBar>
 export function NavBar({ activeHref, children }) {
-  return React.createElement(
-    'div', { id: 'filters' },
-    React.createElement(
-      'div', { className: 'nav-stack' },
-      ...NAV.map(({ label, href, external }) => {
-        if (href === activeHref)
-          return React.createElement('span', { key: label, className: 'nav-link nav-active' }, label);
-        const props = { key: label, className: 'nav-link', href };
-        if (external) { props.target = '_blank'; props.rel = 'noopener noreferrer'; }
-        return React.createElement('a', props, label);
-      })
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  // Close the dropdown when the user taps outside it on mobile.
+  React.useEffect(() => {
+    if (!menuOpen) return;
+    const close = e => {
+      if (!document.getElementById('filters')?.contains(e.target)) setMenuOpen(false);
+    };
+    const id = setTimeout(() => document.addEventListener('pointerdown', close), 0);
+    return () => { clearTimeout(id); document.removeEventListener('pointerdown', close); };
+  }, [menuOpen]);
+
+  return React.createElement('div', { id: 'filters', className: menuOpen ? 'menu-open' : '' },
+    React.createElement('button', {
+      id: 'menu-btn',
+      onClick: () => setMenuOpen(m => !m),
+      'aria-label': menuOpen ? 'Close menu' : 'Open menu',
+      'aria-expanded': String(menuOpen),
+    }, menuOpen ? '✕' : '☰'),
+    React.createElement('div', { className: 'nav-menu' },
+      React.createElement('div', { className: 'nav-stack' },
+        ...NAV.map(({ label, href, external }) => {
+          if (href === activeHref)
+            return React.createElement('span', { key: label, className: 'nav-link nav-active' }, label);
+          const props = { key: label, className: 'nav-link', href };
+          if (external) { props.target = '_blank'; props.rel = 'noopener noreferrer'; }
+          return React.createElement('a', props, label);
+        })
+      ),
+      children,
     ),
-    children,
   );
 }
 

@@ -19,7 +19,7 @@
     import { createRoot } from 'react-dom/client';
     import { createPortal } from 'react-dom';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { NavBar, FilterChips, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, normalizeNodeWeights, drawLabel, linkEnds, useGraphState } from './shell.js';
+    import { NavBar, FilterChips, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
 
     setupLayout();
 
@@ -72,7 +72,8 @@
 
       const size = useVizPaneSize(fgRef);
 
-      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, onNodeClick, onBackgroundClick } = useGraphState(raw, NODE_TYPES);
+      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick } = useGraphState(raw, NODE_TYPES);
+      const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
 
       const physicsProps = useGraphPhysics(fgRef, graph, fg => {
         fg.d3Force('link').distance(60);
@@ -162,7 +163,7 @@
           {...physicsProps}
           onNodeHover={node => setHoveredId(node?.id ?? null)}
           onNodeClick={onNodeClick}
-          onBackgroundClick={onBackgroundClick}
+          onBackgroundClick={handleBackgroundClick}
           nodeCanvasObject={paintNode}
           nodePointerAreaPaint={(node, color, ctx) => {
             ctx.fillStyle = color;
