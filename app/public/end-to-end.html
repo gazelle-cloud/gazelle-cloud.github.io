@@ -65,6 +65,186 @@
       n.fy = Math.sin(angle) * 280;
     });
 
+    // ─── detail pane helpers ─────────────────────────────────────────────────
+
+    function InfoLabel({ children }) {
+      return <div className="info-label">{children}</div>;
+    }
+
+    function InfoText({ children }) {
+      return <p className="info-text">{children}</p>;
+    }
+
+    function TagList({ items }) {
+      if (!items?.length) return null;
+      return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, margin: '4px 0 8px' }}>
+          {items.map(item => (
+            <span key={item} style={{
+              fontSize: 10, padding: '2px 6px', borderRadius: 3,
+              border: '1px solid rgba(180,180,180,0.35)',
+              color: 'inherit', opacity: 0.8,
+            }}>{item}</span>
+          ))}
+        </div>
+      );
+    }
+
+    function BulletList({ items }) {
+      if (!items?.length) return null;
+      return (
+        <ul style={{ margin: '4px 0 8px', paddingLeft: 16 }}>
+          {items.map((item, i) => (
+            <li key={i} className="info-text" style={{ margin: '2px 0' }}>{item}</li>
+          ))}
+        </ul>
+      );
+    }
+
+    function NumberedList({ items }) {
+      if (!items?.length) return null;
+      return (
+        <ol style={{ margin: '4px 0 8px', paddingLeft: 16 }}>
+          {items.map((item, i) => (
+            <li key={i} className="info-text" style={{ margin: '2px 0' }}>{item}</li>
+          ))}
+        </ol>
+      );
+    }
+
+    function RelatedList({ items }) {
+      if (!items?.length) return null;
+      return (
+        <div style={{ margin: '4px 0 8px' }}>
+          {items.map((rel, i) => (
+            <div key={i} style={{ marginBottom: 6 }}>
+              <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{rel.id}</span>
+              {rel.relationship && (
+                <span style={{
+                  fontSize: 10, marginLeft: 6, padding: '1px 5px', borderRadius: 3,
+                  border: '1px solid rgba(180,180,180,0.35)', opacity: 0.8,
+                }}>{rel.relationship}</span>
+              )}
+              {rel.note && (
+                <p className="info-text" style={{ margin: '2px 0 0', opacity: 0.7 }}>{rel.note}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function MonoList({ items }) {
+      if (!items?.length) return null;
+      return (
+        <div style={{ margin: '4px 0 8px' }}>
+          {items.map((item, i) => (
+            <div key={i} className="info-text"
+              style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all', margin: '2px 0' }}>
+              {item}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ─── full-schema detail panel ─────────────────────────────────────────────
+
+    function DecisionDetail({ node, theme }) {
+      return <>
+        <DetailHeader typeLabel={TYPE_LABELS[node.type]} nodeId={node.id} theme={theme} />
+
+        {node.why && <>
+          <InfoLabel>Why</InfoLabel>
+          <InfoText>{node.why}</InfoText>
+        </>}
+
+        {node.mechanism && <>
+          <InfoLabel>Mechanism</InfoLabel>
+          <InfoText>{node.mechanism}</InfoText>
+        </>}
+
+        {node.scope?.length > 0 && <>
+          <InfoLabel>Scope</InfoLabel>
+          <TagList items={node.scope} />
+        </>}
+
+        {node.related?.length > 0 && <>
+          <InfoLabel>Related</InfoLabel>
+          <RelatedList items={node.related} />
+        </>}
+
+        {node.violations?.length > 0 && <>
+          <InfoLabel>Violations</InfoLabel>
+          <BulletList items={node.violations} />
+        </>}
+      </>;
+    }
+
+    function PrincipleDetail({ node, theme }) {
+      return <>
+        <DetailHeader typeLabel={TYPE_LABELS[node.type]} nodeId={node.id} theme={theme} />
+
+        {node.description && <>
+          <InfoLabel>Description</InfoLabel>
+          <InfoText>{node.description}</InfoText>
+        </>}
+
+        {node.priority != null && <>
+          <InfoLabel>Priority</InfoLabel>
+          <InfoText>{node.priority}</InfoText>
+        </>}
+
+        {node.decisions?.length > 0 && <>
+          <InfoLabel>Decisions</InfoLabel>
+          <MonoList items={node.decisions} />
+        </>}
+      </>;
+    }
+
+    function OperationDetail({ node, theme }) {
+      return <>
+        <DetailHeader typeLabel={TYPE_LABELS[node.type]} nodeId={node.id} theme={theme} />
+
+        {node.workflow && <>
+          <InfoLabel>Workflow</InfoLabel>
+          <InfoText style={{ fontFamily: 'monospace', fontSize: 11 }}>{node.workflow}</InfoText>
+        </>}
+
+        {node.prerequisite && <>
+          <InfoLabel>Prerequisite</InfoLabel>
+          <InfoText style={{ fontFamily: 'monospace', fontSize: 11 }}>{node.prerequisite}</InfoText>
+        </>}
+
+        {node.reasoning?.length > 0 && <>
+          <InfoLabel>Reasoning</InfoLabel>
+          <MonoList items={node.reasoning} />
+        </>}
+
+        {node.steps?.length > 0 && <>
+          <InfoLabel>Steps</InfoLabel>
+          <NumberedList items={node.steps} />
+        </>}
+
+        {node.files?.length > 0 && <>
+          <InfoLabel>Files</InfoLabel>
+          <MonoList items={node.files} />
+        </>}
+      </>;
+    }
+
+    function NodeDetail({ node, theme }) {
+      if (!node) return (
+        <div className="detail-empty">
+          Hover or click a node<br />to explore its full context.
+        </div>
+      );
+      if (node.type === 'decision')  return <DecisionDetail  node={node} theme={theme} />;
+      if (node.type === 'principle') return <PrincipleDetail node={node} theme={theme} />;
+      if (node.type === 'operation') return <OperationDetail node={node} theme={theme} />;
+      return <DetailHeader typeLabel={node.type} nodeId={node.id} theme={theme} />;
+    }
+
     // ─── component ───────────────────────────────────────────────────────────
 
     function Graph() {
@@ -130,11 +310,11 @@
         }
 
         ctx.globalAlpha = 1;
-        node.__r = r; // expose to nodePointerAreaPaint for hit-testing
+        node.__r = r;
       }, [activeId, neighbours, searchMatchIds, theme]);
 
       return <>
-        <NavBar activeHref="./design-decisions.html">
+        <NavBar activeHref="./end-to-end.html">
           <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
                        colors={COLORS} visible={visible} toggleType={toggleType} />
           <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
@@ -143,25 +323,7 @@
         </NavBar>
 
         {createPortal(
-          activeNode
-            ? <>
-                <DetailHeader typeLabel={TYPE_LABELS[activeNode.type]} nodeId={activeNode.id} theme={theme} />
-                {activeNode.description && <>
-                  <div className="info-label">Description</div>
-                  <p className="info-text">{activeNode.description}</p>
-                </>}
-                {activeNode.mechanism && <>
-                  <div className="info-label">Mechanism</div>
-                  <p className="info-text">{activeNode.mechanism}</p>
-                </>}
-                {activeNode.why && <>
-                  <div className="info-label">Why</div>
-                  <p className="info-text">{activeNode.why}</p>
-                </>}
-              </>
-            : <div className="detail-empty">
-                Hover or click a node<br />to explore its design context.
-              </div>,
+          <NodeDetail node={activeNode} theme={theme} />,
           document.getElementById('detail-pane')
         )}
 
