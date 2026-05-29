@@ -1266,295 +1266,344 @@
       "why": "Hardcoded contacts in alert rules go stale as teams change — alerts fire to former members and incidents go unresponded.",
       "type": "decision",
       "id": "action-group",
-      "mechanism": "A dedicated Action Group per landing zone wires all platform alert rules to contact details sourced from the application profile."
+      "mechanism": "A dedicated Action Group per landing zone wires all platform alert rules to contact details sourced from the application profile.",
+      "insight": "Contact information has an independent lifecycle from the system that uses it — it's correct when written and drifts from that point. Deriving alert contacts from a single registration rather than hardcoding them means they stay current by construction. When the team changes, the routing changes with it, not because someone remembered to update a monitoring rule."
     },
     {
       "why": "The pipeline's region constraint can be bypassed by portal or script. Policy enforces at the control plane. Sourcing from deployment().location avoids drift when the GitHub variable changes.",
       "type": "decision",
       "id": "allowed-locations",
-      "mechanism": "Azure Policy denies resource deployment outside the approved region. The assignment parameter comes from deployment().location, so it stays in sync with the GitHub variable automatically."
+      "mechanism": "Azure Policy denies resource deployment outside the approved region. The assignment parameter comes from deployment().location, so it stays in sync with the GitHub variable automatically.",
+      "insight": "A constraint that should be universal must be enforced at the universal layer. A pipeline can control where things are deployed — but only for requests that go through it. Policy enforcement operates at the control plane before any resource exists, regardless of how the request arrived. The portal, a CLI, a script — all face the same gate."
     },
     {
       "why": "The whitelist is the platform's approval gate — a resource type absent from it has no policy coverage or diagnostic settings. Security and observability coverage begins when the type is added.",
       "type": "decision",
       "id": "allowed-resources",
-      "mechanism": "Azure Policy denies resource types not on the platform-approved list at the management group level. The list is a curated parameter file versioned with the platform."
+      "mechanism": "Azure Policy denies resource types not on the platform-approved list at the management group level. The list is a curated parameter file versioned with the platform.",
+      "insight": "Approving a resource type is a commitment — that it will have security policy, telemetry, and access control coverage. The approved list makes that commitment structural: a type without an entry can't be deployed, and a type with an entry carries obligations. The whitelist isn't a restriction; it's the platform's promise of complete coverage."
     },
     {
       "why": "A single registration bootstraps all application-specific platform state from one source. From that point the platform recognizes the application and enables self-service operations.",
       "type": "decision",
       "id": "application-profile",
-      "mechanism": "A JSON file registers an application on the platform. The application profile workflow bootstraps Entra ID groups, Azure Invoice Section, and application GitHub repository."
+      "mechanism": "A JSON file registers an application on the platform. The application profile workflow bootstraps Entra ID groups, Azure Invoice Section, and application GitHub repository.",
+      "insight": "Registering an application on a platform usually means coordinating across teams — billing, identity, access control, and monitoring each need to know the application exists. A single registration file replaces that coordination by making the application's identity computable. When everything derives from one source, the teams don't need to talk to each other — the data does it for them."
     },
     {
       "why": "Without billing isolation, cost ownership relies on tag accuracy — tags drift and require active governance.",
       "type": "decision",
       "id": "application-teams-own-the-cost",
-      "mechanism": "Cost attributed per application through Microsoft Customer Agreement Invoice Sections. All landing zone subscriptions under one application share a single billing scope."
+      "mechanism": "Cost attributed per application through Microsoft Customer Agreement Invoice Sections. All landing zone subscriptions under one application share a single billing scope.",
+      "insight": "Cost attribution through tags requires continuous discipline to stay accurate — tags drift, get omitted, and are quietly wrong in ways that don't generate alerts. Billing isolation at the invoice section level doesn't rely on discipline: the boundary is structural, not metadata. When a cost question arises, the answer is a fact, not an inference."
     },
     {
       "why": "Azure Container Registry adds fixed monthly cost, while GitHub Packages avoids it. Without VNet integration, only public registries are reachable.",
       "type": "decision",
       "id": "automation-docker-images-pulled-over-public-internet",
-      "mechanism": "Container App Jobs pull images from GitHub Packages over public internet. No VNet integration means no private registry is reachable."
+      "mechanism": "Container App Jobs pull images from GitHub Packages over public internet. No VNet integration means no private registry is reachable.",
+      "insight": "A private registry solves a problem that only exists if you have a private network to protect. Without one, the only reachable registries are public — and a public registry backed by an established platform carries no meaningful additional risk. The decision is internally consistent: the choice that removed the private network also removed the reason for a private registry."
     },
     {
       "why": "VNet integration carries fixed monthly cost. Control-plane-only eliminates that cost while preserving full ARM resource management.",
       "type": "decision",
       "id": "automation-jobs-have-access-at-control-plane-only",
-      "mechanism": "Container App Jobs deploy without VNet integration — ARM API calls only. No data plane access."
+      "mechanism": "Container App Jobs deploy without VNet integration — ARM API calls only. No data plane access.",
+      "insight": "A network connection costs money whether or not anything crosses it. Limiting automation to the ARM control plane eliminates that standing cost while preserving everything needed to manage Azure resources — create, modify, delete, assign. The ARM API is sufficient for everything the platform's automation needs to do. Connecting more would cost more without enabling more."
     },
     {
       "why": "Per-job identities require dedicated least-privilege RBAC per job type. Trade-off: all jobs inherit Owner at subscription scope — control-plane-only bounds blast radius to ARM operations.",
       "type": "decision",
       "id": "automation-jobs-runs-as-landing-zone-identity",
-      "mechanism": "Each Container App Job authenticates as the landing zone managed identity. No separate identity per job."
+      "mechanism": "Each Container App Job authenticates as the landing zone managed identity. No separate identity per job.",
+      "insight": "A separate identity per job type means separate provisioning, separate permissions, and a growing surface with every job added. Sharing the landing zone's existing identity collapses that into a single step — one identity, one RBAC assignment, one thing to audit and revoke. Simplicity here is a consequence of thinking about the whole before the parts."
     },
     {
       "why": "Without an enforced gate, a single push can alter production infrastructure with no prior validation.",
       "type": "decision",
       "id": "branch-gated-environment-promotion",
-      "mechanism": "Non-main pushes deploy to test. Merged PRs and manual prod dispatches deploy to prod. Each workflow encodes this as job-level if: conditions backed by GitHub Environment protection rules."
+      "mechanism": "Non-main pushes deploy to test. Merged PRs and manual prod dispatches deploy to prod. Each workflow encodes this as job-level if: conditions backed by GitHub Environment protection rules.",
+      "insight": "A test environment only has value if something enforces that it must succeed before production runs. Without the gate, a parallel hierarchy exists but doesn't constrain — it's infrastructure without a guarantee. The gate and the hierarchy are a single decision: one is useless without the other."
     },
     {
       "why": "Microsoft Customer Agreement subscription quota is finite. Always creating new subscriptions ties quota to total provisioning count, not active count — decommissioned subscriptions still count against the ceiling.",
       "type": "decision",
       "id": "bring-your-own-subscription",
-      "mechanism": "Landing zone provisioning draws from a 'subscription bank' before creating a new subscription. Subscriptions enter the bank on decommission. New subscriptions created only when the bank is empty."
+      "mechanism": "Landing zone provisioning draws from a 'subscription bank' before creating a new subscription. Subscriptions enter the bank on decommission. New subscriptions created only when the bank is empty.",
+      "insight": "Azure subscription quotas count every subscription ever created, not just active ones. Reusing decommissioned subscriptions keeps the count from growing monotonically — the quota reflects churn, not accumulation. Safe reuse requires a deployment lifecycle that guarantees nothing is left behind. When that guarantee is structural, reuse needs no manual verification."
     },
     {
       "why": "An approved resource type without a diagnostic settings definition has no telemetry and no remediation path — the coverage gap is silent.",
       "type": "decision",
       "id": "config-diagnostic-settings",
-      "mechanism": "The diagnostic settings policy initiative includes a DeployIfNotExists definition per approved resource type. Whitelisting a type requires adding a corresponding definition."
+      "mechanism": "The diagnostic settings policy initiative includes a DeployIfNotExists definition per approved resource type. Whitelisting a type requires adding a corresponding definition.",
+      "insight": "Admitting a resource type to the platform is a commitment to observe it. A resource that runs without emitting telemetry is a blind spot — you've agreed it can exist but you can't see what it does. Coupling the approved list to diagnostic coverage makes the commitment complete by construction: you can't have one without the other."
     },
     {
       "why": "Actual-spend thresholds (50%, 80%) fire on normal consumption variability — noise without decision value. A single forecast threshold detects trend deviations regardless of spend pattern.",
       "type": "decision",
       "id": "cost-forecast-over-hardcoded-thresholds",
-      "mechanism": "Budget alerts use forecasted threshold type instead of hardcoded actual-spend thresholds."
+      "mechanism": "Budget alerts use forecasted threshold type instead of hardcoded actual-spend thresholds.",
+      "insight": "A percentage threshold on actual spend tells you where you are on the way to a number you already chose. A forecast alert fires when the trajectory changes — it catches the anomaly before the spend happens rather than confirming it after. For variable consumption services, the trajectory is the only signal that arrives in time to act on."
     },
     {
       "why": "A whitelisted resource type with no Deny gate can be deployed in any configuration — the platform approves the type but cannot enforce the posture. Audit-only built-in policies observe violations; they do not prevent them.",
       "type": "decision",
       "id": "custom-policy-definitions",
-      "mechanism": "When no built-in policy provides the required effect, a custom definition is authored in customDefinitions/, declared in policyDefinitions.bicepparam, and referenced in initiative parameters as {{custom}}/name."
+      "mechanism": "When no built-in policy provides the required effect, a custom definition is authored in customDefinitions/, declared in policyDefinitions.bicepparam, and referenced in initiative parameters as {{custom}}/name.",
+      "insight": "Built-in Azure policies frequently offer Audit where the platform requires Deny. Auditing a violation records it; denying one prevents it — the distinction is the difference between detecting a problem after creation and stopping it before. Custom definitions exist to close the gaps that product shipping schedules leave open. The security posture doesn't wait for the vendor."
     },
     {
       "why": "A default is a starting condition, not a control — it can be changed after deployment with no policy signal.",
       "type": "decision",
       "id": "defaults-are-not-policy",
-      "mechanism": "Security Deny gates are required for every applicable property on every whitelisted resource type. Whether the service default is already compliant is not evaluated."
+      "mechanism": "Security Deny gates are required for every applicable property on every whitelisted resource type. Whether the service default is already compliant is not evaluated.",
+      "insight": "A service default is a starting condition, not a commitment — it can be changed after deployment with no policy signal, no alert, and no audit record. A platform that relies on compliant defaults for its security posture is trusting that nothing will change after the first deployment. The Deny gate replaces that trust with enforcement."
     },
     {
       "why": "Cross-tenant replication operates at the data plane — network deny policies don't intercept it. Without explicit denial, data is replicable to external tenants.",
       "type": "decision",
       "id": "deny-cross-tenant-replication",
-      "mechanism": "Azure Policy denies cross-tenant object replication at the management group level. Exceptions require a policy exemption."
+      "mechanism": "Azure Policy denies cross-tenant object replication at the management group level. Exceptions require a policy exemption.",
+      "insight": "Closing the network boundary doesn't prevent data from leaving the tenant — replication operates at the data plane, independently of network access controls. Two different attack surfaces require two different gates, each operating at the layer where the threat actually exists. A security model that closes one and assumes the other is covered has a gap it can't see."
     },
     {
       "why": "Local auth bypasses Entra ID — access keys and connection strings grant data-plane access invisible to the RBAC model. A key holder circumvents the entire access control model.",
       "type": "decision",
       "id": "deny-local-authentication",
-      "mechanism": "Azure Policy denies local authentication at the management group level. Exceptions require a policy exemption."
+      "mechanism": "Azure Policy denies local authentication at the management group level. Exceptions require a policy exemption.",
+      "insight": "A local authentication key isn't a weaker form of RBAC — it's a bypass of it. Access keys grant data-plane access completely outside the identity layer, invisible to role assignments, audit logs, and Conditional Access policies. Denying local auth isn't a hardening measure; it's a decision to have one access model rather than two operating simultaneously."
     },
     {
       "why": "Without explicit denial, accidental public exposure is indistinguishable from intentional — attack surface acquired silently with no deployment-time signal.",
       "type": "decision",
       "id": "deny-public-network-access",
-      "mechanism": "Azure Policy denies public network access at the management group level. Exceptions require a policy exemption."
+      "mechanism": "Azure Policy denies public network access at the management group level. Exceptions require a policy exemption.",
+      "insight": "Accidental public exposure and intentional public exposure are indistinguishable without an explicit record of the decision. A policy Deny means every resource that ends up public was deliberately exempted — there's a PR, a review, and a stated reason. The Deny doesn't restrict capability; it makes intent legible."
     },
     {
       "why": "Without explicit denial, traffic silently downgrades to protocols with known cryptographic weaknesses. Attackers can force a downgrade without the operator being aware.",
       "type": "decision",
       "id": "deny-weak-tls",
-      "mechanism": "Azure Policy denies TLS versions below 1.2 at the management group level. Exceptions require a policy exemption."
+      "mechanism": "Azure Policy denies TLS versions below 1.2 at the management group level. Exceptions require a policy exemption.",
+      "insight": "TLS version negotiation is itself an attack surface: without a hard floor, the protocol version is determined by the weakest party in the exchange. A policy Deny removes the negotiation entirely — there is no weak version to offer, so no downgrade is possible. This is the only control that operates before a resource accepts its first connection."
     },
     {
       "why": "Without deleteAll, manually created or orphaned resources persist with no code representation — the live environment drifts from Bicep and decommissioning requires manual auditing.",
       "type": "decision",
       "id": "deployment-stack-delete-all-lifecycle",
-      "mechanism": "All Deployment Stacks use deleteAll lifecycle. Any Azure resource not declared in the Bicep template is deleted on the next deployment — the template is the source of truth."
+      "mechanism": "All Deployment Stacks use deleteAll lifecycle. Any Azure resource not declared in the Bicep template is deleted on the next deployment — the template is the source of truth.",
+      "insight": "If something isn't in the template, it doesn't exist in Azure — that's the contract. Any resource not declared is removed on the next deployment. The template isn't a record of what was once deployed. It's a complete specification of what exists right now, continuously enforced."
     },
     {
       "why": "Direct Azure changes produce state with no code representation — it drifts from Bicep, survives decommissions, and is invisible to review. A single pipeline path makes every change auditable, reversible, and reproducible.",
       "type": "decision",
       "id": "end-to-end-deployment",
-      "mechanism": "All infrastructure changes travel through a PR → review → GitHub Actions → Bicep/Deployment Stack pipeline. No human applies changes to Azure directly. Config lives in GitHub variables; Bicep declares the resource state; Deployment Stacks enforce it as live reality."
+      "mechanism": "All infrastructure changes travel through a PR → review → GitHub Actions → Bicep/Deployment Stack pipeline. No human applies changes to Azure directly. Config lives in GitHub variables; Bicep declares the resource state; Deployment Stacks enforce it as live reality.",
+      "insight": "The pipeline is the only entry point to Azure — no portal, no CLI, no script creates anything directly. Every resource that exists was created by a PR that was reviewed and deployed. The interesting property this creates isn't just auditability: it's reproducibility. If the pipeline can create it, the pipeline can recreate it. If it can't be recreated, it shouldn't exist."
     },
     {
       "why": "Managed identities are bound to Azure resources and can't exist before one does. The platform identity must exist before any subscription. App registrations are pure Entra ID objects — they satisfy the bootstrap constraint and receive Graph application permissions through standard admin consent.",
       "type": "decision",
       "id": "entra-id-app-as-platform-identity",
-      "mechanism": "A single Entra ID app registration serves as the platform identity. Created during initialization before any Azure infrastructure exists. Authenticates to GitHub via OIDC and holds permissions to provision landing zone identities."
+      "mechanism": "A single Entra ID app registration serves as the platform identity. Created during initialization before any Azure infrastructure exists. Authenticates to GitHub via OIDC and holds permissions to provision landing zone identities.",
+      "insight": "Every cloud platform has a bootstrap problem: the identity that provisions infrastructure can't itself be the infrastructure it's provisioning. Managed identities are bound to Azure resources and can't exist before one does. An Entra ID app registration exists independently of any Azure resource — it's the identity that bootstraps everything before anything exists to attach an identity to."
     },
     {
       "why": "Individual assignments couple RBAC to user lifecycle — a deleted user GUID fails Bicep deployment, and every onboard/offboard requires redeployment. Groups separate composition from permission grants — membership changes take effect without touching any deployment.",
       "type": "decision",
       "id": "entra-id-groups-over-individual-assignments",
-      "mechanism": "Azure roles assigned to Entra ID groups, not individuals. Platform owns groups and role bindings; membership managed in Entra ID."
+      "mechanism": "Azure roles assigned to Entra ID groups, not individuals. Platform owns groups and role bindings; membership managed in Entra ID.",
+      "insight": "Role assignments to individuals couple the access model to user lifecycle — when someone leaves, their GUID becomes an orphaned reference that breaks future deployments. Groups separate the two concerns: the platform defines what permissions exist, directory membership determines who holds them. A team change becomes a membership operation, not a redeployment."
     },
     {
       "why": "Some Defender recommendations require paid SKUs, creating unavoidable compliance-score degradation for landing zones that don't adopt those capabilities. Only recommendations requiring paid SKUs or cost-generating infrastructure qualify for the platform exemption list.",
       "type": "decision",
       "id": "exemptions-defender-for-cloud",
-      "mechanism": "Landing zone stack deploys policy exemptions against Defender for Cloud recommendation assessments. Exempted set defined in defenderForCloudExemptions.jsonc, applied uniformly. Per-recommendation selection not supported."
+      "mechanism": "Landing zone stack deploys policy exemptions against Defender for Cloud recommendation assessments. Exempted set defined in defenderForCloudExemptions.jsonc, applied uniformly. Per-recommendation selection not supported.",
+      "insight": "A compliance score that penalises you for not adopting paid capabilities is measuring product coverage, not security posture. Some Defender recommendations require paid SKUs to remediate — failing them marks down a deliberate cost decision, not a gap in thinking. The exemption list makes that trade-off explicit and platform-wide: here is what was evaluated and why it was set aside."
     },
     {
       "why": "Static secrets remain valid after the job completes, can be extracted, and require rotation. OIDC tokens expire with the workflow run, and federation scope ensures one landing zone's credential can't be used by another.",
       "type": "decision",
       "id": "federated-auth-to-github",
-      "mechanism": "GitHub Actions authenticate to Azure via OIDC federation. Azure evaluates a short-lived token from GitHub's OIDC provider against a federated credential pinned to org/repo/environment. No secret is stored or exchanged."
+      "mechanism": "GitHub Actions authenticate to Azure via OIDC federation. Azure evaluates a short-lived token from GitHub's OIDC provider against a federated credential pinned to org/repo/environment. No secret is stored or exchanged.",
+      "insight": "A static secret remains valid long after the workflow that needed it has finished — it can be extracted, reused, and is only as safe as wherever it's stored. OIDC tokens expire with the workflow run and are never stored. Each credential is then pinned to a specific repository, branch, and environment. Lateral movement between landing zones is structurally impossible."
     },
     {
       "why": "Resource-specific roles multiply with every new resource type — role count grows unbounded and auditing becomes impractical. Function-scoped roles absorb new actions into existing definitions without proliferation.",
       "type": "decision",
       "id": "function-centric-role",
-      "mechanism": "Humans get only permissions for their job function via custom roles scoped to function, not resource. Roles are extended with new actions when capabilities require it."
+      "mechanism": "Humans get only permissions for their job function via custom roles scoped to function, not resource. Roles are extended with new actions when capabilities require it.",
+      "insight": "Resource-specific role definitions multiply with every new resource type — the permission surface grows unbounded alongside the platform. Scoping roles to job function instead means a new resource type extends an existing definition rather than requiring a new one. The number of roles stays proportional to how many distinct things people do, not to how many resource types exist."
     },
     {
       "why": "PATs couple to a human and never expire gracefully. GITHUB_TOKEN cannot reach other repos or org-level resources. A GitHub App provides auditable, scoped tokens without human dependency.",
       "type": "decision",
       "id": "github-app-as-platform-automation-identity",
-      "mechanism": "A GitHub App (APP_GITHUB_AZUREPLATFORM_ID) is the platform's GitHub-side identity. Workflows mint short-lived tokens via actions/create-github-app-token scoped to the repository owner."
+      "mechanism": "A GitHub App (APP_GITHUB_AZUREPLATFORM_ID) is the platform's GitHub-side identity. Workflows mint short-lived tokens via actions/create-github-app-token scoped to the repository owner.",
+      "insight": "A personal access token is coupled to a human account — it inherits the person's permissions, persists after they leave, and has no expiry tied to use. A GitHub App is an identity that belongs to the platform, not to a person: tokens are scoped, short-lived, and auditable independently. Automation designed to outlive individuals needs an identity designed the same way."
     },
     {
       "why": "Without a single committed source, configuration drifts between environments and onboarding a new capability requires tracing values through the GitHub UI.",
       "type": "decision",
       "id": "github-variables-as-configuration-source-of-truth",
-      "mechanism": "githubVariables.json defines org, repo, and per-environment variables. A workflow propagates them to GitHub via API. Bicep parameter files consume them at deploy time via readEnvironmentVariable()."
+      "mechanism": "githubVariables.json defines org, repo, and per-environment variables. A workflow propagates them to GitHub via API. Bicep parameter files consume them at deploy time via readEnvironmentVariable().",
+      "insight": "Configuration that lives only in a UI has no diff, no review, and no rollback — it exists but can't be reasoned about as a change. A committed JSON file gives configuration the same lifecycle as code: it can be reviewed, compared across time, and used as the source for every environment simultaneously. The UI becomes a view of what the file says, not the authoritative record."
     },
     {
       "why": "Overlapping VNet address spaces block peering at the API level — the only fix is re-addressing, which requires destroying and recreating every resource holding an IP.",
       "type": "decision",
       "id": "ipam",
-      "mechanism": "Landing zone creation allocates each VNet a unique CIDR from a managed supernet (IPAM_DEFAULT_NETWORK) by querying Azure Resource Graph for existing prefixes and selecting the next free block. No CIDR is assigned manually."
+      "mechanism": "Landing zone creation allocates each VNet a unique CIDR from a managed supernet (IPAM_DEFAULT_NETWORK) by querying Azure Resource Graph for existing prefixes and selecting the next free block. No CIDR is assigned manually.",
+      "insight": "Overlapping network address spaces block peering at the API level — the only fix is re-addressing, which means destroying and recreating every resource that holds an IP. Manual CIDR allocation turns uniqueness into a coordination problem that fails silently until peering is attempted. Automated allocation from a managed supernet makes uniqueness a structural guarantee. No coordination required because no conflict is possible."
     },
     {
       "why": "External automation would require a shared management subscription with baseline cost and team dependency, but the platform has no such subscription. Landing-zone-native automation is self-contained, cost-free at idle, and independently deployable.",
       "type": "decision",
       "id": "landing-zone-automation",
-      "mechanism": "Automation is a platform service within each landing zone. Job definitions and images are managed centrally; instances run inside the landing zone's subscription."
+      "mechanism": "Automation is a platform service within each landing zone. Job definitions and images are managed centrally; instances run inside the landing zone's subscription.",
+      "insight": "A centralised automation runtime is a shared dependency — every landing zone that relies on it inherits a failure mode it doesn't own. Landing-zone-native automation keeps the runtime inside the subscription it manages. When it fails, it fails locally. When the landing zone is decommissioned, the automation disappears with it. Self-containment applies to automation for the same reason it applies to everything else."
     },
     {
       "why": "Sharing infrastructure between landing zones couples their lifecycles — one team's change or outage can block another.",
       "type": "decision",
       "id": "landing-zone-autonomy",
-      "mechanism": "Each landing zone is provisioned with its own VNet, identity, monitoring, and automation runtime. No platform capability is shared between landing zones."
+      "mechanism": "Each landing zone is provisioned with its own VNet, identity, monitoring, and automation runtime. No platform capability is shared between landing zones.",
+      "insight": "Isolation isn't a security feature — it's how you make failure local. Every team gets its own subscription, identity, and network: the incident boundary is drawn before the incident happens. When something goes wrong, it goes wrong inside a container the platform already defined."
     },
     {
       "why": "Teams need test workloads under the same policy, RBAC, and network constraints as prod. Splitting tiers across hierarchies breaks that guarantee.",
       "type": "decision",
       "id": "landing-zone-environment-tier",
-      "mechanism": "All application landing zones deploy into oases-prod regardless of environment tier. The environment parameter declares lifecycle stage — it does not control management group placement."
+      "mechanism": "All application landing zones deploy into oases-prod regardless of environment tier. The environment parameter declares lifecycle stage — it does not control management group placement.",
+      "insight": "A test environment that runs under different policy than production doesn't test what matters. The environment label declares a lifecycle stage — it doesn't change which management group the workload sits in or which policies apply. Running test workloads under production policy is the only way to verify they'll behave the same way there."
     },
     {
       "why": "Without a single identity, each capability (workflows, jobs, Graph queries) needs a separate identity with its own RBAC and OIDC config — permission surface multiplies with every new capability.",
       "type": "decision",
       "id": "landing-zone-identity",
-      "mechanism": "Each landing zone gets a user-assigned managed identity with Owner at subscription scope, OIDC federated credentials scoped to org/repo/env, and Directory Reader Graph permissions."
+      "mechanism": "Each landing zone gets a user-assigned managed identity with Owner at subscription scope, OIDC federated credentials scoped to org/repo/env, and Directory Reader Graph permissions.",
+      "insight": "Each landing zone gets one identity that serves every capability that needs one: workflow authentication, automation jobs, directory queries. Fragmenting into per-capability identities multiplies provisioning steps, RBAC assignments, and audit surface simultaneously. A single identity with a clear scope is easier to reason about — and revoking it is one operation, not many."
     },
     {
       "why": "Shared workspaces co-mingle telemetry — one team can query another's data, and ingestion cost can't be attributed. Retention beyond 30 days incurs per-GB charges across all workspaces without proportional value.",
       "type": "decision",
       "id": "landing-zone-log-analytics",
-      "mechanism": "A dedicated Log Analytics workspace per landing zone with 30-day retention."
+      "mechanism": "A dedicated Log Analytics workspace per landing zone with 30-day retention.",
+      "insight": "Most observability decisions optimise for more retention — longer is always better. Here, 30-day retention is a hard constraint that keeps the workspace within the free storage tier. The interesting observation is that a cost principle is actively shaping what most platforms treat as a purely technical decision. Observability has no marginal cost because its design was bounded by one."
     },
     {
       "why": "Multiple resource groups split management across boundaries — teardown requires coordinated operations across groups. A central platform subscription creates a remote dependency the landing zone doesn't own.",
       "type": "decision",
       "id": "landing-zone-resource-group",
-      "mechanism": "All platform-managed capabilities (identity, VNet, monitoring, automation) are in a single `landingzone-resources` resource group within the landing zone subscription."
+      "mechanism": "All platform-managed capabilities (identity, VNet, monitoring, automation) are in a single `landingzone-resources` resource group within the landing zone subscription.",
+      "insight": "The unit of deployment and the unit of lifecycle should be the same thing. A single resource group is both the scope of the Deployment Stack and the scope of teardown — when the stack enforces its delete lifecycle, it touches exactly what it provisioned. Decommissioning is atomic because the deployment boundary and the cleanup boundary are identical."
     },
     {
       "why": "A dedicated workflow per landing zone gives each an independent deployment lifecycle and visible CI/CD status — a shared deployer would couple their lifecycles.",
       "type": "decision",
       "id": "landing-zone-scaffolding-via-code-generation",
-      "mechanism": "Creating a landing zone generates a .bicepparam and a dedicated lz-*.yml workflow from templates. Placeholders are replaced with request inputs. The result is committed as a PR."
+      "mechanism": "Creating a landing zone generates a .bicepparam and a dedicated lz-*.yml workflow from templates. Placeholders are replaced with request inputs. The result is committed as a PR.",
+      "insight": "A landing zone created manually exists in Azure with no code representation — it runs but can't be reviewed, reproduced, or reasoned about from the repository. Code generation produces the parameter file and the workflow together as a single PR. The landing zone's first moment is a review — it enters the platform as a verified, auditable artifact before it ever deploys."
     },
     {
       "why": "Shared VNets couple network lifecycles — address space changes or NSG modifications in one landing zone affect another, requiring cross-team coordination.",
       "type": "decision",
       "id": "landing-zone-vnet",
-      "mechanism": "Each landing zone gets a dedicated VNet with a CIDR from IPAM. PaaS services connect via service endpoints — private endpoints are not used because they add fixed hourly cost."
+      "mechanism": "Each landing zone gets a dedicated VNet with a CIDR from IPAM. PaaS services connect via service endpoints — private endpoints are not used because they add fixed hourly cost.",
+      "insight": "A shared network couples the operational lifecycles of every team that uses it — an address space change or a security rule in one landing zone ripples to others. A dedicated VNet keeps network management as isolated as identity and monitoring. Service endpoints provide private-network-level access to PaaS services without the fixed hourly cost a private endpoint carries."
     },
     {
       "why": "Dynamic discovery removes a central registry — new landing zones participate in bulk deployment the moment their workflow merges.",
       "type": "decision",
       "id": "landing-zone-workflow-prefix-contract",
-      "mechanism": "Landing zone workflows are named lz-*.yml. The platform trigger discovers and dispatches them by prefix via GitHub API — no hardcoded list."
+      "mechanism": "Landing zone workflows are named lz-*.yml. The platform trigger discovers and dispatches them by prefix via GitHub API — no hardcoded list.",
+      "insight": "A central registry requires a coordinator — it's correct until it isn't, and incorrect entries fail silently. Discovery by naming convention removes the registry entirely: participation is a property of the workflow's name, not an entry in a list. A new landing zone joins bulk operations the moment its workflow merges, with no person to notify and no list to maintain."
     },
     {
       "why": "Orphaned RBAC assignments appear as unknown objects — resolving them to a displayName for removal requires querying Entra ID, which fails without Graph permissions.",
       "type": "decision",
       "id": "microsoft-graph-permissions",
-      "mechanism": "Each landing zone identity gets Directory.Read.All to query users, groups, and principals in Entra ID."
+      "mechanism": "Each landing zone identity gets Directory.Read.All to query users, groups, and principals in Entra ID.",
+      "insight": "Managing role assignments and understanding them are different capabilities. RBAC lets you create and delete assignments, but a deleted principal leaves a GUID that the ARM layer can't resolve to a name. Directory read permission closes the gap between management authority and interpretive authority — without both, the system can act on assignments but can't reason about them."
     },
     {
       "why": "Capabilities without deployment autonomy accumulate hidden circular dependencies — changes to one require coordinating across the dependency graph, blocking independent development.",
       "type": "decision",
       "id": "platform-capability-autonomy",
-      "mechanism": "Each platform capability has a dedicated GitHub Actions workflow that owns its complete deployment — Azure resources via a deployment stack and downstream config via Bicep outputs. No capability's resources are provisioned outside its own workflow."
+      "mechanism": "Each platform capability has a dedicated GitHub Actions workflow that owns its complete deployment — Azure resources via a deployment stack and downstream config via Bicep outputs. No capability's resources are provisioned outside its own workflow.",
+      "insight": "When capabilities share a deployment, they share fate — a change in one creates risk in another. Each capability here owns its complete deployment stack and deploys independently. RBAC changes without touching policy. Networking rebuilds without rebuilding identity. The independence isn't a discipline the team maintains; it's a constraint the structure enforces."
     },
     {
       "why": "Without policy-enforced tags, ownership relies on manual discipline — tags drift, go missing on out-of-pipeline resources, and incident routing fails. Policy + profile derivation makes drift self-correcting.",
       "type": "decision",
       "id": "platform-managed-tags",
-      "mechanism": "Engineer contact is a resource-level tag; owner contact is a subscription-level tag. Azure Policy assigns per-key enforcement for each tag. Values derived from the application profile."
+      "mechanism": "Engineer contact is a resource-level tag; owner contact is a subscription-level tag. Azure Policy assigns per-key enforcement for each tag. Values derived from the application profile.",
+      "insight": "Metadata that depends on manual discipline degrades at the speed of organisational change. Enforcing tags through policy, with values derived from a single registration, creates a self-correcting system: the correct value is defined once, policy enforces it, and nightly remediation corrects anything that deviated. Drift is expected and handled automatically — it isn't a failure mode, it's an input."
     },
     {
       "why": "A platform without a verified destroy/recreate cycle accumulates untracked state — bootstrap failures go undetected in test and surface in production.",
       "type": "decision",
       "id": "platform-reproducibility",
-      "mechanism": "BigBang provisions the platform from a defined initial state (Entra ID app registrations, GitHub App, initial tenant config) to fully functioning by sequencing all capability deployments. A destroy workflow resets to that initial state. Both run weekly against the test hierarchy."
+      "mechanism": "BigBang provisions the platform from a defined initial state (Entra ID app registrations, GitHub App, initial tenant config) to fully functioning by sequencing all capability deployments. A destroy workflow resets to that initial state. Both run weekly against the test hierarchy.",
+      "insight": "A platform that can't be built from scratch can only be partially understood — there are always things provisioned once, manually, that are now load-bearing without anyone knowing. A full provision-and-destroy cycle runs weekly. The platform earns the property of reproducibility by continuously verifying it, not by assuming it was designed that way."
     },
     {
       "why": "Without a parallel test hierarchy, platform changes deploy directly to production — failures surface against live landing zones with no safe rollback. HeyAzure ensures deployment parity is verified, not assumed.",
       "type": "decision",
       "id": "platform-test-hierarchy",
-      "mechanism": "Platform changes validated against oases-test (prod-identical management group hierarchy) before promotion to oases-prod. HeyAzure is the canary landing zone in both hierarchies."
+      "mechanism": "Platform changes validated against oases-test (prod-identical management group hierarchy) before promotion to oases-prod. HeyAzure is the canary landing zone in both hierarchies.",
+      "insight": "The only test environment that provides real confidence is one that mirrors production structurally — same hierarchy, same policies, same deployment path. A canary landing zone runs in both, so deployment parity is verified on every change rather than assumed. The test hierarchy earns its cost by being the place where platform changes fail safely."
     },
     {
       "why": "The prefix determines source-of-truth boundary: Config triggers DeployIfNotExists/Modify (Azure writes beyond Bicep); Allowed/Deny are fully represented by code. Without the prefix, enforcement posture isn't recoverable from the name.",
       "type": "decision",
       "id": "policy-assignment-naming-convention",
-      "mechanism": "Policy assignments named [Allowed|Deny|Config] + compliance area. Prefix signals effect type; compliance area is the grouping boundary. Code review is the only gate."
+      "mechanism": "Policy assignments named [Allowed|Deny|Config] + compliance area. Prefix signals effect type; compliance area is the grouping boundary. Code review is the only gate.",
+      "insight": "The prefix encodes behaviour, not just category. A Deny assignment blocks and nothing more — code is the complete record of its effect. A Config assignment triggers DeployIfNotExists, meaning Azure writes resources that no Bicep file declared. Knowing which kind an assignment is from its name alone determines how to reason about what the live environment contains — without opening the portal."
     },
     {
       "why": "Without the generated file, users must query Azure Portal to find assignment IDs and hardcode them. Hardcoded IDs drift silently when an assignment is redeployed and its ARM ID changes. The generated file keeps references in sync with live assignment state and removes a manual lookup step entirely.",
       "type": "decision",
       "id": "policy-assignment-reference",
-      "mechanism": "The Azure Policy workflow generates policy-assignment-reference.json immediately after assignment by querying Azure Resource Graph for live assignment IDs. The file is committed to the repo and provides IntelliSense in bicepparam files — users select policy assignments via dot notation and dropdown rather than knowing any Azure internals."
+      "mechanism": "The Azure Policy workflow generates policy-assignment-reference.json immediately after assignment by querying Azure Resource Graph for live assignment IDs. The file is committed to the repo and provides IntelliSense in bicepparam files — users select policy assignments via dot notation and dropdown rather than knowing any Azure internals.",
+      "insight": "Policy assignment ARM IDs are implementation details that change on every redeployment — a reference that hardcodes one is silently wrong after the next pipeline run. The generated reference file queries live state and commits the result, giving authors stable names instead of volatile IDs. IntelliSense resolves the name to the current ID. The abstraction hides the instability."
     },
     {
       "why": "Mixing gating with execution couples when-to-deploy to how-to-deploy — reuse across test/prod requires duplication.",
       "type": "decision",
       "id": "reusable-workflow-two-tier-pattern",
-      "mechanism": "platform-*.yml owns trigger conditions and gating. template-*.yml owns execution. The trigger calls the template via workflow_call with managementGroupHierarchy as the routing input."
+      "mechanism": "platform-*.yml owns trigger conditions and gating. template-*.yml owns execution. The trigger calls the template via workflow_call with managementGroupHierarchy as the routing input.",
+      "insight": "Mixing gating conditions with deployment execution couples when-to-deploy to how-to-deploy — changing one requires touching the other, and reuse becomes duplication. Separating them into two tiers gives each a single responsibility: the trigger owns when, the template owns how. The same deployment logic runs in test and production because it was never entangled with the conditions that invoke it."
     },
     {
       "why": "Deny policies without self-service create a dependency on platform operators — teams route workloads outside the platform, removing them from the policy boundary entirely.",
       "type": "decision",
       "id": "self-service-policy-exemptions",
-      "mechanism": "Landing zone owners self-service policy exemptions through their bicepparam and a workflow dispatch. The platform does not gate individual exemptions."
+      "mechanism": "Landing zone owners self-service policy exemptions through their bicepparam and a workflow dispatch. The platform does not gate individual exemptions.",
+      "insight": "A hard deny without an escape valve doesn't create security — it creates pressure to route around the platform entirely. Teams that can't get an exemption approved move their workloads outside the policy boundary, where no policy applies. Self-service keeps teams inside the boundary by removing the incentive to leave it."
     },
     {
       "why": "Always-on runtimes pay for hours of idle to run seconds of compute. Container App Jobs cost zero at idle (fits within free tier). Adding a new job type requires no new infrastructure.",
       "type": "decision",
       "id": "serverless-automation-jobs",
-      "mechanism": "Landing zones run Azure Container App Jobs on a nightly cron schedule. Job definitions and Docker images are managed centrally; each landing zone runs its own instances."
+      "mechanism": "Landing zones run Azure Container App Jobs on a nightly cron schedule. Job definitions and Docker images are managed centrally; each landing zone runs its own instances.",
+      "insight": "Holding compute in reserve so it's ready when needed means paying for the waiting, not the working. Container App Jobs provision on demand and return to zero when done — billed by the second, cost-free between runs. The platform that requires applications to follow this model follows it for its own automation. The principle isn't aspirational; it's structural."
     },
     {
       "why": "IPAM allocates from a single supernet with no region dimension. Multi-region would make VNet peering unpredictable. The allowed-locations policy and VNet model carry no region dimension either — relaxing this constraint requires redesigning all three together.",
       "type": "decision",
       "id": "single-region-deployments",
-      "mechanism": "Region defined once as a GitHub variable. All pipelines inject that value at deploy time — no resource or landing zone specifies its own region."
+      "mechanism": "Region defined once as a GitHub variable. All pipelines inject that value at deploy time — no resource or landing zone specifies its own region.",
+      "insight": "Multi-region deployments introduce a geographic dimension into every system that touches them simultaneously — address allocation, network policy, and location enforcement all need to model it. Committing to a single region, defined once and injected everywhere, means none of those systems need that dimension. The simplification isn't a limitation; it's a deliberate trade of flexibility for coherence."
     },
     {
       "why": "Flat-rate services accrue cost at idle — fixed overhead accumulates independent of activity and cannot be attributed to application value.",
       "type": "decision",
       "id": "zero-cost-at-idle",
-      "mechanism": "Platform services use only consumption-based pricing tiers with no idle cost. Flat-rate and reserved-capacity services are not eligible."
+      "mechanism": "Platform services use only consumption-based pricing tiers with no idle cost. Flat-rate and reserved-capacity services are not eligible.",
+      "insight": "Paying to hold capacity that isn't delivering value is waste — the kind that accumulates silently and never appears in a postmortem. Consumption pricing makes that impossible: you pay for execution, not presence. What makes this a design principle rather than a billing preference is the hard constraint it implies: every component must be eligible for consumption pricing, or it doesn't belong."
     },
     {
       "type": "principle",
