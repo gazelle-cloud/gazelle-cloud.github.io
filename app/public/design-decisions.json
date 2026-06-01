@@ -3,7 +3,7 @@
     {
       "id": "bigbang",
       "type": "rule",
-      "intent": "Without verified reproducibility, untracked state accumulates and bootstrap failures surface only in production — the platform provisions from zero and returns to zero without human access, validated weekly."
+      "intent": "A deployment that cannot be traced, reproduced, or validated from zero is not a deployment — every change travels through scaffolded workflows with config committed to the repo, validates through a prod-identical test hierarchy with branch-gated promotion, and the full platform provisions from zero and returns to zero without human access, verified weekly."
     },
     {
       "id": "costless-platform",
@@ -16,19 +16,9 @@
       "intent": "A security requirement without a hard control is a convention — every boundary is enforced by Azure Policy Deny at management group scope regardless of the resource's default posture, with self-service exemptions as the only escape path."
     },
     {
-      "id": "deployment-mechanics",
-      "type": "rule",
-      "intent": "A deployment without a naming convention, reusable pattern, or committed config cannot be traced, reproduced, or debugged — every change travels through scaffolded workflows with configuration sourced from the repo and assignment names that expose effect and compliance domain on inspection."
-    },
-    {
       "id": "identity",
       "type": "rule",
       "intent": "Every principal that touches the platform is an Entra ID identity — no local accounts, no static secrets, no individual role bindings. Authentication is federated, access is group-scoped, and each landing zone owns its identity boundary."
-    },
-    {
-      "id": "test-environment",
-      "type": "rule",
-      "intent": "Without graduated environments and branch-gated promotion, every change goes straight to production — platform changes validate through a prod-identical test hierarchy where promotion to production requires prior success in test, enforced by workflow structure."
     },
     {
       "id": "you-built-it-you-run-it",
@@ -317,6 +307,56 @@
       "relationship": "groups"
     },
     {
+      "source": "bigbang",
+      "target": "deployment-logic-scaffolding",
+      "relationship": "groups"
+    },
+    {
+      "source": "bigbang",
+      "target": "deployment-logic-reusable-workflow",
+      "relationship": "groups"
+    },
+    {
+      "source": "bigbang",
+      "target": "deployment-logic-workflow-prefix",
+      "relationship": "groups"
+    },
+    {
+      "source": "bigbang",
+      "target": "policy-assignment-naming-convention",
+      "relationship": "groups"
+    },
+    {
+      "source": "bigbang",
+      "target": "policy-assignment-naming-convention-reference",
+      "relationship": "groups"
+    },
+    {
+      "source": "bigbang",
+      "target": "platform-managed-tags",
+      "relationship": "groups"
+    },
+    {
+      "source": "bigbang",
+      "target": "single-region-deployments-policy-enforcement",
+      "relationship": "groups"
+    },
+    {
+      "source": "bigbang",
+      "target": "platform-test-hierarchy",
+      "relationship": "groups"
+    },
+    {
+      "source": "bigbang",
+      "target": "platform-test-hierarchy-environment-tier",
+      "relationship": "groups"
+    },
+    {
+      "source": "bigbang",
+      "target": "branch-gated-environment-promotion",
+      "relationship": "groups"
+    },
+    {
       "source": "costless-platform",
       "target": "application-teams-own-the-cost",
       "relationship": "groups"
@@ -382,41 +422,6 @@
       "relationship": "groups"
     },
     {
-      "source": "deployment-mechanics",
-      "target": "deployment-logic-scaffolding",
-      "relationship": "groups"
-    },
-    {
-      "source": "deployment-mechanics",
-      "target": "deployment-logic-reusable-workflow",
-      "relationship": "groups"
-    },
-    {
-      "source": "deployment-mechanics",
-      "target": "deployment-logic-workflow-prefix",
-      "relationship": "groups"
-    },
-    {
-      "source": "deployment-mechanics",
-      "target": "policy-assignment-naming-convention",
-      "relationship": "groups"
-    },
-    {
-      "source": "deployment-mechanics",
-      "target": "policy-assignment-naming-convention-reference",
-      "relationship": "groups"
-    },
-    {
-      "source": "deployment-mechanics",
-      "target": "platform-managed-tags",
-      "relationship": "groups"
-    },
-    {
-      "source": "deployment-mechanics",
-      "target": "single-region-deployments-policy-enforcement",
-      "relationship": "groups"
-    },
-    {
       "source": "identity",
       "target": "identity-entra-id-app",
       "relationship": "groups"
@@ -454,21 +459,6 @@
     {
       "source": "identity",
       "target": "landing-zone-autonomy-identity",
-      "relationship": "groups"
-    },
-    {
-      "source": "test-environment",
-      "target": "platform-test-hierarchy",
-      "relationship": "groups"
-    },
-    {
-      "source": "test-environment",
-      "target": "platform-test-hierarchy-environment-tier",
-      "relationship": "groups"
-    },
-    {
-      "source": "test-environment",
-      "target": "branch-gated-environment-promotion",
       "relationship": "groups"
     },
     {
