@@ -26,17 +26,15 @@
     // ─── constants ───────────────────────────────────────────────────────────
 
     const COLORS = {
-      principle: PALETTE.ENTRY,
-      operation: PALETTE.CONNECTOR,
-      decision:  PALETTE.LEAF,
+      rule:     PALETTE.ENTRY,
+      decision: PALETTE.LEAF,
     };
 
-    const NODE_TYPES = ['principle', 'operation', 'decision'];
+    const NODE_TYPES = ['rule', 'decision'];
 
     const TYPE_LABELS = {
-      principle: 'design-principles',
-      operation: 'platform-operations',
-      decision:  'design-decisions',
+      rule:     'platform-rules',
+      decision: 'design-decisions',
     };
 
     const dotRadius = node =>
@@ -52,13 +50,7 @@
 
     normalizeNodeWeights(raw);
 
-    const byType = t => raw.nodes.filter(n => n.type === t);
-    const rim = [];
-    const principles = byType('principle'), ops = byType('operation');
-    for (let i = 0; i < Math.max(principles.length, ops.length); i++) {
-      if (principles[i]) rim.push(principles[i]);
-      if (ops[i])        rim.push(ops[i]);
-    }
+    const rim = raw.nodes.filter(n => n.type === 'rule');
     rim.forEach((n, i) => {
       const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
       n.fx = Math.cos(angle) * 280;
@@ -80,7 +72,7 @@
         fg.d3Force('link').distance(60);
         fg.d3Force('collision', forceCollide(n => dotRadius(n) + 3));
         fg.d3Force('radial', forceRadial(0, 0, 0)
-          .strength(n => n.type === 'decision' ? 0.04 + n.__weight * 0.25 : 0));
+          .strength(n => n.type === 'rule' ? 0 : 0.04 + n.__weight * 0.25));
       });
 
       const linkColor = React.useCallback(l => {
@@ -110,7 +102,7 @@
         ctx.fillStyle = isActive ? activeColor : COLORS[node.type];
         ctx.fill();
 
-        const isRim     = node.type === 'principle' || node.type === 'operation';
+        const isRim     = node.type === 'rule';
         const showLabel = isRim || isActive || isNeighbour || isMatch;
         if (showLabel) {
           const gap = r + RENDER.labelGap / globalScale;
@@ -146,13 +138,9 @@
           activeNode
             ? <>
                 <DetailHeader typeLabel={TYPE_LABELS[activeNode.type]} nodeId={activeNode.id} theme={theme} />
-                {activeNode.description && <>
-                  <div className="info-label">Description</div>
-                  <p className="info-text">{activeNode.description}</p>
-                </>}
-                {activeNode.insight && <>
-                  <div className="info-label">Insight</div>
-                  <p className="info-text">{activeNode.insight}</p>
+                {activeNode.intent && <>
+                  <div className="info-label">Intent</div>
+                  <p className="info-text">{activeNode.intent}</p>
                 </>}
                 {activeNode.mechanism && <>
                   <div className="info-label">Mechanism</div>
