@@ -5,8 +5,7 @@ import React from 'react';
 export const NAV = [
   { label: 'Design decisions',  href: './design-decisions.html' },
   { label: 'Azure deployments', href: './azure-deployments.html' },
-  { label: 'Landing Zone',      href: './landing-zone.html' },
-  { label: 'GitHub',            href: 'https://github.com/orgs/gazelle-cloud/', external: true },
+{ label: 'GitHub',            href: 'https://github.com/orgs/gazelle-cloud/', external: true },
 ];
 
 // ── linkEnds ─────────────────────────────────────────────────────────────────
