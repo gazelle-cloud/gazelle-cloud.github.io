@@ -341,7 +341,12 @@ export function NavBar({ activeHref, children }) {
 // --bg-color so the ForceGraph2D backgroundColor prop stays in sync.
 // Returns { theme, toggleTheme, bgColor }.
 export function useTheme() {
-  const [theme, setTheme] = React.useState('dark');
+  const [theme, setTheme] = React.useState(() => {
+    const saved = localStorage.getItem('theme');
+    const initial = saved === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = initial === 'light' ? 'light' : '';
+    return initial;
+  });
   const [bgColor, setBgColor] = React.useState(
     () => getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim()
   );
@@ -350,6 +355,7 @@ export function useTheme() {
     setTheme(t => {
       const next = t === 'dark' ? 'light' : 'dark';
       document.documentElement.dataset.theme = next === 'light' ? 'light' : '';
+      localStorage.setItem('theme', next);
       setBgColor(getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim());
       return next;
     });
