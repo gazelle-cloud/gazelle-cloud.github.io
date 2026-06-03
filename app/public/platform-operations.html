@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./shell.css">
+  <script type="importmap">{ "imports": {
+    "react": "https://esm.sh/react",
+    "react-dom": "https://esm.sh/react-dom",
+    "react-dom/client": "https://esm.sh/react-dom/client"
+  }}</script>
+</head>
+
+<body>
+
+  <script src="//cdn.jsdelivr.net/npm/@babel/standalone"></script>
+  <script type="text/jsx" data-type="module">
+    import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { createPortal } from 'react-dom';
+    import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
+    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
+
+    setupLayout();
+
+    // ─── constants ───────────────────────────────────────────────────────────
+
+    const COLORS = {
+      operation: PALETTE.ENTRY,
+      decision:  PALETTE.LEAF,
+      file:      PALETTE.CONNECTOR,
+    };
+
+    const NODE_TYPES = ['operation', 'decision', 'file'];
+
+    const TYPE_LABELS = {
+      operation: 'platform-operations',
+      decision:  'design-decisions',
+      file:      'files',
+    };
+
+    const dotRadius = node =>
+      node.type === 'operation' ? 6 : 2 + node.__weight * 7;
+
+    // ─── data prep ───────────────────────────────────────────────────────────
+
+    const raw = await fetch('./platform-operations.json').then(r => r.json());
+
+    const ids = new Set(raw.nodes.map(n => n.id));
+    raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
+
+    normalizeNodeWeights(raw);
+
+    const rim = raw.nodes.filter(n => n.type === 'operation');
+    rim.forEach((n, i) => {
+      const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
+      n.fx = Math.cos(angle) * 280;
+      n.fy = Math.sin(angle) * 280;
+    });
+
+    // ─── detail pane helpers ─────────────────────────────────────────────────
+
+    function ConnectedList({ label, items }) {
+      if (!items?.length) return null;
+      return <>
+        <div className="info-label">{label}</div>
+        <div style={{ margin: '4px 0 8px' }}>
+          {items.map((item, i) => (
+            <div key={i} className="info-text"
+              style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all', margin: '2px 0' }}>
+              {item}
+            </div>
+          ))}
+        </div>
+      </>;
+    }
+
+    function NodeDetail({ node, links, theme }) {
+      if (!node) return (
+        <div className="detail-empty">
+          Hover or click a node<br />to explore its connections.
+        </div>
+      );
+
+      const connected = links
+        .filter(l => { const [s, t] = linkEnds(l); return s === node.id || t === node.id; })
+        .map(l => {
+          const [s, t] = linkEnds(l);
+          return { id: s === node.id ? t : s, type: l.type };
+        });
+
+      const reasoning = connected.filter(c => c.type === 'reasoning').map(c => c.id);
+      const files     = connected.filter(c => c.type === 'file').map(c => c.id);
+      const other     = connected.filter(c => c.type !== 'reasoning' && c.type !== 'file').map(c => c.id);
+
+      return <>
+        <DetailHeader typeLabel={TYPE_LABELS[node.type]} nodeId={node.id} theme={theme} />
+        <ConnectedList label="Reasoning (decisions)" items={reasoning} />
+        <ConnectedList label="Files" items={files} />
+        <ConnectedList label="Connected" items={other} />
+      </>;
+    }
+
+    // ─── component ───────────────────────────────────────────────────────────
+
+    function Graph() {
+      const fgRef = React.useRef();
+      const { theme, toggleTheme, bgColor } = useTheme();
+
+      const size = useVizPaneSize(fgRef);
+
+      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
+      const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
+
+      const physicsProps = useGraphPhysics(fgRef, graph, fg => {
+        fg.d3Force('link').distance(60);
+        fg.d3Force('collision', forceCollide(n => dotRadius(n) + 3));
+        // decisions cluster in the center, files orbit in a middle ring
+        fg.d3Force('radial', forceRadial(
+          n => n.type === 'decision' ? 0 : n.type === 'file' ? 160 : 0,
+          0, 0
+        ).strength(n => n.type === 'operation' ? 0 : n.type === 'decision' ? 0.3 : 0.15));
+      });
+
+      const linkColor = React.useCallback(l => {
+        const dim    = theme === 'dark' ? 'rgba(180,195,225,0.28)' : 'rgba(80,80,100,0.15)';
+        const active = theme === 'dark' ? 'rgba(235,242,255,0.95)' : 'rgba(30,30,50,0.75)';
+        const faded  = theme === 'dark' ? 'rgba(180,180,180,0.04)' : 'rgba(80,80,100,0.04)';
+        if (!activeId) return dim;
+        const [s, t] = linkEnds(l);
+        return (s === activeId || t === activeId) ? active : faded;
+      }, [activeId, theme]);
+
+      const paintNode = React.useCallback((node, ctx, globalScale) => {
+        const isActive    = node.id === activeId;
+        const isNeighbour = neighbours?.has(node.id);
+        const isMatch     = searchMatchIds.has(node.id);
+        const dimmed      = activeId
+          ? !isActive && !isNeighbour
+          : searchMatchIds.size > 0 && !isMatch;
+        const r           = dotRadius(node) / globalScale;
+
+        const activeColor = theme === 'dark' ? '#fff' : '#1a1b26';
+        const backdrop    = theme === 'dark' ? 'rgba(31,36,48,0.9)' : 'rgba(245,241,232,0.9)';
+
+        ctx.globalAlpha = dimmed ? RENDER.dimmedAlpha : 1;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
+        ctx.fillStyle = isActive ? activeColor : COLORS[node.type];
+        ctx.fill();
+
+        const isRim     = node.type === 'operation';
+        const showLabel = isRim || isActive || isNeighbour || isMatch;
+        if (showLabel) {
+          const gap = r + RENDER.labelGap / globalScale;
+          let lx, ly, align;
+          if (isRim) {
+            const angle = Math.atan2(node.y, node.x);
+            lx    = node.x + Math.cos(angle) * gap;
+            ly    = node.y + Math.sin(angle) * gap;
+            align = Math.cos(angle) >= 0 ? 'left' : 'right';
+          } else {
+            lx    = node.x + gap;
+            ly    = node.y;
+            align = 'left';
+          }
+          drawLabel(ctx, node.id, lx, ly, align, RENDER.labelFontSize, globalScale,
+            isActive ? activeColor : COLORS[node.type] ?? '#ccc', backdrop);
+        }
+
+        ctx.globalAlpha = 1;
+        node.__r = r;
+      }, [activeId, neighbours, searchMatchIds, theme]);
+
+      return <>
+        <NavBar activeHref="./platform-operations.html">
+          <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
+                       colors={COLORS} visible={visible} toggleType={toggleType} />
+          <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
+                     setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
+          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+        </NavBar>
+
+        {createPortal(
+          <NodeDetail node={activeNode} links={graph.links} theme={theme} />,
+          document.getElementById('detail-pane')
+        )}
+
+        <ForceGraph2D
+          ref={fgRef}
+          width={size.width}
+          height={size.height}
+          graphData={graph}
+          linkColor={linkColor}
+          {...physicsProps}
+          backgroundColor={bgColor}
+          onNodeHover={node => setHoveredId(node?.id ?? null)}
+          onNodeClick={onNodeClick}
+          onBackgroundClick={handleBackgroundClick}
+          nodeCanvasObject={paintNode}
+          nodePointerAreaPaint={(node, color, ctx) => {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, (node.__r ?? 4) + RENDER.hitTestPadding, 0, 2 * Math.PI);
+            ctx.fill();
+          }}
+        />
+      </>;
+    }
+
+    // ─── mount ───────────────────────────────────────────────────────────────
+
+    createRoot(document.getElementById('graph')).render(<Graph />);
+  </script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="8d6f8fcd-8e1a-4eb4-8c64-1b32c60e82cd"></script>
+</body>
+</html>

@@ -3,9 +3,10 @@ import React from 'react';
 // ── navigation entries ───────────────────────────────────────────────────────
 // Add one object here whenever you create a new page. That's it.
 export const NAV = [
-  { label: 'Design decisions',  href: './design-decisions.html' },
-  { label: 'Azure deployments', href: './azure-deployments.html' },
-{ label: 'GitHub',            href: 'https://github.com/orgs/gazelle-cloud/', external: true },
+  { label: 'Design decisions',    href: './design-decisions.html' },
+  { label: 'Platform operations', href: './platform-operations.html' },
+  { label: 'Azure deployments',   href: './azure-deployments.html' },
+  { label: 'GitHub',              href: 'https://github.com/orgs/gazelle-cloud/', external: true },
 ];
 
 // ── linkEnds ─────────────────────────────────────────────────────────────────
