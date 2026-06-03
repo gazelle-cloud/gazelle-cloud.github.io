@@ -1,384 +1,324 @@
 ﻿{
   "nodes": [
     {
-      "id": "bigbang",
+      "id": "as-code",
       "type": "rule",
-      "intent": "A deployment that cannot be traced, reproduced, or validated from zero is not a deployment — every change travels through scaffolded workflows with config committed to the repo, validates through a prod-identical test hierarchy with branch-gated promotion, and the full platform provisions from zero and returns to zero without human access, verified weekly."
-    },
-    {
-      "id": "costless-platform",
-      "type": "rule",
-      "intent": "Any platform resource with a fixed cost floor bills whether work happens or not — platform resources must use free-tier SKUs only, and each application's spend flows to a dedicated invoice section, never pooled."
+      "intent": "Configuration has one source of truth: the repo. Every change flows through a branch, a PR, and a pipeline. Nothing is set manually."
     },
     {
       "id": "deny-by-default",
       "type": "rule",
-      "intent": "A security requirement without a hard control is a convention — every boundary is enforced by Azure Policy Deny at management group scope regardless of the resource's default posture, with self-service exemptions as the only escape path."
+      "intent": "Every resource type is denied until the platform has security controls and observability wired. Approval is the platform's commitment, not a task left to the application team."
     },
     {
-      "id": "identity",
+      "id": "landing-zone-on-demand",
       "type": "rule",
-      "intent": "Every principal that touches the platform is an Entra ID identity — no local accounts, no static secrets, no individual role bindings. Authentication is federated, access is group-scoped, and each landing zone owns its identity boundary."
+      "intent": "Self-service, self-contained landing zones. The application team owns it end-to-end — what they build and how they run it is their call."
     },
     {
-      "id": "you-built-it-you-run-it",
+      "id": "zero-cost-on-idle",
       "type": "rule",
-      "intent": "Sharing infrastructure between landing zones couples their lifecycles — each zone gets its own subscription, identity, VNet, monitoring, and automation runtime so teams have full operational control inside a boundary the platform creates."
+      "intent": "No flat fees. The platform favours consumption-based services that scale to zero when nothing is running."
     },
     {
       "id": "allowed-resources",
       "type": "decision",
-      "mechanism": "Azure Policy denies resource types not on the platform-approved list.",
-      "why": "An Azure resource absent from the list has no security baseline or diagnostic coverage."
+      "mechanism": "Every resource is denied by default. It appears on the approved list only after the platform has whitelisted.",
+      "why": "Without whitelisting, it's impossible to tell if a resource is misconfigured or made with intent."
     },
     {
       "id": "application-profile",
       "type": "decision",
-      "mechanism": "An application must be registered before landing zones are provisioned — establishes billing scope, access groups, and repository.",
-      "why": "without this, billing per application, and landing zone self-service and autonomy wouldn't exist."
+      "mechanism": "Every application is registered as Application Profile before any landing zone can be created. The profile binds an Entra ID group, a GitHub repository, and an Azure invoice section.",
+      "why": "A landing zone without a Application Profile has no billing scope to charge, and no repository to fetch landing zone parameters. The Application Profile is the prerequisite that makes self-service possible."
     },
     {
       "id": "application-teams-own-the-cost-cost-forecast",
       "type": "decision",
       "mechanism": "Budget alerts use forecast thresholds — single alert detects spend trajectory regardless of consumption level.",
-      "why": "Actual-spend thresholds (50%, 80%) fire on normal consumption variability — noise without decision value. A single forecast threshold detects trend deviations regardless of spend pattern."
+      "why": "Actual-spend thresholds (80%) fire on normal consumption variability — noise without decision value. A forecast threshold catches the trend deviation early enough for the team to act"
     },
     {
       "id": "application-teams-own-the-cost",
       "type": "decision",
-      "mechanism": "Each application has a dedicated billing scope. All its subscriptions bill to it — cost attribution is structural, not inferred from tags.",
+      "mechanism": "Each application has its own billing scope. Every subscription bills to it — cost attribution is structural, not inferred from tags. The team that builds it sees exactly what it costs.",
       "why": "Shared invoice sections make it impossible to attribute a cost anomaly to a single team without manual analysis."
     },
     {
       "id": "azure-native-services-only",
       "type": "decision",
-      "mechanism": "Only ARM-reachable services are eligible — Policy, RBAC, Deployment Stacks, and diagnostic settings are all ARM-native controls.",
-      "why": "Non Azure Resource Manager resources have no policy, RBAC, or diagnostic coverage, leaving control plane blind for platform"
+      "mechanism": "Only ARM-reachable services are eligible. Policy, RBAC, Deployment Stacks, and diagnostic settings are all ARM-native controls.",
+      "why": "Non-ARM resources have no policy, RBAC, or diagnostic coverage. The control plane cannot enforce security baselines on what it cannot see."
     },
     {
       "id": "branch-gated-environment-promotion",
       "type": "decision",
-      "mechanism": "Every production deployment requires prior validation in a test environment — enforced, not conventional.",
+      "mechanism": "Every platform production deployment passes through a test environment first. This is enforced by branch protection rules and workflow structure.",
       "why": "Without an enforced gate, a single push can change production infrastructure with no prior validation."
     },
     {
       "id": "config-lives-in-the-repo",
       "type": "decision",
-      "mechanism": "Configuration has one committed source of truth — propagated to runtime at deployment, never set manually.",
-      "why": "Without one committed source, environments drift and onboarding means tracing values through the GitHub UI."
+      "mechanism": "Configuration has one committed source of truth — a single JSON file in the repo. Values are propagated to GitHub variables and Bicep parameters at deployment time. Nothing is set manually in the UI or injected out of band.",
+      "why": "Without one committed source, environments drift. Onboarding a new engineer means tracing values through the GitHub UI instead of reading a file."
     },
     {
       "id": "custom-policy-definitions",
       "type": "decision",
-      "mechanism": "When no built-in policy fulfills the required effect, a custom definition is authored to close the gap.",
-      "why": "Without a custom definition, a resource type missing built-in Deny or diagnostic coverage cannot be whitelisted."
+      "mechanism": "When no built-in policy provides the required Deny or DeployIfNotExists effect, a custom definition is authored to close the gap.",
+      "why": "A built-in policy that only offers Audit logs the violation but cannot prevent it. A custom Deny definition makes the guardrail enforceable, not advisory."
     },
     {
       "id": "declarative-resource-lifecycle",
       "type": "decision",
-      "mechanism": "All Deployment Stacks use deleteAll lifecycle. Any Azure resource not declared in the Bicep template is deleted on the next deployment — the template is the source of truth.",
-      "why": "Without deleteAll, orphaned resources persist with no code representation and decommissioning means manual auditing."
+      "mechanism": "Deployment Stacks use deleteAll lifecycle. Any Azure resource no longer declared in the Bicep template is deleted on the next deployment. The template is source of truth — what's in the code is what exists in Azure.",
+      "why": "Without deleteAll, orphaned resources persist with no code representation. Decommissioning becomes manual task."
     },
     {
       "id": "deny-cross-tenant-replication",
       "type": "decision",
-      "mechanism": "Azure Policy denies cross-tenant object replication.",
-      "why": "Replication is a data-plane operation network policies don't see, so it needs a separate deny."
+      "mechanism": "Data can only be replicated within the tenant boundary — replication to external tenants requires an explicit policy exemption.",
+      "why": "Denying public access alone doesn't prevent data from leaving the tenant via replication rules."
     },
     {
       "id": "deny-local-authentication",
       "type": "decision",
-      "mechanism": "Azure Policy denies local authentication. Exceptions require a policy exemption.",
-      "why": "A key or connection string is an identity outside Entra — unseen by RBAC, audit, and Conditional Access."
+      "mechanism": "Azure Policy denies local authentication on every resource type that supports it. All access must go through Entra ID — keys, connection strings, and shared access is blocked.",
+      "why": "Keys and connection strings are credentials outside Entra ID — invisible to RBAC, exempt from conditional access, and impossible to attribute to a principal in audit logs."
     },
     {
       "id": "deny-public-network-access",
       "type": "decision",
-      "mechanism": "Azure Policy denies public network access. Exceptions require a policy exemption.",
-      "why": "Without a deny, accidental public exposure looks identical to intentional and acquires attack surface silently."
+      "mechanism": "Azure Policy denies public network access on every resource type that supports it. Services are reachable through PaaS service native firewalls.",
+      "why": "Without a deny, accidental public exposure looks identical to intentional. The resource silently acquires attack surface that no review process catches."
     },
     {
       "id": "deny-weak-tls",
       "type": "decision",
-      "mechanism": "Azure Policy denies TLS versions below 1.2. Exceptions require a policy exemption.",
-      "why": "Without an enfordment standards, traffic can be silently downgraded to a cryptographically weak TLS version."
+      "mechanism": "Azure Policy denies TLS versions below 1.2 on every resource type that exposes a transport endpoint.",
+      "why": "Without enforcement, traffic can be silently downgraded to a cryptographically weak TLS version."
     },
     {
       "id": "deployment-logic-reusable-workflow",
       "type": "decision",
-      "mechanism": "Gating and execution are separate layers — triggers own conditions and gates, execution layers own logic. Never merged.",
-      "why": "Mixing gating with execution forces the same deploy logic to be duplicated per environment."
+      "mechanism": "Gating and execution are separate workflow layers. Trigger workflows own conditions, branch rules, and environment gates. Template workflows own deployment logic. The two are never merged — a trigger calls a template, never the reverse.",
+      "why": "Mixing gating with execution forces the same deploy logic to be duplicated per environment. A bug fix in deployment logic becomes a multi-file change."
     },
     {
       "id": "deployment-logic-scaffolding",
       "type": "decision",
-      "mechanism": "Each landing zone owns its generated parameter file and workflow — no artifacts are shared between zones.",
-      "why": "Without a dedicated workflow per landing zone, deployment lifecycles are coupled — one zone's change affects another's"
-    },
-    {
-      "id": "deployment-logic-workflow-prefix",
-      "type": "decision",
-      "mechanism": "Landing zones are discoverable by naming convention alone. No central list is maintained.",
-      "why": "Without the prefix contract, a hardcoded list needs an entry per zone and fails silently when one is missing."
+      "mechanism": "Each landing zone owns its generated parameter file and workflow. No artifacts are shared between zones — a landing zone's deployment is fully self-contained from trigger to stack update.",
+      "why": "Without a dedicated workflow per landing zone, deployment lifecycles are coupled. One zone's change triggers another's redeployment."
     },
     {
       "id": "end-to-end-deployment",
       "type": "decision",
-      "mechanism": "All infrastructure changes travel through PR → review → GitHub Actions → Bicep pipeline — no change reaches Azure outside it.",
-      "why": "A change made outside the pipeline has no code representation — invisible to review and deleted on the next deploy."
+      "mechanism": "Each platform capability owns its Bicep modules and GitHub workflows end-to-end, so changes are fully isolated.",
+      "why": "Without isolation, a change to one capability risks triggering or breaking another's deployment — the blast radius of every PR becomes unpredictable."
     },
     {
       "id": "federated-auth-to-github",
       "type": "decision",
-      "mechanism": "Pipelines authenticate via short-lived federated tokens — no static secrets stored, each token scoped to repo and environment.",
-      "why": "Static secrets outlive the job and can be extracted; OIDC tokens expire with the run."
-    },
-    {
-      "id": "group-based-access-assignment",
-      "type": "decision",
-      "mechanism": "Azure roles assigned to Entra ID groups, not individuals. Platform owns groups and role bindings; membership managed in Entra ID.",
-      "why": "Without groups, access management escapes Entra ID into infrastructure code — access reviews, and audit trails no longer apply to platform access."
+      "mechanism": "Pipelines authenticate to Azure via OIDC federation — short-lived tokens scoped to a specific repo and environment.",
+      "why": "Client secrets persist after the workflow run and must be rotated manually."
     },
     {
       "id": "identity-entra-id-app",
       "type": "decision",
-      "mechanism": "A single Entra ID app registration serves as the platform identity — manages platform resources, creates landing zones, and assigns Directory.Read.All to each LZ identity.",
-      "why": "Managed identities need an Azure resource to exist — app registrations are pure Entra ID objects that can exist before any subscription."
+      "mechanism": "A single Entra ID app registration is the platform identity. It provisions landing zones, assigns Graph permissions to their managed identities.",
+      "why": "A managed identity requires an Azure resource as its host. The platform has no subscription of its own — an app registration exists in Entra ID independent of any Azure infrastructure."
     },
     {
       "id": "identity-github-app",
       "type": "decision",
-      "mechanism": "A single GitHub App serves as the platform's GitHub-side identity — used by all platform workflows and landing zone deployments to authenticate to GitHub.",
+      "mechanism": "A single GitHub App serves as the platform's GitHub-side identity. All platform workflows and landing zone deployments authenticate to GitHub through it — each workflow mints its own short-lived token from the same App.",
       "why": "Without a dedicated GitHub identity, cross-repo and org-level operations have no viable auth path."
     },
     {
       "id": "identity-graph-permissions",
       "type": "decision",
-      "mechanism": "Each landing zone identity gets Directory.Read.All to query users, groups, and principals in Entra ID.",
-      "why": "Without Directory.Read.All, LZ identities cannot query Entra ID — group membership, user lookups, and principal resolution all fail."
+      "mechanism": "Each landing zone identity receives Directory.Read.All at creation time. This lets automation jobs query Entra ID for users, groups, and principals.",
+      "why": "Without Directory.Read.All, landing zone automation cannot detect deleted principals or resolve group membership. Role cleanup jobs fail silently and stale assignments accumulate."
     },
     {
       "id": "ipam",
       "type": "decision",
-      "mechanism": "Landing zone creation automatically allocates each VNet a unique CIDR from the platform managed address space. No CIDR is assigned manually",
-      "why": "Fixing an address overlap means re-addressing — destroying and recreating every resource holding an IP."
+      "mechanism": "Landing zone creation automatically allocates each VNet a unique CIDR from the platform-managed address space.",
+      "why": "Fixing an address overlap means re-wiring network."
     },
     {
       "id": "job-function-scoped-roles",
       "type": "decision",
-      "mechanism": "Custom roles are scoped to job function, not resource type. When new capabilities require new actions, existing roles are extended — not new ones created",
-      "why": "Resource-specific roles multiply with every new type until auditing them becomes impractical."
+      "mechanism": "Custom roles are scoped to job function, not resource type. A role describes what a person does (platform engineer), not what resources they touch. When new capabilities require new actions, existing roles are extended — new roles are not created.",
+      "why": "Resource-specific roles multiply with every new type until auditing them becomes impractical. Function-scoped roles grow in actions, not in count."
     },
     {
       "id": "landing-zone-autonomy-action-group",
       "type": "decision",
-      "mechanism": "A dedicated Action Group per landing zone wires alerts to contact details sourced from the application profile.",
-      "why": "Hardcoded contacts go stale as teams change — alerts fire to former members, incidents go unanswered"
+      "mechanism": "Each landing zone has a dedicated Action Group that wires budget and activity log — to contact details sourced from the application profile. The team that owns the landing zone receives every notification.",
+      "why": "Hardcoded contacts go stale as teams change. Alerts fire to former members, incidents go unanswered, and nobody knows until production is affected."
     },
     {
       "id": "landing-zone-autonomy-automation-control-plane",
       "type": "decision",
-      "mechanism": "Automation jobs are control-plane only — data-plane access and fixed-cost image hosting are prohibited.",
-      "why": "VNet integration carries a fixed monthly cost — without it, data-plane access is unavailable and a private registry is unreachable."
+      "mechanism": "Automation jobs call the ARM API only — no data-plane access, no VNet integration, no private registry. Images are pulled from public registries.",
+      "why": "VNet integration carries a fixed monthly cost per landing zone. By not provisioning it, the platform makes data-plane access and private registries structurally unreachable — control-plane-only is enforced by architecture, not policy."
     },
     {
       "id": "landing-zone-autonomy-automation",
       "type": "decision",
-      "mechanism": "Each landing zone has a dedicated automation runtime — centrally managed, running inside the landing zone's subscription.",
-      "why": "Centralized automation requires a shared management subscription with baseline cost and team dependency — the platform has none."
+      "mechanism": "Each landing zone has a dedicated automation runtime running inside its own subscription. Job definitions and images are centrally managed by the platform, but execution happens locally.",
+      "why": "Centralized automation requires a shared management subscription with baseline cost and team dependency. The platform has neither — automation runs where the landing zone lives."
     },
     {
       "id": "landing-zone-autonomy-github-runners",
       "type": "decision",
-      "mechanism": "Pipelines must execute inside the landing zone network.",
-      "why": "Public runners require public data-plane exposure — Azure Policy denies that, blocking all data-plane pipeline jobs."
+      "mechanism": "GitHub-hosted agents run inside the landing zone network, giving workflows private access to Azure services.",
+      "why": "Public network access is denied on every service. A public GitHub runner has no network path to the data plane."
     },
     {
       "id": "landing-zone-autonomy-identity",
       "type": "decision",
-      "mechanism": "Each landing zone has a single managed identity that serves all its capabilities — workflows, automation jobs, and Entra ID queries.",
-      "why": "Without a single identity, each capability needs its own RBAC and OIDC config — permission surface multiplies with every new capability."
+      "mechanism": "Each landing zone has a single managed identity that serves all its capabilities — GitHub workflows, automation jobs, and Entra ID queries.",
+      "why": "Without a single identity, each capability needs its own RBAC and OIDC config. The permission surface multiplies with every new capability and auditing becomes impractical."
     },
     {
       "id": "landing-zone-autonomy-monitoring",
       "type": "decision",
-      "mechanism": "A dedicated Log Analytics workspace per landing zone with 30-day retention.",
-      "why": "A shared workspace blends ingestion cost across zones — no single team owns a line on the bill."
+      "mechanism": "Each landing zone has a dedicated Log Analytics workspace with retention within the free-tier boundary.",
+      "why": "A shared workspace merges ingestion costs across landing zones. Attributing a cost to application requires additional tooling."
     },
     {
       "id": "landing-zone-autonomy-resource-group",
       "type": "decision",
-      "mechanism": "All platform-managed landing zone resources live in a single resource group, and protected by Azure Deployment Stack from unwanted actions.",
-      "why": "A shared resource group blends platform and application resources — no clean ownership boundary exists for teardown, RBAC, or incident management."
+      "mechanism": "Platform-managed landing zone resources live in a single resource group, protected by an Azure Deployment Stack.",
+      "why": "A shared resource group blends platform and application resources. No clean boundary exists for teardown, RBAC, or incident management when both share the same scope."
     },
     {
       "id": "landing-zone-autonomy-vnet",
       "type": "decision",
-      "mechanism": "Each landing zone gets a dedicated VNet with a CIDR from IPAM. PaaS services connect via service endpoints — private endpoints are not used because they add fixed hourly cost.",
+      "mechanism": "Each landing zone gets a dedicated VNet with a CIDR allocated by IPAM. PaaS services connect via service endpoints — private endpoints are not used because they add fixed hourly cost per endpoint.",
       "why": "Without a dedicated VNet, network routing and configuration become shared decisions requiring cross-team coordination."
-    },
-    {
-      "id": "platform-capability-autonomy",
-      "type": "decision",
-      "mechanism": "Each platform capability has a dedicated workflow that owns its complete deployment. No capability's resources are provisioned outside its own workflow.",
-      "why": "Without per-capability deployment, changes accumulate circular dependencies that force coordinated redeploys."
     },
     {
       "id": "platform-managed-tags",
       "type": "decision",
-      "mechanism": "Azure Policy enforces required tags on every resource. Values come from the application profile — not from whoever creates the resource.",
-      "why": "Tags left to whoever creates a resource drift and go missing, so incident routing fails."
+      "mechanism": "Azure Policy enforces required tags on every resource. Tag values are sourced from the application profile and remediated nightly — they are never manually authored.",
+      "why": "Manually applied tags drift within weeks. When an incident fires, the email points to someone who left the team and the alert goes unanswered."
     },
     {
       "id": "platform-test-hierarchy-environment-tier",
       "type": "decision",
-      "mechanism": "Environment tier is a lifecycle label, not a placement control — all landing zones share one hierarchy.",
-      "why": "Without uniform placement, dev and staging landing zones fall under different policy and RBAC — platform rules become tier-dependent."
+      "mechanism": "All application landing zones live under the same management group hierarchy and inherit the same policy and RBAC — regardless of tier.",
+      "why": "Without uniform placement, dev and staging landing zones fall under different policy and RBAC. Platform rules become tier-dependent and the security baseline fractures."
     },
     {
       "id": "platform-test-hierarchy",
       "type": "decision",
-      "mechanism": "Platform changes deploy to a prod-identical test hierarchy before reaching production — environment where failures are safe to land.",
-      "why": "Without a parallel hierarchy, platform changes hit production directly — failures land on live landing zones."
+      "mechanism": "Platform changes deploy to a prod-identical test management group hierarchy before reaching production. It is where failures are safe to land.",
+      "why": "Without a parallel hierarchy, platform changes hit production directly."
     },
     {
       "id": "policy-assignment-naming-convention-reference",
       "type": "decision",
-      "mechanism": "Policy assignment ARM IDs are never hardcoded — a generated reference is the single resolution path.",
-      "why": "Without the generated file, assignment IDs are hardcoded from a portal lookup — they drift silently when an assignment is redeployed and its ARM ID changes."
-    },
-    {
-      "id": "policy-assignment-naming-convention",
-      "type": "decision",
-      "mechanism": "Assignment names must encode enforcement effect and compliance domain — posture legible from the name alone.",
-      "why": "Without the prefix, a reviewer can't tell from the name whether an assignment denies, audits, or modifies resources."
+      "mechanism": "Policy assignment ARM IDs are never hardcoded. A generated reference file is the single resolution path — it is rebuilt on every policy deployment, so exemptions always point to the current assignment ID.",
+      "why": "Without the generated file, assignment IDs are hardcoded from a portal lookup. They drift silently when an assignment is redeployed and its ARM ID changes, breaking every exemption that references it."
     },
     {
       "id": "self-service-policy-exemptions-defender-for-cloud",
       "type": "decision",
-      "mechanism": "The platform applies a fixed set of Defender for Cloud exemptions to every landing zone — recommendations with no free remediation path.",
-      "why": "Excluded recommendations have no free remediation path — exempting them removes noise from the compliance score."
+      "mechanism": "The platform provides a set of Defender for Cloud exemptions. These cover recommendations where remediation requires a paid SKU or infrastructure with flat cost.",
+      "why": "Unexempted recommendations with no free remediation path inflate the compliance backlog with items nobody can act on. The score becomes noise."
     },
     {
       "id": "self-service-policy-exemptions",
       "type": "decision",
-      "mechanism": "Policy exemptions are declared in code by application teams — no operator approval, no portal creation.",
-      "why": "Without self-service, exemption decisions shift to operators who lack the application-specific context to evaluate them."
-    },
-    {
-      "id": "single-region-deployments-policy-enforcement",
-      "type": "decision",
-      "mechanism": "Control plane policy enforces region boundaries independently of pipeline configuration.",
-      "why": "The pipeline's region setting is bypassable by portal or script; Azure policy enforces it at the control plane."
+      "mechanism": "Policy exemptions are declared in code by application teams. The team that needs the exemption authors it in the bicepparam, and the PR is the review record.",
+      "why": "Without self-service, the platform team becomes a bottleneck for every landing zone change."
     },
     {
       "id": "single-region-deployments",
       "type": "decision",
-      "mechanism": "Region is defined once and injected everywhere — engineers never specify it. Pipeline, Policy, and VNet stay in sync automatically.",
-      "why": "Without a platform-managed region, engineers make geographic decisions manually — every deployment, every service, every landing zone."
+      "mechanism": "Region is defined once in platform configuration and injected everywhere — engineers never specify it. Pipeline, Policy, and VNet all consume the same value.",
+      "why": "Without a platform-managed region, engineers make geographic decisions manually for every deployment, every service, every landing zone. Drift between components is inevitable."
     },
     {
       "id": "subscription-reuse-lifecycle",
       "type": "decision",
-      "mechanism": "Landing zone provisioning draws from a 'subscription bank'. Decommissioned subscriptions go into a bank — new ones are created only when the bank is empty.",
-      "why": "MCA quota counts active and cancelled subscriptions, so always creating new subscription exhausts quota ceiling."
+      "mechanism": "Landing zone provisioning draws from a subscription bank. Decommissioned subscriptions return to the bank after deleteAll guarantees they are empty. New subscriptions are created only when the bank is empty.",
+      "why": "MCA quota counts active and cancelled subscriptions equally. Always creating new subscriptions exhausts the quota ceiling — reuse is the only sustainable path."
     },
     {
       "id": "visibility-out-of-the-box",
       "type": "decision",
-      "mechanism": "Every approved resource type has diagnostic settings deployed automatically by Azure Policy. Adding a type to the approved list requires adding its diagnostic coverage.",
-      "why": "Without diagnostic settings defined per approved type, telemetry depends on each team remembering to enable it."
+      "mechanism": "Every whitelisted resource type has diagnostic settings deployed automatically via DeployIfNotExists policy. Telemetry flows to the landing zone's Log Analytics workspace with no team action required.",
+      "why": "Opt-in telemetry produces gaps that surface only during an incident."
     }
   ],
   "links": [
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "end-to-end-deployment",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "declarative-resource-lifecycle",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "config-lives-in-the-repo",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "deployment-logic-scaffolding",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "deployment-logic-reusable-workflow",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "deployment-logic-workflow-prefix",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "policy-assignment-naming-convention",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "policy-assignment-naming-convention-reference",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "platform-managed-tags",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "single-region-deployments-policy-enforcement",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "platform-test-hierarchy",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "platform-test-hierarchy-environment-tier",
       "relationship": "groups"
     },
     {
-      "source": "bigbang",
+      "source": "as-code",
       "target": "branch-gated-environment-promotion",
-      "relationship": "groups"
-    },
-    {
-      "source": "costless-platform",
-      "target": "application-teams-own-the-cost",
-      "relationship": "groups"
-    },
-    {
-      "source": "costless-platform",
-      "target": "application-teams-own-the-cost-cost-forecast",
-      "relationship": "groups"
-    },
-    {
-      "source": "costless-platform",
-      "target": "single-region-deployments",
-      "relationship": "groups"
-    },
-    {
-      "source": "costless-platform",
-      "target": "landing-zone-autonomy-automation",
-      "relationship": "groups"
-    },
-    {
-      "source": "costless-platform",
-      "target": "landing-zone-autonomy-automation-control-plane",
       "relationship": "groups"
     },
     {
@@ -403,6 +343,11 @@
     },
     {
       "source": "deny-by-default",
+      "target": "deny-local-authentication",
+      "relationship": "groups"
+    },
+    {
+      "source": "deny-by-default",
       "target": "deny-weak-tls",
       "relationship": "groups"
     },
@@ -422,93 +367,78 @@
       "relationship": "groups"
     },
     {
-      "source": "identity",
-      "target": "identity-entra-id-app",
-      "relationship": "groups"
-    },
-    {
-      "source": "identity",
-      "target": "identity-github-app",
-      "relationship": "groups"
-    },
-    {
-      "source": "identity",
-      "target": "federated-auth-to-github",
-      "relationship": "groups"
-    },
-    {
-      "source": "identity",
-      "target": "deny-local-authentication",
-      "relationship": "groups"
-    },
-    {
-      "source": "identity",
-      "target": "group-based-access-assignment",
-      "relationship": "groups"
-    },
-    {
-      "source": "identity",
-      "target": "job-function-scoped-roles",
-      "relationship": "groups"
-    },
-    {
-      "source": "identity",
-      "target": "identity-graph-permissions",
-      "relationship": "groups"
-    },
-    {
-      "source": "identity",
-      "target": "landing-zone-autonomy-identity",
-      "relationship": "groups"
-    },
-    {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "application-profile",
       "relationship": "groups"
     },
     {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "subscription-reuse-lifecycle",
       "relationship": "groups"
     },
     {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "ipam",
       "relationship": "groups"
     },
     {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "platform-capability-autonomy",
       "relationship": "groups"
     },
     {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "visibility-out-of-the-box",
       "relationship": "groups"
     },
     {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "landing-zone-autonomy-vnet",
       "relationship": "groups"
     },
     {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "landing-zone-autonomy-resource-group",
       "relationship": "groups"
     },
     {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "landing-zone-autonomy-monitoring",
       "relationship": "groups"
     },
     {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "landing-zone-autonomy-github-runners",
       "relationship": "groups"
     },
     {
-      "source": "you-built-it-you-run-it",
+      "source": "landing-zone-on-demand",
       "target": "landing-zone-autonomy-action-group",
+      "relationship": "groups"
+    },
+    {
+      "source": "zero-cost-on-idle",
+      "target": "application-teams-own-the-cost",
+      "relationship": "groups"
+    },
+    {
+      "source": "zero-cost-on-idle",
+      "target": "application-teams-own-the-cost-cost-forecast",
+      "relationship": "groups"
+    },
+    {
+      "source": "zero-cost-on-idle",
+      "target": "single-region-deployments",
+      "relationship": "groups"
+    },
+    {
+      "source": "zero-cost-on-idle",
+      "target": "landing-zone-autonomy-automation",
+      "relationship": "groups"
+    },
+    {
+      "source": "zero-cost-on-idle",
+      "target": "landing-zone-autonomy-automation-control-plane",
       "relationship": "groups"
     },
     {
@@ -607,16 +537,6 @@
       "relationship": "related"
     },
     {
-      "source": "branch-gated-environment-promotion",
-      "target": "platform-capability-autonomy",
-      "relationship": "related"
-    },
-    {
-      "source": "config-lives-in-the-repo",
-      "target": "platform-capability-autonomy",
-      "relationship": "related"
-    },
-    {
       "source": "config-lives-in-the-repo",
       "target": "application-profile",
       "relationship": "related"
@@ -644,6 +564,11 @@
     {
       "source": "custom-policy-definitions",
       "target": "deny-weak-tls",
+      "relationship": "related"
+    },
+    {
+      "source": "custom-policy-definitions",
+      "target": "deny-cross-tenant-replication",
       "relationship": "related"
     },
     {
@@ -687,6 +612,11 @@
       "relationship": "related"
     },
     {
+      "source": "deny-cross-tenant-replication",
+      "target": "custom-policy-definitions",
+      "relationship": "related"
+    },
+    {
       "source": "deny-local-authentication",
       "target": "federated-auth-to-github",
       "relationship": "related"
@@ -702,6 +632,11 @@
       "relationship": "related"
     },
     {
+      "source": "deny-local-authentication",
+      "target": "custom-policy-definitions",
+      "relationship": "related"
+    },
+    {
       "source": "deny-public-network-access",
       "target": "self-service-policy-exemptions-defender-for-cloud",
       "relationship": "related"
@@ -714,6 +649,21 @@
     {
       "source": "deny-public-network-access",
       "target": "self-service-policy-exemptions",
+      "relationship": "related"
+    },
+    {
+      "source": "deny-public-network-access",
+      "target": "custom-policy-definitions",
+      "relationship": "related"
+    },
+    {
+      "source": "deny-public-network-access",
+      "target": "deny-cross-tenant-replication",
+      "relationship": "related"
+    },
+    {
+      "source": "deny-public-network-access",
+      "target": "deny-weak-tls",
       "relationship": "related"
     },
     {
@@ -737,6 +687,11 @@
       "relationship": "related"
     },
     {
+      "source": "deny-weak-tls",
+      "target": "custom-policy-definitions",
+      "relationship": "related"
+    },
+    {
       "source": "deployment-logic-reusable-workflow",
       "target": "end-to-end-deployment",
       "relationship": "related"
@@ -747,11 +702,6 @@
       "relationship": "related"
     },
     {
-      "source": "deployment-logic-reusable-workflow",
-      "target": "platform-capability-autonomy",
-      "relationship": "related"
-    },
-    {
       "source": "deployment-logic-scaffolding",
       "target": "end-to-end-deployment",
       "relationship": "related"
@@ -759,31 +709,6 @@
     {
       "source": "deployment-logic-scaffolding",
       "target": "application-profile",
-      "relationship": "related"
-    },
-    {
-      "source": "deployment-logic-scaffolding",
-      "target": "self-contained-landing-zones",
-      "relationship": "related"
-    },
-    {
-      "source": "deployment-logic-scaffolding",
-      "target": "platform-capability-autonomy",
-      "relationship": "related"
-    },
-    {
-      "source": "deployment-logic-workflow-prefix",
-      "target": "end-to-end-deployment",
-      "relationship": "related"
-    },
-    {
-      "source": "deployment-logic-workflow-prefix",
-      "target": "deployment-logic-scaffolding",
-      "relationship": "related"
-    },
-    {
-      "source": "deployment-logic-workflow-prefix",
-      "target": "self-contained-landing-zones",
       "relationship": "related"
     },
     {
@@ -799,11 +724,6 @@
     {
       "source": "end-to-end-deployment",
       "target": "config-lives-in-the-repo",
-      "relationship": "related"
-    },
-    {
-      "source": "end-to-end-deployment",
-      "target": "platform-capability-autonomy",
       "relationship": "related"
     },
     {
@@ -824,21 +744,6 @@
     {
       "source": "federated-auth-to-github",
       "target": "identity-github-app",
-      "relationship": "related"
-    },
-    {
-      "source": "group-based-access-assignment",
-      "target": "job-function-scoped-roles",
-      "relationship": "related"
-    },
-    {
-      "source": "group-based-access-assignment",
-      "target": "landing-zone-autonomy-identity",
-      "relationship": "related"
-    },
-    {
-      "source": "group-based-access-assignment",
-      "target": "deny-local-authentication",
       "relationship": "related"
     },
     {
@@ -872,11 +777,6 @@
       "relationship": "related"
     },
     {
-      "source": "identity-github-app",
-      "target": "platform-capability-autonomy",
-      "relationship": "related"
-    },
-    {
       "source": "identity-graph-permissions",
       "target": "landing-zone-autonomy-identity",
       "relationship": "related"
@@ -894,11 +794,6 @@
     {
       "source": "ipam",
       "target": "landing-zone-autonomy-vnet",
-      "relationship": "related"
-    },
-    {
-      "source": "job-function-scoped-roles",
-      "target": "group-based-access-assignment",
       "relationship": "related"
     },
     {
@@ -1032,36 +927,6 @@
       "relationship": "related"
     },
     {
-      "source": "platform-capability-autonomy",
-      "target": "job-function-scoped-roles",
-      "relationship": "related"
-    },
-    {
-      "source": "platform-capability-autonomy",
-      "target": "single-region-deployments",
-      "relationship": "related"
-    },
-    {
-      "source": "platform-capability-autonomy",
-      "target": "platform-test-hierarchy",
-      "relationship": "related"
-    },
-    {
-      "source": "platform-capability-autonomy",
-      "target": "declarative-resource-lifecycle",
-      "relationship": "related"
-    },
-    {
-      "source": "platform-capability-autonomy",
-      "target": "deployment-logic-reusable-workflow",
-      "relationship": "related"
-    },
-    {
-      "source": "platform-capability-autonomy",
-      "target": "config-lives-in-the-repo",
-      "relationship": "related"
-    },
-    {
       "source": "platform-managed-tags",
       "target": "application-profile",
       "relationship": "related"
@@ -1088,11 +953,6 @@
     },
     {
       "source": "platform-test-hierarchy",
-      "target": "self-contained-landing-zones",
-      "relationship": "related"
-    },
-    {
-      "source": "platform-test-hierarchy",
       "target": "branch-gated-environment-promotion",
       "relationship": "related"
     },
@@ -1104,41 +964,6 @@
     {
       "source": "policy-assignment-naming-convention-reference",
       "target": "self-service-policy-exemptions",
-      "relationship": "related"
-    },
-    {
-      "source": "policy-assignment-naming-convention",
-      "target": "deny-local-authentication",
-      "relationship": "related"
-    },
-    {
-      "source": "policy-assignment-naming-convention",
-      "target": "self-service-policy-exemptions-defender-for-cloud",
-      "relationship": "related"
-    },
-    {
-      "source": "policy-assignment-naming-convention",
-      "target": "policy-assignment-naming-convention-reference",
-      "relationship": "related"
-    },
-    {
-      "source": "policy-assignment-naming-convention",
-      "target": "single-region-deployments-policy-enforcement",
-      "relationship": "related"
-    },
-    {
-      "source": "policy-assignment-naming-convention",
-      "target": "visibility-out-of-the-box",
-      "relationship": "related"
-    },
-    {
-      "source": "policy-assignment-naming-convention",
-      "target": "deny-cross-tenant-replication",
-      "relationship": "related"
-    },
-    {
-      "source": "policy-assignment-naming-convention",
-      "target": "deny-weak-tls",
       "relationship": "related"
     },
     {
@@ -1164,21 +989,6 @@
     {
       "source": "self-service-policy-exemptions",
       "target": "policy-assignment-naming-convention",
-      "relationship": "related"
-    },
-    {
-      "source": "single-region-deployments-policy-enforcement",
-      "target": "single-region-deployments",
-      "relationship": "related"
-    },
-    {
-      "source": "single-region-deployments-policy-enforcement",
-      "target": "policy-assignment-naming-convention",
-      "relationship": "related"
-    },
-    {
-      "source": "single-region-deployments",
-      "target": "single-region-deployments-policy-enforcement",
       "relationship": "related"
     },
     {

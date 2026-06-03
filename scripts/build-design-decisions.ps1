@@ -1,7 +1,7 @@
 $SRC  = 'C:\gazelle\AzurePlatform\knowledge-graph'
 $DEST = 'C:\gazelle\gazelle-cloud.github.io\app\public\design-decisions.json'
 
-$rules     = Get-ChildItem "$SRC\platform-rules"    -Filter '*.json' | Sort-Object Name | ForEach-Object { Get-Content $_.FullName -Raw | ConvertFrom-Json }
+$rules     = Get-ChildItem "$SRC\platform-design"    -Filter '*.json' | Sort-Object Name | ForEach-Object { Get-Content $_.FullName -Raw | ConvertFrom-Json }
 $decisions = Get-ChildItem "$SRC\platform-decisions" -Filter '*.json' | Sort-Object Name | ForEach-Object { Get-Content $_.FullName -Raw | ConvertFrom-Json }
 
 $nodes = [System.Collections.Generic.List[object]]::new()
