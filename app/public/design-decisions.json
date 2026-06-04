@@ -478,22 +478,7 @@
     },
     {
       "source": "application-profile",
-      "target": "application-teams-own-the-cost",
-      "relationship": "related"
-    },
-    {
-      "source": "application-profile",
       "target": "platform-managed-tags",
-      "relationship": "related"
-    },
-    {
-      "source": "application-profile",
-      "target": "deployment-logic-scaffolding",
-      "relationship": "related"
-    },
-    {
-      "source": "application-profile",
-      "target": "landing-zone-autonomy-identity",
       "relationship": "related"
     },
     {
@@ -523,11 +508,6 @@
     },
     {
       "source": "azure-native-services-only",
-      "target": "landing-zone-autonomy-monitoring",
-      "relationship": "related"
-    },
-    {
-      "source": "azure-native-services-only",
       "target": "visibility-out-of-the-box",
       "relationship": "related"
     },
@@ -544,36 +524,6 @@
     {
       "source": "config-lives-in-the-repo",
       "target": "federated-auth-to-github",
-      "relationship": "related"
-    },
-    {
-      "source": "custom-policy-definitions",
-      "target": "allowed-resources",
-      "relationship": "related"
-    },
-    {
-      "source": "custom-policy-definitions",
-      "target": "deny-public-network-access",
-      "relationship": "related"
-    },
-    {
-      "source": "custom-policy-definitions",
-      "target": "deny-local-authentication",
-      "relationship": "related"
-    },
-    {
-      "source": "custom-policy-definitions",
-      "target": "deny-weak-tls",
-      "relationship": "related"
-    },
-    {
-      "source": "custom-policy-definitions",
-      "target": "deny-cross-tenant-replication",
-      "relationship": "related"
-    },
-    {
-      "source": "custom-policy-definitions",
-      "target": "visibility-out-of-the-box",
       "relationship": "related"
     },
     {
@@ -612,11 +562,6 @@
       "relationship": "related"
     },
     {
-      "source": "deny-cross-tenant-replication",
-      "target": "custom-policy-definitions",
-      "relationship": "related"
-    },
-    {
       "source": "deny-local-authentication",
       "target": "federated-auth-to-github",
       "relationship": "related"
@@ -627,21 +572,6 @@
       "relationship": "related"
     },
     {
-      "source": "deny-local-authentication",
-      "target": "self-service-policy-exemptions",
-      "relationship": "related"
-    },
-    {
-      "source": "deny-local-authentication",
-      "target": "custom-policy-definitions",
-      "relationship": "related"
-    },
-    {
-      "source": "deny-public-network-access",
-      "target": "self-service-policy-exemptions-defender-for-cloud",
-      "relationship": "related"
-    },
-    {
       "source": "deny-public-network-access",
       "target": "policy-assignment-naming-convention",
       "relationship": "related"
@@ -649,31 +579,6 @@
     {
       "source": "deny-public-network-access",
       "target": "self-service-policy-exemptions",
-      "relationship": "related"
-    },
-    {
-      "source": "deny-public-network-access",
-      "target": "custom-policy-definitions",
-      "relationship": "related"
-    },
-    {
-      "source": "deny-public-network-access",
-      "target": "deny-cross-tenant-replication",
-      "relationship": "related"
-    },
-    {
-      "source": "deny-public-network-access",
-      "target": "deny-weak-tls",
-      "relationship": "related"
-    },
-    {
-      "source": "deny-weak-tls",
-      "target": "deny-public-network-access",
-      "relationship": "related"
-    },
-    {
-      "source": "deny-weak-tls",
-      "target": "self-service-policy-exemptions-defender-for-cloud",
       "relationship": "related"
     },
     {
@@ -772,11 +677,6 @@
       "relationship": "related"
     },
     {
-      "source": "identity-github-app",
-      "target": "identity-entra-id-app",
-      "relationship": "related"
-    },
-    {
       "source": "identity-graph-permissions",
       "target": "landing-zone-autonomy-identity",
       "relationship": "related"
@@ -809,11 +709,6 @@
     {
       "source": "landing-zone-autonomy-action-group",
       "target": "application-teams-own-the-cost",
-      "relationship": "related"
-    },
-    {
-      "source": "landing-zone-autonomy-action-group",
-      "target": "landing-zone-autonomy-monitoring",
       "relationship": "related"
     },
     {
@@ -939,11 +834,6 @@
     {
       "source": "platform-test-hierarchy-environment-tier",
       "target": "platform-test-hierarchy",
-      "relationship": "related"
-    },
-    {
-      "source": "platform-test-hierarchy-environment-tier",
-      "target": "application-profile",
       "relationship": "related"
     },
     {
