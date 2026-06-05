@@ -20,7 +20,7 @@ foreach ($d in $decisions) {
 # links: rule -> decision (groups)
 foreach ($r in $rules) {
   foreach ($dec in $r.decisions) {
-    $links.Add([pscustomobject]@{ source = $r.id; target = $dec.id; relationship = 'groups' })
+    $links.Add([pscustomobject]@{ source = $r.id; target = $dec; relationship = 'groups' })
   }
 }
 
