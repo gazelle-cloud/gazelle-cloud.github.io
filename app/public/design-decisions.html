@@ -150,6 +150,17 @@
                   <div className="info-label">Why</div>
                   <p className="info-text">{activeNode.why}</p>
                 </>}
+                {activeNode.links && activeNode.links.length > 0 && <>
+                  <div className="info-label">Links</div>
+                  <div className="code-block" style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' }}>
+                    {activeNode.links.map((l, i) => (
+                      <div key={i}>
+                        <span style={{ color: '#f0a500', fontFamily: 'monospace', fontSize: 12 }}>{l.id}</span>
+                        {l.note && <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>{l.note}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </>}
               </>
             : <div className="detail-empty">
                 Hover or click a node<br />to explore its design context.

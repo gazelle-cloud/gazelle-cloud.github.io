@@ -14,7 +14,9 @@ foreach ($r in $rules) {
 
 # decision nodes
 foreach ($d in $decisions) {
-  $nodes.Add([pscustomobject]@{ id = $d.id; type = 'decision'; mechanism = $d.decision; why = $d.why })
+  $refs = [System.Collections.Generic.List[object]]::new()
+  if ($d.links) { foreach ($l in $d.links) { $refs.Add($l) } }
+  $nodes.Add([pscustomobject]@{ id = $d.id; type = 'decision'; mechanism = $d.decision; why = $d.why; links = $refs })
 }
 
 # links: rule -> decision (groups)
