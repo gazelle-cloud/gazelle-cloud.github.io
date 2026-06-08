@@ -1,37 +1,22 @@
 /* ── reset ──────────────────────────────────────────────────────────────── */
 html, body { margin: 0; height: 100%; overflow: hidden; }
 :root {
-  --bg-color:       #1f2430;
-  --viz-pane-width: 70%;
-  --viz-padding:    20px;
+  --bg-color:    #1f2430;
+  --viz-padding: 20px;
 }
 body { background: var(--bg-color); }
 
-/* ── split layout ───────────────────────────────────────────────────────── */
+/* ── layout ─────────────────────────────────────────────────────────────── */
 #layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
 }
 #viz-pane {
-  flex: 0 0 var(--viz-pane-width);
+  flex: 1 1 100%;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
-}
-#detail-pane {
-  flex: 1;
-  overflow-y: auto;
-  padding: 72px 28px 32px 0;
-  color: #c5ceea;
-  font: 15px/1.7 sans-serif;
-}
-.detail-empty {
-  color: rgba(185,200,230,0.52);
-  font-size: 15px;
-  text-align: center;
-  margin-top: 48px;
-  line-height: 1.8;
 }
 
 #graph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
@@ -89,19 +74,7 @@ body { background: var(--bg-color); }
 }
 .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-/* ── info panel (azure-deployments overlay; index.html uses #detail-pane) ── */
-#info-panel {
-  position: fixed;
-  top: 14px; right: 14px;
-  width: 280px;
-  background: rgba(22,26,36,0.95);
-  border: 1px solid rgba(155,175,215,0.15);
-  border-radius: 8px;
-  padding: 14px 16px;
-  z-index: 10;
-  pointer-events: none;
-  font: 15px/1.6 sans-serif;
-}
+/* ── shared info typography (used inside CornerPanel and NodeTooltip) ───── */
 .info-id {
   font-size: 13px;
   text-transform: uppercase;
@@ -118,7 +91,7 @@ body { background: var(--bg-color); }
 }
 .info-text { margin: 0; color: #bbb; }
 
-/* ── code block (syntax-highlighted <pre> in info panel) ───────────────── */
+/* ── code block (syntax-highlighted <pre> in panels) ───────────────────── */
 .code-block {
   margin: 4px 0 0; padding: 10px 12px;
   background: var(--bg-color);
@@ -128,7 +101,7 @@ body { background: var(--bg-color); }
   color: #e2e8f0; white-space: pre; overflow-x: auto;
 }
 
-/* ── info panel extras ──────────────────────────────────────────────────── */
+/* ── info badge ──────────────────────────────────────────────────────────── */
 .info-badge {
   display: inline-block;
   padding: 2px 8px;
@@ -157,8 +130,6 @@ body { background: var(--bg-color); }
 [data-theme="light"] { --bg-color: #f5f1e8; }
 [data-theme="light"] body { background: var(--bg-color); }
 
-[data-theme="light"] #detail-pane { color: #444; }
-[data-theme="light"] .detail-empty { color: rgba(0,0,0,0.2); }
 [data-theme="light"] .info-id    { color: #999; }
 [data-theme="light"] .info-label { color: #999; }
 [data-theme="light"] .info-text  { color: #555; }
@@ -201,6 +172,11 @@ body { background: var(--bg-color); }
 [data-theme="light"] .theme-toggle:hover {
   color: rgba(30,30,50,0.9);
   border-color: rgba(30,30,50,0.4);
+}
+
+[data-theme="light"] .code-block {
+  border-color: rgba(30,30,50,0.1);
+  color: #1a1b26;
 }
 
 /* ── search box ─────────────────────────────────────────────────────────── */
@@ -247,62 +223,68 @@ body { background: var(--bg-color); }
 /* ── nav-menu: transparent wrapper on desktop ───────────────────────────── */
 .nav-menu { display: contents; }
 
-/* ── detail pane collapse button (desktop) ──────────────────────────────── */
-#detail-collapse-btn {
-  position: absolute;
-  right: 6px; top: 14px;
-  width: 20px; height: 40px;
-  background: rgba(155,175,215,0.10);
-  border: 1.5px solid rgba(155,175,215,0.20);
-  border-radius: 6px;
-  color: rgba(215,225,248,0.80);
-  font-size: 14px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
-  z-index: 5;
+/* ── corner panel (fixed top-right overlay) ─────────────────────────────── */
+/* Standard info panel for all graph pages. Render <CornerPanel> from shell.js
+   and pass node + theme; the panel appears when node is non-null. */
+.corner-panel {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  width: 290px;
+  max-height: calc(100vh - 28px);
+  overflow-y: auto;
+  background: rgba(22, 26, 36, 0.97);
+  border: 1px solid rgba(155, 175, 215, 0.15);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font: 14px/1.7 sans-serif;
+  color: #c5ceea;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
+  z-index: 10;
 }
-#detail-collapse-btn:hover {
-  color: rgba(235,242,255,0.97);
-  border-color: rgba(155,175,215,0.48);
-  background: rgba(155,175,215,0.20);
+.corner-panel .info-id    { margin-bottom: 8px; }
+.corner-panel .info-label { margin-top: 12px; margin-bottom: 3px; }
+.corner-panel .info-text  { margin: 0; color: #bbb; }
+.corner-panel .code-block { font-size: 11px; }
+.corner-panel.light {
+  background: rgba(245, 241, 232, 0.98);
+  border-color: rgba(30, 30, 50, 0.10);
+  color: #444;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
 }
-#detail-collapse-btn::before { content: '›'; }
-#layout[data-detail-hidden] #detail-collapse-btn::before { content: '‹'; }
+.corner-panel.light .info-text { color: #555; }
 
-[data-theme="light"] .code-block {
-  border-color: rgba(30,30,50,0.1);
-  color: #1a1b26;
+/* ── hover tooltip (cursor-following alternative, available from shell.js) ─ */
+.node-tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 50;
+  background: rgba(22, 26, 36, 0.97);
+  border: 1px solid rgba(155, 175, 215, 0.20);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font: 13px/1.65 sans-serif;
+  color: #c5ceea;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  max-height: 60vh;
+  overflow-y: auto;
 }
-
-[data-theme="light"] #detail-collapse-btn {
-  background: rgba(30,30,50,0.06);
-  border-color: rgba(30,30,50,0.12);
-  color: rgba(30,30,50,0.4);
+.node-tooltip .info-id    { margin-bottom: 6px; }
+.node-tooltip .info-label { margin-top: 10px; margin-bottom: 2px; }
+.node-tooltip .info-text  { font-size: 13px; margin: 0; }
+.node-tooltip .code-block { font-size: 11px; }
+.node-tooltip.light {
+  background: rgba(245, 241, 232, 0.98);
+  border-color: rgba(30, 30, 50, 0.12);
+  color: #444;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
-[data-theme="light"] #detail-collapse-btn:hover {
-  color: rgba(30,30,50,0.85);
-  border-color: rgba(30,30,50,0.3);
-  background: rgba(30,30,50,0.1);
-}
-
-/* collapsed state */
-#layout[data-detail-hidden] #detail-pane { display: none; }
-#layout[data-detail-hidden] #viz-pane { flex: 1 1 100%; }
-
-/* ── detail pane toggle (hidden on desktop) ─────────────────────────────── */
-#detail-toggle { display: none; }
 
 /* ── mobile ─────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* graph fills the full viewport; detail pane overlays as a bottom sheet */
-  #layout { flex-direction: column; }
   #viz-pane {
-    flex: 0 0 100vh;
     overflow: visible; /* allow the nav dropdown to escape the container */
   }
-
-  #detail-collapse-btn { display: none; }
 
   /* ── hamburger button ───────────────────────────────────────────────── */
   #menu-btn {
@@ -351,54 +333,16 @@ body { background: var(--bg-color); }
     background: rgba(245,241,232,0.98);
     border-color: rgba(30,30,50,0.1);
   }
-  [data-theme="light"] #detail-pane {
-    background: rgba(245,241,232,0.98);
-    border-color: rgba(30,30,50,0.08);
-  }
 
-  /* ── bottom sheet ───────────────────────────────────────────────────── */
-  #detail-pane {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    height: 75vh;
-    padding: 0 20px 40px;
-    background: rgba(20,24,34,0.97);
-    border: 1px solid rgba(155,175,215,0.15);
-    border-bottom: none;
+  /* ── corner panel reflows to a bottom sheet on mobile ───────────────── */
+  .corner-panel {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 60vh;
     border-radius: 16px 16px 0 0;
-    overflow-y: auto;
-    transform: translateY(0);
-    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-    z-index: 15;
-  }
-  #layout[data-panel-dismissed] #detail-pane { transform: translateY(100%); }
-
-  /* ── drag handle / dismiss button ──────────────────────────────────── */
-  #detail-toggle {
-    display: flex;
-    align-items: center; justify-content: center;
-    width: 100%; height: 40px;
-    background: rgba(22,23,34,0.97);
-    border: none;
-    cursor: pointer;
-    position: sticky; top: 0;
-    z-index: 1;
-    margin-bottom: 4px;
-    flex-shrink: 0;
-  }
-  #detail-toggle::before {
-    content: '✕';
-    display: flex;
-    align-items: center; justify-content: center;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: rgba(155,175,215,0.20);
-    color: rgba(218,228,250,0.88);
-    font-size: 16px;
-    transition: background 0.15s, color 0.15s;
-  }
-  #detail-toggle:active::before { 
-    background: rgba(155,175,215,0.28); 
-    color: rgba(235,242,255,0.97); 
+    border-bottom: none;
   }
 }

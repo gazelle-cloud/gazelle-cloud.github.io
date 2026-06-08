@@ -17,9 +17,8 @@
     import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
     import React from 'react';
     import { createRoot } from 'react-dom/client';
-    import { createPortal } from 'react-dom';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
+    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
 
     setupLayout();
 
@@ -181,10 +180,9 @@
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </NavBar>
 
-        {createPortal(
-          <NodeDetail node={activeNode} links={graph.links} theme={theme} />,
-          document.getElementById('detail-pane')
-        )}
+        <CornerPanel node={activeNode} theme={theme}>
+          <NodeDetail node={activeNode} links={graph.links} theme={theme} />
+        </CornerPanel>
 
         <ForceGraph2D
           ref={fgRef}

@@ -17,9 +17,8 @@
     import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
     import React from 'react';
     import { createRoot } from 'react-dom/client';
-    import { createPortal } from 'react-dom';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
+    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
 
     setupLayout();
 
@@ -134,39 +133,32 @@
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </NavBar>
 
-        {createPortal(
-          activeNode
-            ? <>
-                <DetailHeader typeLabel={TYPE_LABELS[activeNode.type]} nodeId={activeNode.id} theme={theme} />
-                {activeNode.intent && <>
-                  <div className="info-label">Intent</div>
-                  <p className="info-text">{activeNode.intent}</p>
-                </>}
-                {activeNode.mechanism && <>
-                  <div className="info-label">Mechanism</div>
-                  <p className="info-text">{activeNode.mechanism}</p>
-                </>}
-                {activeNode.why && <>
-                  <div className="info-label">Why</div>
-                  <p className="info-text">{activeNode.why}</p>
-                </>}
-                {activeNode.links && activeNode.links.length > 0 && <>
-                  <div className="info-label">Links</div>
-                  <div className="code-block" style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' }}>
-                    {activeNode.links.map((l, i) => (
-                      <div key={i}>
-                        <span style={{ color: '#f0a500', fontFamily: 'monospace', fontSize: 12 }}>{l.id}</span>
-                        {l.note && <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>{l.note}</div>}
-                      </div>
-                    ))}
-                  </div>
-                </>}
-              </>
-            : <div className="detail-empty">
-                Hover or click a node<br />to explore its design context.
-              </div>,
-          document.getElementById('detail-pane')
-        )}
+        <CornerPanel node={activeNode} theme={theme}>
+          <DetailHeader typeLabel={TYPE_LABELS[activeNode?.type]} nodeId={activeNode?.id} theme={theme} />
+          {activeNode?.intent && <>
+            <div className="info-label">Intent</div>
+            <p className="info-text">{activeNode.intent}</p>
+          </>}
+          {activeNode?.mechanism && <>
+            <div className="info-label">Mechanism</div>
+            <p className="info-text">{activeNode.mechanism}</p>
+          </>}
+          {activeNode?.why && <>
+            <div className="info-label">Why</div>
+            <p className="info-text">{activeNode.why}</p>
+          </>}
+          {activeNode?.links && activeNode.links.length > 0 && <>
+            <div className="info-label">Links</div>
+            <div className="code-block" style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' }}>
+              {activeNode.links.map((l, i) => (
+                <div key={i}>
+                  <span style={{ color: '#f0a500', fontFamily: 'monospace', fontSize: 12 }}>{l.id}</span>
+                  {l.note && <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>{l.note}</div>}
+                </div>
+              ))}
+            </div>
+          </>}
+        </CornerPanel>
 
         <ForceGraph2D
           ref={fgRef}

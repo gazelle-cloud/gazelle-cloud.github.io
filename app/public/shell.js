@@ -84,28 +84,8 @@ const BACKDROP = RENDER.bgColor
 export function setupLayout() {
   const layout = document.createElement('div');
   layout.id = 'layout';
-  layout.innerHTML =
-    '<div id="viz-pane"><div id="graph"></div><button id="detail-collapse-btn" aria-label="Toggle detail panel"></button></div>' +
-    '<div id="detail-pane"><button id="detail-toggle" aria-label="Dismiss panel"></button></div>';
+  layout.innerHTML = '<div id="viz-pane"><div id="graph"></div></div>';
   document.body.appendChild(layout);
-
-  // Desktop only: collapse/expand the detail pane, persisted across pages.
-  // Skipped on mobile so the bottom sheet is never accidentally hidden.
-  const isDesktop = () => window.innerWidth > 768;
-
-  if (isDesktop() && localStorage.getItem('detail-hidden') === '1')
-    layout.setAttribute('data-detail-hidden', '');
-
-  document.getElementById('detail-collapse-btn').addEventListener('click', () => {
-    const hidden = layout.toggleAttribute('data-detail-hidden');
-    if (isDesktop()) localStorage.setItem('detail-hidden', hidden ? '1' : '0');
-  });
-
-  // Mobile: tapping the close button dismisses the bottom sheet.
-  // Node clicks (handled in useGraphState) clear this attribute to re-open it.
-  document.getElementById('detail-toggle').addEventListener('click', () => {
-    layout.setAttribute('data-panel-dismissed', '');
-  });
 }
 
 // ── useGraphPhysics ───────────────────────────────────────────────────────────
@@ -154,7 +134,7 @@ export function useGraphPhysics(fgRef, graph, setupForcesFn) {
 // Replaces useGraphResize for pages that use the split layout.
 export function useVizPaneSize(fgRef, padding = _cssPx('--viz-padding')) {
   const [size, setSize] = React.useState(() => ({
-    width:  window.innerWidth * _cssPct('--viz-pane-width') - padding * 2,
+    width:  window.innerWidth - padding * 2,
     height: window.innerHeight - padding * 2,
   }));
   React.useEffect(() => {
@@ -182,18 +162,6 @@ export function useGraphState(raw, nodeTypes) {
   const [focusedId, setFocusedId] = React.useState(null);
 
   const activeId = focusedId ?? hoveredId;
-
-  // Drive the mobile bottom sheet: set data-active on #detail-pane so CSS
-  // can slide it up/down without any per-page logic.
-  React.useEffect(() => {
-    const pane = document.getElementById('detail-pane');
-    if (pane) pane.dataset.active = activeId ? 'true' : '';
-  }, [activeId]);
-
-  // Mobile: re-open the bottom sheet whenever a node is focused via a tap.
-  React.useEffect(() => {
-    if (focusedId) document.getElementById('layout')?.removeAttribute('data-panel-dismissed');
-  }, [focusedId]);
 
   const [searchQuery, setSearchQuery] = React.useState('');
 
@@ -248,9 +216,7 @@ export function useGraphState(raw, nodeTypes) {
       setFocusedId(p => p === node.id ? null : node.id);
     },
     onBackgroundClick: ()   => {
-      // Close both the hamburger menu and dismiss the detail panel.
       window.__closeNavMenu?.();
-      document.getElementById('layout')?.setAttribute('data-panel-dismissed', '');
       setFocusedId(null);
     },
   };
@@ -431,6 +397,75 @@ export function DetailHeader({ typeLabel, nodeId, theme }) {
       className: 'info-text',
       style: { color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px', fontWeight: 600 },
     }, nodeId),
+  );
+}
+
+// ── useMousePos ───────────────────────────────────────────────────────────────
+// Tracks the current mouse position in viewport coordinates.
+// Returns { x, y } on desktop, or null on touch-only devices.
+export function useMousePos() {
+  const [pos, setPos] = React.useState(null);
+  React.useEffect(() => {
+    const h = e => setPos({ x: e.clientX, y: e.clientY });
+    window.addEventListener('mousemove', h);
+    return () => window.removeEventListener('mousemove', h);
+  }, []);
+  return pos;
+}
+
+// ── NodeTooltip ───────────────────────────────────────────────────────────────
+// Floating tooltip that follows the cursor on desktop and anchors to the
+// bottom-centre on mobile (where there is no mouse position).
+// Renders nothing when `node` is null/undefined.
+//
+// Usage:
+//   const mousePos = useMousePos();
+//   <NodeTooltip node={activeNode} mousePos={mousePos} theme={theme}>
+//     {/* your info-label / info-text elements */}
+//   </NodeTooltip>
+const TOOLTIP_W = 280;
+export function NodeTooltip({ node, mousePos, theme, children }) {
+  if (!node) return null;
+
+  let style;
+  if (mousePos) {
+    let x = mousePos.x + 16;
+    let y = mousePos.y + 16;
+    if (x + TOOLTIP_W > window.innerWidth - 16) x = mousePos.x - TOOLTIP_W - 16;
+    if (y < 10) y = 10;
+    style = { left: x, top: y, maxWidth: TOOLTIP_W };
+  } else {
+    // Mobile: centred near the bottom of the screen
+    style = {
+      left: '50%',
+      transform: 'translateX(-50%)',
+      bottom: 24,
+      maxWidth: Math.min(TOOLTIP_W, window.innerWidth - 32),
+    };
+  }
+
+  return React.createElement(
+    'div',
+    { className: `node-tooltip${theme === 'light' ? ' light' : ''}`, style },
+    children,
+  );
+}
+
+// ── CornerPanel ───────────────────────────────────────────────────────────────
+// Fixed overlay panel anchored to the top-right corner of the viewport.
+// Invisible when `node` is null; scrollable when content is tall.
+// On mobile it reflows to a bottom sheet.
+//
+// Usage:
+//   <CornerPanel node={activeNode} theme={theme}>
+//     {/* info-label / info-text elements */}
+//   </CornerPanel>
+export function CornerPanel({ node, theme, children }) {
+  if (!node) return null;
+  return React.createElement(
+    'div',
+    { className: `corner-panel${theme === 'light' ? ' light' : ''}` },
+    children,
   );
 }
 

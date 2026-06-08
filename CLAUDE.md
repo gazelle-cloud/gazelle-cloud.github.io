@@ -57,10 +57,38 @@ Anchors group decisions by theme. No `mechanism`/`why` — they are named princi
 ```
 Operations are runbooks. `reasoning[]` links to the decisions that constrain the operation; those edges appear in the graph.
 
-## Visualization (`app/public/index.html`)
+## Visualization (`app/public/*.html`)
 
-- **React + ForceGraph2D** rendered into `#graph`; JSX transpiled in-browser by Babel standalone
-- Node types: `anchor` (gold), `operation` (green), `decision` (blue)
-- Anchors and operations are pinned on a rim circle; decisions float by D3 force
-- Hover or click a decision node → top-right panel shows its `mechanism` and `why`
-- Filter chips (top-left) toggle visibility by node type
+Each page is a self-contained React app (JSX via Babel standalone) that renders into `#graph`.
+
+### Shell (`app/public/shell.js` + `shell.css`)
+
+Shared infrastructure imported by every page:
+
+| Export | Purpose |
+|--------|---------|
+| `setupLayout()` | Creates `#layout > #viz-pane > #graph` DOM structure. Call once at top of each page, before mounting React. |
+| `useGraphState(raw, nodeTypes)` | Centralises hover/focus/visibility/search state. |
+| `useGraphPhysics(fgRef, graph, setupFn)` | Applies standard D3 forces and camera lifecycle. |
+| `useVizPaneSize(fgRef)` | Tracks `#viz-pane` size via ResizeObserver. |
+| `useBraveClickFix(...)` | Geometric hit-test fallback for Brave's canvas restrictions. |
+| `CornerPanel` | **Standard info panel — use this on every page.** Fixed top-right overlay that appears on hover/click; scrolls for long content; reflows to a bottom sheet on mobile. |
+| `NodeTooltip` | Cursor-following tooltip alternative (available but not the default). |
+| `NavBar`, `FilterChips`, `SearchBox`, `ThemeToggle`, `DetailHeader` | Standard UI chrome. |
+| `PALETTE`, `RENDER`, `drawLabel`, `linkEnds`, `normalizeNodeWeights` | Shared rendering constants and helpers. |
+
+### Adding a new page
+
+1. Create `app/public/my-page.html` — copy the structure from `design-decisions.html`.
+2. Call `setupLayout()` once before mounting React.
+3. Use `<CornerPanel node={activeNode} theme={theme}>` for the info panel — populate it with `.info-label` / `.info-text` elements matching your data schema.
+4. Add the page to `NAV` in `shell.js` so it appears in the nav bar.
+5. Serve locally or push — no build step needed for the HTML/JS layer.
+
+### Node colour roles
+
+| `PALETTE` key | Colour | Typical use |
+|---------------|--------|-------------|
+| `ENTRY` | gold | Entry points (anchors, workflows) |
+| `CONNECTOR` | green | Orchestrators (operations, main-bicep) |
+| `LEAF` | blue | Most nodes (decisions, modules) |

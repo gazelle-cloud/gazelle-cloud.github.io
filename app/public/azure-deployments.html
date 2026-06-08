@@ -17,9 +17,8 @@
     import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
     import React from 'react';
     import { createRoot } from 'react-dom/client';
-    import { createPortal } from 'react-dom';
     import { forceCollide, forceX, forceY } from 'https://esm.sh/d3-force';
-    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix } from './shell.js';
+    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
 
     setupLayout();
 
@@ -244,49 +243,42 @@
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </NavBar>
 
-        {createPortal(
-          activeNode
-            ? <>
-                <DetailHeader typeLabel={TYPE_LABELS[activeNode.type]} nodeId={activeNode.id} theme={theme} />
+        <CornerPanel node={activeNode} theme={theme}>
+          <DetailHeader typeLabel={TYPE_LABELS[activeNode?.type]} nodeId={activeNode?.id} theme={theme} />
 
-                {activeNode.description && <>
-                  <div className="info-label">Description</div>
-                  <p className="info-text">{activeNode.description}</p>
-                </>}
+          {activeNode?.description && <>
+            <div className="info-label">Description</div>
+            <p className="info-text">{activeNode.description}</p>
+          </>}
 
-                {activeNode.jobs && <>
-                  <div className="info-label">Jobs</div>
-                  <pre className="code-block"
-                    dangerouslySetInnerHTML={{ __html: highlightJobs(activeNode.jobs) }}
-                  />
-                </>}
+          {activeNode?.jobs && <>
+            <div className="info-label">Jobs</div>
+            <pre className="code-block"
+              dangerouslySetInnerHTML={{ __html: highlightJobs(activeNode.jobs) }}
+            />
+          </>}
 
-                {activeNode.path && <>
-                  <div className="info-label">Path</div>
-                  <p className="info-text" style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>
-                    {activeNode.path}
-                  </p>
-                </>}
+          {activeNode?.path && <>
+            <div className="info-label">Path</div>
+            <p className="info-text" style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>
+              {activeNode.path}
+            </p>
+          </>}
 
-                {activeNode.snippet && <>
-                  <div className="info-label">Snippet</div>
-                  <pre className="code-block"
-                    dangerouslySetInnerHTML={{ __html: highlightBicep(activeNode.snippet) }}
-                  />
-                </>}
+          {activeNode?.snippet && <>
+            <div className="info-label">Snippet</div>
+            <pre className="code-block"
+              dangerouslySetInnerHTML={{ __html: highlightBicep(activeNode.snippet) }}
+            />
+          </>}
 
-                {activeNode.inputs && <>
-                  <div className="info-label">Inputs</div>
-                  <pre className="code-block"
-                    dangerouslySetInnerHTML={{ __html: highlightBicep(activeNode.inputs) }}
-                  />
-                </>}
-              </>
-            : <div className="detail-empty">
-                Hover or click a node<br />to explore its details.
-              </div>,
-          document.getElementById('detail-pane')
-        )}
+          {activeNode?.inputs && <>
+            <div className="info-label">Inputs</div>
+            <pre className="code-block"
+              dangerouslySetInnerHTML={{ __html: highlightBicep(activeNode.inputs) }}
+            />
+          </>}
+        </CornerPanel>
 
         <ForceGraph2D
           ref={fgRef}
