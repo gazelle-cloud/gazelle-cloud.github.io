@@ -34,7 +34,7 @@ export function normalizeNodeWeights(raw) {
 // align: 'left' | 'right' | 'center'
 export function drawLabel(ctx, text, lx, ly, align, fontSize, globalScale, color, backdrop = BACKDROP) {
   const fs = fontSize / globalScale;
-  ctx.font = `${fs}px Sans-Serif`;
+  ctx.font = `${fs}px 'IBM Plex Sans', system-ui, sans-serif`;
   const tw = ctx.measureText(text).width;
   const p  = 4 / globalScale;
 
@@ -398,7 +398,7 @@ export function DetailHeader({ typeLabel, nodeId, theme }) {
     React.createElement('div', { className: 'info-id' }, typeLabel),
     React.createElement('p', {
       className: 'info-text',
-      style: { color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px', fontWeight: 600 },
+      style: { color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px' },
     }, nodeId),
   );
 }

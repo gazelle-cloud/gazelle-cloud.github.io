@@ -31,10 +31,6 @@
           "note": "Application Profile registration creates the invoice section."
         },
         {
-          "id": "zero-cost-on-idle",
-          "note": "A landing zone costs nothing until the application team deploys — every line on their invoice is their own spend, not platform overhead."
-        },
-        {
           "id": "landing-zone-action-group",
           "note": "Landing zone budget alerts are routed via action groups to the team that owns the spend."
         }
@@ -46,10 +42,6 @@
       "mechanism": "Only Azure Resource Manager (ARM) reachable services are eligible.",
       "why": "Without ARM reachability, the control plane has no reach — deny-by-default, declarative lifecycle, and diagnostic coverage all fail at once.",
       "links": [
-        {
-          "id": "deny-by-default",
-          "note": "ARM-native is the prerequisite for deny-by-default to hold."
-        },
         {
           "id": "self-service-policy-exemptions",
           "note": "Self-service exemptions are viable because every resource is within Azure Policy's reach — a non-ARM service sits outside Policy's scope entirely."
@@ -171,10 +163,6 @@
           "note": "deleteAll in test verifies code produces the expected Azure state before promotion to prod."
         },
         {
-          "id": "landing-zone-resource-group",
-          "note": "Single resource group is the stack's scope deleteAll on it is a complete teardown."
-        },
-        {
           "id": "landing-zone-lifecycle",
           "note": "A subscription after deleteAll is guaranteed empty makes subscription reuse safe."
         },
@@ -212,7 +200,7 @@
       "links": [
         {
           "id": "end-to-end-deployment",
-          "note": "Reusable workflow separation is how end-to-end deployment achieves consistent execution logic without duplication across environments."
+          "note": "Reusable workflows provide end-to-end deployment structure for each platform capability."
         },
         {
           "id": "branch-gated-environment-promotion",
@@ -255,10 +243,6 @@
           "note": "App registration created, OIDC federation configured, and role assigned at the management group."
         },
         {
-          "id": "platform-identity-graph",
-          "note": "Microsoft Graph roles granted to the app registration via admin consent."
-        },
-        {
           "id": "platform-identity-github",
           "note": "GitHub App created, installed in the org, and org-level secrets and variables seeded."
         },
@@ -290,10 +274,6 @@
       "mechanism": "Roles are scoped to a job function. A role describes what a person does (e.g., app engineer), not what resources they touch.",
       "why": "Resource-specific roles multiply with every newly whitelisted resource type, frequently requiring team members to apply for new roles.",
       "links": [
-        {
-          "id": "azure-policy-allowed-resources",
-          "note": "New resource type triggers review of whether roles need new actions."
-        },
         {
           "id": "landing-zone-application-profile",
           "note": "The Application Profile creates an Entra ID group dedicated to application engineers, providing only the minimum access that does not break Infrastructure-as-Code principles."
@@ -339,14 +319,6 @@
       "why": "Centralized automation requires a shared management subscription with baseline cost and team dependency. The platform has neither — automation runs where the landing zone lives.",
       "links": [
         {
-          "id": "landing-zone-tags",
-          "note": "Tag remediation runs as a landing-zone automation job."
-        },
-        {
-          "id": "zero-cost-on-idle",
-          "note": "Container Apps free monthly minutes cover jobs that complete in seconds."
-        },
-        {
           "id": "platform-identity-graph",
           "note": "Automation jobs query Entra ID, so landing zone identities receive Graph permissions."
         }
@@ -381,14 +353,6 @@
         {
           "id": "landing-zone-vnet",
           "note": "Runners have a dedicated /28 subnet under the landing zone VNet."
-        },
-        {
-          "id": "landing-zone-self-service",
-          "note": "Each landing zone registers its own runner, keeping execution isolated within its own workflow."
-        },
-        {
-          "id": "single-region",
-          "note": "GitHub Actions service and subnet must be in one of supported regions."
         },
         {
           "id": "platform-identity-github",
@@ -437,10 +401,6 @@
         {
           "id": "single-region",
           "note": "Log Analytics workspace is regional."
-        },
-        {
-          "id": "zero-cost-on-idle",
-          "note": "Log Analytics workspace retention is set within the free-tier boundary."
         }
       ]
     },
@@ -537,10 +497,6 @@
         {
           "id": "single-region",
           "note": "VNet is provisioned in AZURE_DEFAULT_LOCATION; a second region requires a new VNet and a separate regional IPAM allocation."
-        },
-        {
-          "id": "zero-cost-on-idle",
-          "note": "Private endpoints are not considered due to their fixed hourly costs."
         }
       ]
     },
@@ -598,10 +554,6 @@
       "why": "Without a parallel hierarchy, platform changes hit production directly.",
       "links": [
         {
-          "id": "branch-gated-environment-promotion",
-          "note": "Test hierarchy is the target the promotion gate validates against."
-        },
-        {
           "id": "deployment-logic-reusable-workflow",
           "note": "Template workflow changes are validated in the test environment."
         },
@@ -640,10 +592,6 @@
         {
           "id": "application-teams-own-the-cost",
           "note": "Defender for cloud paid SKU lands on the subscription billing."
-        },
-        {
-          "id": "azure-policy-allowed-resources",
-          "note": "Whitelisting a resource type triggers a Defender recommendation check new recommendations requiring paid SKUs are candidates for the exemption list."
         }
       ]
     },
@@ -840,21 +788,9 @@
     },
     {
       "source": "application-teams-own-the-cost",
-      "target": "zero-cost-on-idle",
-      "relationship": "related",
-      "note": "A landing zone costs nothing until the application team deploys — every line on their invoice is their own spend, not platform overhead."
-    },
-    {
-      "source": "application-teams-own-the-cost",
       "target": "landing-zone-action-group",
       "relationship": "related",
       "note": "Landing zone budget alerts are routed via action groups to the team that owns the spend."
-    },
-    {
-      "source": "azure-native-services-only",
-      "target": "deny-by-default",
-      "relationship": "related",
-      "note": "ARM-native is the prerequisite for deny-by-default to hold."
     },
     {
       "source": "azure-native-services-only",
@@ -954,12 +890,6 @@
     },
     {
       "source": "declarative-resource-lifecycle",
-      "target": "landing-zone-resource-group",
-      "relationship": "related",
-      "note": "Single resource group is the stack's scope deleteAll on it is a complete teardown."
-    },
-    {
-      "source": "declarative-resource-lifecycle",
       "target": "landing-zone-lifecycle",
       "relationship": "related",
       "note": "A subscription after deleteAll is guaranteed empty makes subscription reuse safe."
@@ -992,7 +922,7 @@
       "source": "deployment-logic-reusable-workflow",
       "target": "end-to-end-deployment",
       "relationship": "related",
-      "note": "Reusable workflow separation is how end-to-end deployment achieves consistent execution logic without duplication across environments."
+      "note": "Reusable workflows provide end-to-end deployment structure for each platform capability."
     },
     {
       "source": "deployment-logic-reusable-workflow",
@@ -1032,12 +962,6 @@
     },
     {
       "source": "initial-setup",
-      "target": "platform-identity-graph",
-      "relationship": "related",
-      "note": "Microsoft Graph roles granted to the app registration via admin consent."
-    },
-    {
-      "source": "initial-setup",
       "target": "platform-identity-github",
       "relationship": "related",
       "note": "GitHub App created, installed in the org, and org-level secrets and variables seeded."
@@ -1059,12 +983,6 @@
       "target": "single-region",
       "relationship": "related",
       "note": "Address space is allocated without regional segmentation."
-    },
-    {
-      "source": "job-function-scoped-roles",
-      "target": "azure-policy-allowed-resources",
-      "relationship": "related",
-      "note": "New resource type triggers review of whether roles need new actions."
     },
     {
       "source": "job-function-scoped-roles",
@@ -1098,18 +1016,6 @@
     },
     {
       "source": "landing-zone-automation",
-      "target": "landing-zone-tags",
-      "relationship": "related",
-      "note": "Tag remediation runs as a landing-zone automation job."
-    },
-    {
-      "source": "landing-zone-automation",
-      "target": "zero-cost-on-idle",
-      "relationship": "related",
-      "note": "Container Apps free monthly minutes cover jobs that complete in seconds."
-    },
-    {
-      "source": "landing-zone-automation",
       "target": "platform-identity-graph",
       "relationship": "related",
       "note": "Automation jobs query Entra ID, so landing zone identities receive Graph permissions."
@@ -1137,18 +1043,6 @@
       "target": "landing-zone-vnet",
       "relationship": "related",
       "note": "Runners have a dedicated /28 subnet under the landing zone VNet."
-    },
-    {
-      "source": "landing-zone-github-runners",
-      "target": "landing-zone-self-service",
-      "relationship": "related",
-      "note": "Each landing zone registers its own runner, keeping execution isolated within its own workflow."
-    },
-    {
-      "source": "landing-zone-github-runners",
-      "target": "single-region",
-      "relationship": "related",
-      "note": "GitHub Actions service and subnet must be in one of supported regions."
     },
     {
       "source": "landing-zone-github-runners",
@@ -1185,12 +1079,6 @@
       "target": "single-region",
       "relationship": "related",
       "note": "Log Analytics workspace is regional."
-    },
-    {
-      "source": "landing-zone-monitoring",
-      "target": "zero-cost-on-idle",
-      "relationship": "related",
-      "note": "Log Analytics workspace retention is set within the free-tier boundary."
     },
     {
       "source": "landing-zone-resource-group",
@@ -1289,12 +1177,6 @@
       "note": "VNet is provisioned in AZURE_DEFAULT_LOCATION; a second region requires a new VNet and a separate regional IPAM allocation."
     },
     {
-      "source": "landing-zone-vnet",
-      "target": "zero-cost-on-idle",
-      "relationship": "related",
-      "note": "Private endpoints are not considered due to their fixed hourly costs."
-    },
-    {
       "source": "platform-exemptions-automation",
       "target": "azure-native-services-only",
       "relationship": "related",
@@ -1317,12 +1199,6 @@
       "target": "initial-setup",
       "relationship": "related",
       "note": "Graph permissions are granted via admin consent as a manual prerequisite."
-    },
-    {
-      "source": "platform-test-environment",
-      "target": "branch-gated-environment-promotion",
-      "relationship": "related",
-      "note": "Test hierarchy is the target the promotion gate validates against."
     },
     {
       "source": "platform-test-environment",
@@ -1371,12 +1247,6 @@
       "target": "application-teams-own-the-cost",
       "relationship": "related",
       "note": "Defender for cloud paid SKU lands on the subscription billing."
-    },
-    {
-      "source": "self-service-policy-exemptions-defender-for-cloud",
-      "target": "azure-policy-allowed-resources",
-      "relationship": "related",
-      "note": "Whitelisting a resource type triggers a Defender recommendation check new recommendations requiring paid SKUs are candidates for the exemption list."
     },
     {
       "source": "self-service-policy-exemptions",
