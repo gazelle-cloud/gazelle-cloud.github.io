@@ -15,13 +15,16 @@ export const NAV = [
 export const linkEnds = l => [l.source?.id ?? l.source, l.target?.id ?? l.target];
 
 // ── normalizeNodeWeights ─────────────────────────────────────────────────────
-// Computes normalised in-degree (0–1) and stores it as node.__weight.
+// Computes normalised total degree (in + out, 0–1) and stores it as node.__weight.
 // Mutates raw in place; call once after fetching, before mounting.
 export function normalizeNodeWeights(raw) {
-  const inDeg = Object.fromEntries(raw.nodes.map(n => [n.id, 0]));
-  raw.links.forEach(l => { inDeg[l.target] = (inDeg[l.target] ?? 0) + 1; });
-  const maxDeg = Math.max(1, ...Object.values(inDeg));
-  raw.nodes.forEach(n => { n.__weight = (inDeg[n.id] ?? 0) / maxDeg; });
+  const deg = Object.fromEntries(raw.nodes.map(n => [n.id, 0]));
+  raw.links.forEach(l => {
+    deg[l.source] = (deg[l.source] ?? 0) + 1;
+    deg[l.target] = (deg[l.target] ?? 0) + 1;
+  });
+  const maxDeg = Math.max(1, ...Object.values(deg));
+  raw.nodes.forEach(n => { n.__weight = (deg[n.id] ?? 0) / maxDeg; });
 }
 
 // ── drawLabel ────────────────────────────────────────────────────────────────

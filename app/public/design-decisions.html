@@ -62,10 +62,16 @@
 
     const rim = raw.nodes.filter(n => n.type === 'rule');
     rim.forEach((n, i) => {
-      const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
-      n.fx = Math.cos(angle) * 280;
-      n.fy = Math.sin(angle) * 280;
+      const angle = (2 * Math.PI * i) / rim.length - Math.PI / 4;
+      n.x = Math.cos(angle) * 105;
+      n.y = Math.sin(angle) * 105;
     });
+
+    raw.nodes
+      .filter(n => n.type !== 'rule')
+      .sort((a, b) => b.__weight - a.__weight)
+      .slice(0, 2)
+      .forEach(n => { n.fx = 0; n.fy = 0; });
 
     // ─── component ───────────────────────────────────────────────────────────
 
@@ -93,10 +99,11 @@
       }, [activeId, graph.links]);
 
       const physicsProps = useGraphPhysics(fgRef, graph, fg => {
-        fg.d3Force('link').distance(60);
+        fg.d3Force('link').distance(60).strength(0.05);
         fg.d3Force('collision', forceCollide(n => dotRadius(n) + 3));
-        fg.d3Force('radial', forceRadial(0, 0, 0)
-          .strength(n => n.type === 'rule' ? 0 : 0.04 + n.__weight * 0.25));
+        fg.d3Force('charge').strength(n => n.type === 'rule' ? 0 : -5);
+        fg.d3Force('radial', forceRadial(n => n.type === 'rule' ? 105 : (1 - n.__weight) * 110, 0, 0)
+          .strength(n => n.type === 'rule' ? 0.8 : 1.0));
       });
 
       const OUTBOUND_COLOR = '#fb923c';
@@ -158,8 +165,6 @@
 
       return <>
         <NavBar activeHref="./design-decisions.html">
-          <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
-                       colors={COLORS} visible={visible} toggleType={toggleType} />
           <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
                      setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
@@ -180,7 +185,7 @@
             <p className="info-text">{activeNode.why}</p>
           </>}
           {outLinks.length > 0 && <>
-            <div className="info-label">Outbound Links →</div>
+            <div className="info-label" style={{ color: OUTBOUND_COLOR }}>Outbound Links →</div>
             <div className="code-block" style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' }}>
               {outLinks.map((l, i) => {
                 const [, targetId] = linkEnds(l);
@@ -195,7 +200,7 @@
             </div>
           </>}
           {inLinks.length > 0 && <>
-            <div className="info-label">Inbound Links ←</div>
+            <div className="info-label" style={{ color: INBOUND_COLOR }}>Inbound Links ←</div>
             <div className="code-block" style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' }}>
               {inLinks.map((l, i) => {
                 const [sourceId] = linkEnds(l);
@@ -217,9 +222,7 @@
           height={size.height}
           graphData={graph}
           linkColor={linkColor}
-          linkDirectionalArrowLength={l => l.relationship === 'related' ? 5 : 0}
-          linkDirectionalArrowRelPos={0.85}
-          linkDirectionalArrowColor={linkColor}
+          linkDirectionalArrowLength={0}
           {...physicsProps}
           backgroundColor={bgColor}
           onNodeHover={node => setHoveredId(node?.id ?? null)}
