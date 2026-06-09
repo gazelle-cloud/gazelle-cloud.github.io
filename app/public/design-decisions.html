@@ -99,12 +99,19 @@
           .strength(n => n.type === 'rule' ? 0 : 0.04 + n.__weight * 0.25));
       });
 
+      const OUTBOUND_COLOR = '#fb923c';
+      const INBOUND_COLOR  = '#7dd3fc';
+
       const linkColor = React.useCallback(l => {
         const dim    = theme === 'dark' ? 'rgba(180,195,225,0.28)' : 'rgba(80,80,100,0.15)';
         const active = theme === 'dark' ? 'rgba(235,242,255,0.95)' : 'rgba(30,30,50,0.75)';
         const faded  = theme === 'dark' ? 'rgba(180,180,180,0.04)' : 'rgba(80,80,100,0.04)';
         if (!activeId) return dim;
         const [s, t] = linkEnds(l);
+        if (l.relationship === 'related') {
+          if (s === activeId) return OUTBOUND_COLOR;
+          if (t === activeId) return INBOUND_COLOR;
+        }
         return (s === activeId || t === activeId) ? active : faded;
       }, [activeId, theme]);
 
@@ -179,7 +186,7 @@
                 const [, targetId] = linkEnds(l);
                 return (
                   <div key={i}>
-                    <span style={{ color: '#f0a500', fontFamily: 'monospace', fontSize: 12, cursor: 'pointer' }}
+                    <span style={{ color: OUTBOUND_COLOR, fontFamily: 'monospace', fontSize: 12, cursor: 'pointer' }}
                           onClick={() => setFocusedId(targetId)}>→ {targetId}</span>
                     {l.note && <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>{l.note}</div>}
                   </div>
@@ -194,7 +201,7 @@
                 const [sourceId] = linkEnds(l);
                 return (
                   <div key={i}>
-                    <span style={{ color: '#7dd3fc', fontFamily: 'monospace', fontSize: 12, cursor: 'pointer' }}
+                    <span style={{ color: INBOUND_COLOR, fontFamily: 'monospace', fontSize: 12, cursor: 'pointer' }}
                           onClick={() => setFocusedId(sourceId)}>← {sourceId}</span>
                     {l.note && <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>{l.note}</div>}
                   </div>
