@@ -49,6 +49,17 @@
 
     normalizeNodeWeights(raw);
 
+    // Enrich related links with notes from source nodes (in case
+    // the JSON was built before notes were added to link objects)
+    const nodeMap = new Map(raw.nodes.map(n => [n.id, n]));
+    raw.links.forEach(l => {
+      if (l.relationship === 'related' && !l.note) {
+        const src = nodeMap.get(l.source);
+        const entry = src?.links?.find(e => e.id === l.target);
+        if (entry?.note) l.note = entry.note;
+      }
+    });
+
     const rim = raw.nodes.filter(n => n.type === 'rule');
     rim.forEach((n, i) => {
       const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
@@ -66,6 +77,20 @@
 
       const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
       const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
+
+      const { outLinks, inLinks } = React.useMemo(() => {
+        if (!activeId) return { outLinks: [], inLinks: [] };
+        return {
+          outLinks: graph.links.filter(l => {
+            const [s] = linkEnds(l);
+            return s === activeId && l.relationship === 'related';
+          }),
+          inLinks: graph.links.filter(l => {
+            const [, t] = linkEnds(l);
+            return t === activeId && l.relationship === 'related';
+          }),
+        };
+      }, [activeId, graph.links]);
 
       const physicsProps = useGraphPhysics(fgRef, graph, fg => {
         fg.d3Force('link').distance(60);
@@ -147,15 +172,34 @@
             <div className="info-label">Why</div>
             <p className="info-text">{activeNode.why}</p>
           </>}
-          {activeNode?.links && activeNode.links.length > 0 && <>
-            <div className="info-label">Links</div>
+          {outLinks.length > 0 && <>
+            <div className="info-label">Outbound Links →</div>
             <div className="code-block" style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' }}>
-              {activeNode.links.map((l, i) => (
-                <div key={i}>
-                  <span style={{ color: '#f0a500', fontFamily: 'monospace', fontSize: 12 }}>{l.id}</span>
-                  {l.note && <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>{l.note}</div>}
-                </div>
-              ))}
+              {outLinks.map((l, i) => {
+                const [, targetId] = linkEnds(l);
+                return (
+                  <div key={i}>
+                    <span style={{ color: '#f0a500', fontFamily: 'monospace', fontSize: 12, cursor: 'pointer' }}
+                          onClick={() => setFocusedId(targetId)}>→ {targetId}</span>
+                    {l.note && <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>{l.note}</div>}
+                  </div>
+                );
+              })}
+            </div>
+          </>}
+          {inLinks.length > 0 && <>
+            <div className="info-label">Inbound Links ←</div>
+            <div className="code-block" style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' }}>
+              {inLinks.map((l, i) => {
+                const [sourceId] = linkEnds(l);
+                return (
+                  <div key={i}>
+                    <span style={{ color: '#7dd3fc', fontFamily: 'monospace', fontSize: 12, cursor: 'pointer' }}
+                          onClick={() => setFocusedId(sourceId)}>← {sourceId}</span>
+                    {l.note && <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>{l.note}</div>}
+                  </div>
+                );
+              })}
             </div>
           </>}
         </CornerPanel>

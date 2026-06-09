@@ -29,7 +29,7 @@ foreach ($r in $rules) {
 # links: decision -> decision (related)
 foreach ($d in $decisions) {
   foreach ($l in $d.links) {
-    $links.Add([pscustomobject]@{ source = $d.id; target = $l.id; relationship = 'related' })
+    $links.Add([pscustomobject]@{ source = $d.id; target = $l.id; relationship = 'related'; note = $l.note })
   }
 }
 
