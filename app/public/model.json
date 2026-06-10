@@ -155,7 +155,7 @@
     {
       "id": "declarative-resource-lifecycle",
       "type": "decision",
-      "mechanism": "Deployment Stacks use deleteAll lifecycle. Any Azure resource no longer declared in the Bicep template is deleted on the next deployment. The template is source of truth — what's in the code is what exists in Azure.",
+      "mechanism": "Deployment Stacks use the deleteAll lifecycle — any Azure resource no longer declared in the Bicep template is deleted on the next deployment. The template is the source of truth: what's in the code is what exists in Azure.",
       "why": "deleteAll is what makes the template authoritative — without it, decommissioned subscriptions carry ghost resources, reuse is unsafe, and every teardown becomes a manual investigation.",
       "links": [
         {
@@ -164,43 +164,43 @@
         },
         {
           "id": "landing-zone-lifecycle",
-          "note": "A subscription after deleteAll is guaranteed empty makes subscription reuse safe."
+          "note": "A subscription is guaranteed empty after deleteAll, which makes subscription reuse safe."
         },
         {
           "id": "azure-native-services-only",
-          "note": "ARM-native resources are the only ones stack-managed azure-native-services-only is the prerequisite for deleteAll lifecycle enforcement."
+          "note": "Only ARM-native resources are stack-managed — azure-native-services-only is the prerequisite for deleteAll lifecycle enforcement."
         }
       ]
     },
     {
       "id": "deny-security-controls",
       "type": "decision",
-      "mechanism": "Azure Policy enforces hard denials across security disciplines on every resource type that supports each: public network access, local authentication, minimum TLS version, and cross-tenant replication.",
-      "why": "Without enforcement, misconfiguration is invisible — nothing distinguishes a wrongly configured resource from an intentional one.",
+      "mechanism": "Azure Policy enforces hard denies on public network access, local authentication, minimum TLS, and cross-tenant replication, on every resource type that supports them.",
+      "why": "Without enforcement, misconfiguration is invisible.",
       "links": [
         {
           "id": "azure-policy-naming-convention",
-          "note": "All disciplines deploy as deny- prefixed assignments — the prefix is what makes the enforcement category identifiable without a portal lookup."
+          "note": "All deploy as Deny-prefixed assignments."
         },
         {
           "id": "self-service-policy-exemptions",
-          "note": "Hard denial across disciplines is only sustainable if teams can unblock themselves — without it, operational pressure erodes each deny one at a time."
+          "note": "Hard denial only works if teams can unblock themselves."
         },
         {
           "id": "azure-policy-custom-definition",
-          "note": "Where built-in policies provide only Audit effect for a discipline, a custom definition is required to close the enforcement gap."
+          "note": "Custom definitions close gaps where built-ins only offer Audit."
         }
       ]
     },
     {
       "id": "deployment-logic-reusable-workflow",
       "type": "decision",
-      "mechanism": "Gating and execution are separate workflow layers. Trigger workflows own conditions, branch rules, and environment gates. Template workflows own deployment logic. The two are never merged — a trigger calls a template, never the reverse.",
-      "why": "Mixing gating with execution forces the same deploy logic to be duplicated per environment. A bug fix in deployment logic becomes a multi-file change.",
+      "mechanism": "Gating and execution are separate workflow layers — triggers own conditions, branch rules, and environment gates; templates own deployment logic.",
+      "why": "Mixing the two duplicates deploy logic per environment, turning a bug fix into a multi-file change.",
       "links": [
         {
           "id": "end-to-end-deployment",
-          "note": "Reusable workflows provide end-to-end deployment structure for each platform capability."
+          "note": "Reusable workflows give each platform capability its end-to-end deployment structure."
         },
         {
           "id": "branch-gated-environment-promotion",
@@ -235,8 +235,8 @@
     {
       "id": "initial-setup",
       "type": "decision",
-      "mechanism": "The platform has a one-time manual setup process to configure Azure management group and billing, Entra ID for authentication and GitHub organization.",
-      "why": "BigBang cannot bootstrap its own prerequisites — it needs identity to authenticate, a hierarchy to deploy into, and a repo to store configuration.",
+      "mechanism": "The platform has a one-time manual setup process to configure the Azure management group hierarchy and billing, Entra ID authentication, and the GitHub organization.",
+      "why": "BigBang can't bootstrap its own prerequisites — it needs identity to authenticate, a hierarchy to deploy into, and a repo to store configuration.",
       "links": [
         {
           "id": "platform-identity-azure",
@@ -244,15 +244,15 @@
         },
         {
           "id": "platform-identity-github",
-          "note": "GitHub App created, installed in the org, and org-level secrets and variables seeded."
+          "note": "GitHub App created and installed."
         },
         {
           "id": "landing-zone-lifecycle",
-          "note": "Subscription-bank management group needs to be created."
+          "note": "The subscription-bank management group is created here."
         },
         {
           "id": "platform-test-environment",
-          "note": "Gazelle-test and Gazelle-prod management groups need to be created."
+          "note": "The Gazelle-test and Gazelle-prod management groups are created here."
         }
       ]
     },
@@ -892,37 +892,37 @@
       "source": "declarative-resource-lifecycle",
       "target": "landing-zone-lifecycle",
       "relationship": "related",
-      "note": "A subscription after deleteAll is guaranteed empty makes subscription reuse safe."
+      "note": "A subscription is guaranteed empty after deleteAll, which makes subscription reuse safe."
     },
     {
       "source": "declarative-resource-lifecycle",
       "target": "azure-native-services-only",
       "relationship": "related",
-      "note": "ARM-native resources are the only ones stack-managed azure-native-services-only is the prerequisite for deleteAll lifecycle enforcement."
+      "note": "Only ARM-native resources are stack-managed — azure-native-services-only is the prerequisite for deleteAll lifecycle enforcement."
     },
     {
       "source": "deny-security-controls",
       "target": "azure-policy-naming-convention",
       "relationship": "related",
-      "note": "All disciplines deploy as deny- prefixed assignments — the prefix is what makes the enforcement category identifiable without a portal lookup."
+      "note": "All deploy as Deny-prefixed assignments."
     },
     {
       "source": "deny-security-controls",
       "target": "self-service-policy-exemptions",
       "relationship": "related",
-      "note": "Hard denial across disciplines is only sustainable if teams can unblock themselves — without it, operational pressure erodes each deny one at a time."
+      "note": "Hard denial only works if teams can unblock themselves."
     },
     {
       "source": "deny-security-controls",
       "target": "azure-policy-custom-definition",
       "relationship": "related",
-      "note": "Where built-in policies provide only Audit effect for a discipline, a custom definition is required to close the enforcement gap."
+      "note": "Custom definitions close gaps where built-ins only offer Audit."
     },
     {
       "source": "deployment-logic-reusable-workflow",
       "target": "end-to-end-deployment",
       "relationship": "related",
-      "note": "Reusable workflows provide end-to-end deployment structure for each platform capability."
+      "note": "Reusable workflows give each platform capability its end-to-end deployment structure."
     },
     {
       "source": "deployment-logic-reusable-workflow",
@@ -964,19 +964,19 @@
       "source": "initial-setup",
       "target": "platform-identity-github",
       "relationship": "related",
-      "note": "GitHub App created, installed in the org, and org-level secrets and variables seeded."
+      "note": "GitHub App created and installed."
     },
     {
       "source": "initial-setup",
       "target": "landing-zone-lifecycle",
       "relationship": "related",
-      "note": "Subscription-bank management group needs to be created."
+      "note": "The subscription-bank management group is created here."
     },
     {
       "source": "initial-setup",
       "target": "platform-test-environment",
       "relationship": "related",
-      "note": "Gazelle-test and Gazelle-prod management groups need to be created."
+      "note": "The Gazelle-test and Gazelle-prod management groups are created here."
     },
     {
       "source": "ipam",
@@ -1265,190 +1265,6 @@
       "target": "landing-zone-github-runners",
       "relationship": "related",
       "note": "GitHub runner VNet integration is region-gated, so the platform's chosen region must support it."
-    }
-  ],
-  "operations": [
-    {
-      "id": "add-automation-job",
-      "intent": "A new recurring job is added to the platform automation.",
-      "workflow": "platform-automation",
-      "decisions": [
-        "landing-zone-automation",
-        "platform-exemptions-automation",
-        "landing-zone-identity"
-      ],
-      "steps": [
-        "Read all design decisions in decisions[] to understand access, identity, and image constraints before writing any code.",
-        "Implement the job logic under landing-zones/automation/ — jobs must use the ARM API only; no data-plane or VNet-dependent calls.",
-        "Add a Dockerfile for the new image — base image must be pullable from a public registry without authentication.",
-        "Register the new job in landing-zones/bicep/modules/landingzone-automation.bicep following the existing job definition pattern.",
-        "Verify the job authenticates as the landing zone identity — no separate identity or secret.",
-        "Present a complete draft of all changes before implementing."
-      ],
-      "files": [
-        "landing-zones/automation/",
-        "landing-zones/bicep/modules/landingzone-automation.bicep"
-      ],
-      "violations": [
-        "implementing before reading all decisions"
-      ]
-    },
-    {
-      "id": "allow-resource-type",
-      "intent": "A resource type is admitted to the platform only after security controls, diagnostic settings, and access roles are fully wired.",
-      "workflow": "platform-Azure-Policy",
-      "decisions": [
-        "azure-policy-allowed-resources",
-        "landing-zone-diagnostic-settings",
-        "deny-security-controls",
-        "job-function-scoped-roles",
-        "self-service-policy-exemptions-defender-for-cloud",
-        "azure-policy-custom-definition"
-      ],
-      "steps": [
-        "Read all design decisions in decisions[].",
-        "Add the resource type to allowedResources.json.",
-        "Use mcp__azure__documentation microsoft_docs_search to find the built-in diagnostic settings policy — add it to diagnosticSettings.bicepparam.",
-        "For each file in oases/, use mcp__azure__documentation microsoft_docs_search to find built-in policies with the required effect — add matching entries.",
-        "For each gap where no built-in policy provides the required effect, author a custom definition in customDefinitions/ and register it in policyDefinitions.bicepparam.",
-        "Check defenderForCloudExemptions.jsonc for paid-SKU recommendations specific to this resource type — add qualifying entries.",
-        "Check accessControl.bicepparam for custom role actions needed by this resource type.",
-        "Present a complete draft of all changes before implementing."
-      ],
-      "files": [
-        "platform-management/policy/parameters/oases/",
-        "platform-management/policy/parameters/diagnosticSettings.bicepparam",
-        "platform-management/policy/parameters/customDefinitions/",
-        "platform-management/access-control/parameters/accessControl.bicepparam",
-        "landing-zones/defenderForCloudExemptions.jsonc"
-      ],
-      "violations": [
-        "implementing before reading all decisions"
-      ]
-    },
-    {
-      "id": "create-landing-zone",
-      "intent": "A new isolated Azure environment is provisioned under the application team's billing scope, with guardrails pre-wired and ready for workload deployment.",
-      "workflow": "requestNew-Landing-Zone",
-      "decisions": [
-        "landing-zone-lifecycle",
-        "application-teams-own-the-cost",
-        "ipam",
-        "landing-zone-template",
-        "branch-gated-environment-promotion"
-      ],
-      "steps": [
-        "Confirm the application profile exists under application-profiles/ — if not, the register-application-profile operation must be completed first.",
-        "Collect from the user: application name, environment (test or prod), management group name (oases-prod or oases-test), and budget (optional, default 100).",
-        "Auto-select the subscription ID: run `az account management-group subscription show-sub-under-mg --name subscription-bank --query \"[0].name\" -o tsv`.",
-        "Confirm the values with the user (including the auto-selected subscription ID), then trigger the workflow: gh workflow run requestNew-Landing-Zone.yml -f ApplicationName=\"{AppName}\" -f Environment=\"{env}\" -f ManagementGroupName=\"{mgmtGroup}\" -f SubscriptionId=\"{subscriptionId}\" -f Budget=\"{budget}\" — this raises a pull request.",
-        "A platform engineer reviews and approves the pull request — approval is what triggers the automation to complete provisioning."
-      ],
-      "files": [
-        "application-profiles/"
-      ],
-      "violations": [
-        "implementing before reading all decisions"
-      ]
-    },
-    {
-      "id": "destroy-landing-zone",
-      "intent": "A landing zone is permanently torn down, all resources destroyed, and the subscription returned to the subscription-bank — no manual cleanup left behind.",
-      "workflow": "lz-flow-destroy-landing-zone",
-      "decisions": [
-        "declarative-resource-lifecycle",
-        "landing-zone-lifecycle",
-        "application-teams-own-the-cost",
-        "end-to-end-deployment"
-      ],
-      "steps": [
-        "Read all design decisions in decisions[] to understand what is being destroyed and what constraints apply.",
-        "Collect from the user: subscription ID of the landing zone to decommission.",
-        "Verify the bicepparam file exists at landing-zones/oases-prod/{app}/{env}.bicepparam and the lz workflow at .github/workflows/lz-oasis-{appName}-{env}.yml — do not proceed if either is missing.",
-        "Present to the user what will be permanently destroyed: deployment stack, resource groups, role assignments, budget, Defender settings. Confirm the subscription returns to the bank. Wait for explicit confirmation.",
-        "Trigger lz-flow-destroy-landing-zone via workflow_dispatch with the subscription ID. Do not manually delete files — the workflow resolves app name and env, creates the cleanup PR, and the merge triggers the Azure destroy sequence."
-      ],
-      "files": [
-        "landing-zones/oases-prod/",
-        ".github/workflows/"
-      ],
-      "violations": [
-        "implementing before reading all decisions"
-      ]
-    },
-    {
-      "id": "register-application-profile",
-      "intent": "An application team is registered with the platform, giving them a billing scope and a GitHub repo — the prerequisite for full self-service control over their landing zones.",
-      "workflow": "requestNew-Application-Profile",
-      "decisions": [
-        "landing-zone-application-profile"
-      ],
-      "steps": [
-        "Collect from the user: application name, owner email, and engineer email.",
-        "Confirm the values with the user, then trigger the workflow: gh workflow run requestNew-Application-Profile.yml -f ApplicationName=\"{AppName}\" -f OwnerContact=\"{ownerEmail}\" -f engineerContact=\"{engineerEmail}\" — this raises a pull request.",
-        "A platform engineer reviews and approves the pull request — approval is what triggers the automation to complete provisioning."
-      ],
-      "files": [],
-      "violations": [
-        "implementing before reading all decisions"
-      ]
-    },
-    {
-      "id": "update-knowledge-base",
-      "intent": "The knowledge graph remains accurate, consistent, and self-contained — every entry follows the schema, links are organic and directional, and the validation script passes before any PR is opened.",
-      "workflow": null,
-      "decisions": [],
-      "steps": [
-        "Identify whether this is a new entry or an update to an existing one. For an update, read the existing file first.",
-        "Determine the type: guiding-principles, decisions, or operations.",
-        "Draft the entry. For decisions: id matches filename; decision is a single clear statement; why explains the consequence of not following it; links are organic and unidirectional — each note answers 'how does this linked decision specifically affect or constrain this decision?'; violations are specific enough to detect in a code review; files list only files where a reviewer would look to verify the decision is respected.",
-        "For links: only add one if the note would change how someone implements or reviews this decision. Drop it if the relationship is obvious from context alone.",
-        "Present the complete draft to the user before writing any file.",
-        "Write the file.",
-        "Run the validation script: bash .claude/validate-knowledge-base.sh. Fix any errors before proceeding.",
-        "Open a PR."
-      ],
-      "files": [
-        "knowledge-graph/guiding-principles/",
-        "knowledge-graph/decisions/",
-        "knowledge-graph/operations/"
-      ],
-      "violations": [
-        "writing a file before presenting a draft to the user",
-        "adding a bidirectional link",
-        "link note that does not answer 'how does this linked decision specifically affect or constrain this decision?'",
-        "violation that restates the decision instead of describing a detectable breach"
-      ]
-    },
-    {
-      "id": "update-landing-zone",
-      "intent": "An existing landing zone is updated — cost ceiling, tags, or policy exemptions — entirely through the repo, with no portal access required.",
-      "workflow": "lz-oasis-{appName}-{env}",
-      "decisions": [
-        "end-to-end-deployment",
-        "declarative-resource-lifecycle",
-        "self-service-policy-exemptions",
-        "azure-policy-reference"
-      ],
-      "steps": [
-        "Read all design decisions in decisions[] to understand the constraints on tags, budget, and exemptions before proposing any change.",
-        "Verify the landing zone exists: the bicepparam file at landing-zones/oases-{env}/oases-{appName}-{env}.bicepparam and the workflow at .github/workflows/lz-oasis-{appName}-{env}.yml — do not proceed if either is missing, this is a create-landing-zone task.",
-        "Collect from the user the app/env to manage and which concern to change: cost, tags, or exemptions.",
-        "Cost: edit the single `budget` value only. Do not add actual-spend or additional thresholds — the budget drives a single Forecasted alert.",
-        "Tags: edit `subscriptionLevelTags` / `resourceLevelTags` keys and placement only. Keep ownerEmail and engineerEmail as readEnvironmentVariable references, never hardcoded values (landing-zone-tags, application-profile); keep ownerEmail at subscription level, never resource level.",
-        "Exemptions: ask the user whether the exemption is temporary or long-lived. Temporary -> trigger lz-flow-create-policy-exemption (8-hour expiry, break-glass, no PR record). Long-lived -> add an entry to the `exemptions` array referencing a policy-assignment-reference.json key, never a hardcoded ARM assignment id (self-service-policy-exemptions, azure-policy-reference). defenderRecommendationExemptions and diagSettingsExemption remain platform-managed booleans.",
-        "Present a complete draft of the bicepparam change before implementing.",
-        "For declarative changes (cost, tags, long-lived exemptions) open a PR; the merge triggers lz-oasis-{appName}-{env}.yml, redeploying the landing zone stack with deleteAll. No portal or out-of-band edits (end-to-end-deployment)."
-      ],
-      "files": [
-        "landing-zones/oases-prod/",
-        "landing-zones/oases-test/",
-        "landing-zones/managementGroup-AppName-environment.bicepparam",
-        ".github/workflows/lz-flow-create-policy-exemption.yml"
-      ],
-      "violations": [
-        "implementing before reading all decisions"
-      ]
     }
   ]
 }
