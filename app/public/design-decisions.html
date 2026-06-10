@@ -73,6 +73,28 @@
       .slice(0, 1)
       .forEach(n => { n.fx = 0; n.fy = 0; });
 
+    // ─── hero panel ──────────────────────────────────────────────────────────
+
+    function HeroPanel({ theme }) {
+      return (
+        <div className={`corner-panel${theme === 'light' ? ' light' : ''}`}>
+          <h1 style={{ margin: '0 0 12px', padding: 0, fontSize: 16, fontWeight: 400, lineHeight: 1.3, color: '#fff' }}>
+            Gazelle — Engine for Azure Landing Zones
+          </h1>
+          <p style={{ margin: '0 0 14px', fontSize: 14, color: 'rgba(155,175,215,0.75)', letterSpacing: '0.03em' }}>
+            Explore the platform knowledge graph
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <p className="info-text" style={{ margin: 0 }}>Select any node to understand how the platform works and why it is built this way.</p>
+            <p className="info-text" style={{ margin: 0 }}>Follow connections to trace how decisions propagate across the platform.</p>
+            <hr style={{ border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' }} />
+            <p className="info-text" style={{ margin: 0 }}><span style={{ color: '#f0a500' }}>Yellow</span> = guiding principles</p>
+            <p className="info-text" style={{ margin: 0 }}><span style={{ color: '#4e8ef7' }}>Blue</span> = platform decisions and capabilities</p>
+          </div>
+        </div>
+      );
+    }
+
     // ─── component ───────────────────────────────────────────────────────────
 
     function Graph() {
@@ -84,6 +106,8 @@
 
       const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
       const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
+
+      const [searchFocused, setSearchFocused] = React.useState(false);
 
       const { outLinks, inLinks } = React.useMemo(() => {
         if (!activeId) return { outLinks: [], inLinks: [] };
@@ -168,11 +192,15 @@
         <div id="filters">
           <div style={{ pointerEvents: 'auto', display: 'flex', gap: '8px' }}>
             <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
-                       setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
+                       setSearchQuery={setSearchQuery} setFocusedId={setFocusedId}
+                       onFocus={() => setSearchFocused(true)}
+                       onBlur={() => setSearchFocused(false)} />
           </div>
         </div>
 
-        <CornerPanel node={activeNode} theme={theme}>
+        {!activeNode && !searchFocused && <HeroPanel theme={theme} />}
+
+        {!searchFocused && <CornerPanel node={activeNode} theme={theme}>
           <DetailHeader typeLabel={TYPE_LABELS[activeNode?.type]} nodeId={activeNode?.id?.replaceAll('-', ' ')} theme={theme} />
           {activeNode?.intent && <>
             <div className="info-label">Intent</div>
@@ -216,7 +244,7 @@
               })}
             </div>
           </>}
-        </CornerPanel>
+        </CornerPanel>}
 
         <ForceGraph2D
           ref={fgRef}

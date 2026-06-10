@@ -136,7 +136,7 @@ body { background: var(--bg-color); }
 /* ── search box ─────────────────────────────────────────────────────────── */
 .search-box { position: relative; }
 .search-input {
-  width: 360px;
+  width: 392px;
   background: rgba(155,175,215,0.10);
   border: 1.5px solid rgba(155,175,215,0.28);
   border-radius: 20px;

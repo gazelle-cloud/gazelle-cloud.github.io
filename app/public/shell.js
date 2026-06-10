@@ -353,7 +353,7 @@ export function ThemeToggle({ theme, toggleTheme }) {
 // Usage:
 //   <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
 //              setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
-export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId }) {
+export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId, onFocus, onBlur }) {
   const [open, setOpen] = React.useState(false);
   const q       = searchQuery.toLowerCase();
   const matches = q.length > 0 ? nodes.filter(n => n.id.toLowerCase().includes(q)) : nodes;
@@ -365,8 +365,8 @@ export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId }) 
       placeholder: 'Search…',
       value:       searchQuery,
       onChange:    e => setSearchQuery(e.target.value),
-      onFocus:     () => setOpen(true),
-      onBlur:      () => setOpen(false),
+      onFocus:     () => { setOpen(true);  onFocus?.(); },
+      onBlur:      () => { setOpen(false); onBlur?.(); },
       onKeyDown:   e => { if (e.key === 'Escape') { setSearchQuery(''); setOpen(false); } },
     }),
     open && matches.length > 0 && React.createElement('div', { className: 'search-dropdown' },
