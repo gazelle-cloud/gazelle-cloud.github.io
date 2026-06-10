@@ -6,6 +6,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
   --bg-color:    #1f2430;
   --viz-padding: 20px;
   --topbar-h:    48px;
+  --panel-w:     360px;
+  --panel-gap:   14px;
+  --font-mono:   'Fira Code', 'Cascadia Code', 'Consolas', monospace;
 }
 body { background: var(--bg-color); display: flex; flex-direction: column; }
 
@@ -28,7 +31,7 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
 /* Desktop: panel is transparent — its children are direct flex items of #top-bar */
 .top-bar-panel { display: contents; }
 .top-bar-nav   { display: flex; align-items: center; gap: 8px; }
-.top-bar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.top-bar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; width: var(--panel-w); }
 
 /* ── layout ─────────────────────────────────────────────────────────────── */
 #layout {
@@ -41,7 +44,7 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
-  padding-right: 388px;
+  padding-right: calc(var(--panel-w) + var(--panel-gap) * 2);
 }
 
 #graph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
@@ -95,7 +98,7 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
   background: var(--bg-color);
   border: 1px solid rgba(155,175,215,0.10);
   border-radius: 6px;
-  font-family: monospace; font-size: 12px; line-height: 1.6;
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
   color: #e2e8f0; white-space: pre; overflow-x: auto;
 }
 
@@ -105,7 +108,7 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 13px;
-  font-family: monospace;
+  font-family: var(--font-mono);
   color: #1a1b26;
   margin-top: 2px;
 }
@@ -129,9 +132,9 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
 [data-theme="light"] body { background: var(--bg-color); }
 
 /* ── search box ─────────────────────────────────────────────────────────── */
-.search-box { position: relative; }
+.search-box { position: relative; flex: 1; min-width: 0; }
 .search-input {
-  width: 392px;
+  width: 100%;
   background: rgba(155,175,215,0.10);
   border: 1.5px solid rgba(155,175,215,0.28);
   border-radius: 20px;
@@ -174,10 +177,11 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
    and pass node + theme; the panel appears when node is non-null. */
 .corner-panel {
   position: fixed;
-  top: 62px;   /* 48px top-bar + 14px gap */
-  right: 14px;
-  width: 360px;
-  max-height: calc(100vh - 76px);
+  top: calc(var(--topbar-h) + var(--panel-gap));
+  right: var(--panel-gap);
+  width: var(--panel-w);
+  box-sizing: border-box;
+  max-height: calc(100vh - var(--topbar-h) - var(--panel-gap) * 2);
   overflow-y: auto;
   background: rgba(22, 26, 36, 0.97);
   border: 1px solid rgba(155, 175, 215, 0.15);
@@ -263,7 +267,7 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
   #top-bar.menu-open .top-bar-panel { display: flex; }
 
   .top-bar-nav { flex-direction: column; align-items: flex-start; gap: 6px; }
-  .top-bar-right { flex-direction: column; align-items: flex-start; gap: 8px; margin-left: 0; }
+  .top-bar-right { flex-direction: column; align-items: flex-start; gap: 8px; margin-left: 0; width: 100%; }
   .top-bar-right .search-box { width: 100%; }
   .top-bar-right .search-input { width: 100%; font-size: 15px; padding: 8px 14px; }
   .top-bar-right .theme-toggle { width: 100%; font-size: 15px; padding: 8px 14px; text-align: left; box-sizing: border-box; }

@@ -1,28 +1,32 @@
-{
+﻿{
   "nodes": [
     {
       "id": "template-Azure-Policy",
       "type": "github-workflow",
       "trigger": "workflow_call",
-      "jobs": "job: definitions\n  Checkout\n  validate branch and environment\n  get github token\n  Azure login\n  custom definitions\n  setDefinitions - diagnostic settings\njob: assignments\n  Checkout\n  Azure login\n  get github token\n  policy assignments\n  wait while policy data propagates to graph\n  generate Azure policy reference JSON\n  push JSON to repo\n  create PR if main"
+      "jobs": "job: definitions\n  Checkout\n  validate branch and environment\n  get github token\n  Azure login\n  custom definitions\n  setDefinitions - diagnostic settings\njob: assignments\n  Checkout\n  Azure login\n  get github token\n  policy assignments\n  wait while policy data propagates to graph\n  generate Azure policy reference JSON\n  push JSON to repo\n  create PR if main",
+      "label": "Azure policy"
     },
     {
       "id": "template-Management-Groups",
       "type": "github-workflow",
       "trigger": "workflow_call",
-      "jobs": "job: hierarchy\n  Checkout\n  validate branch and environment\n  get github token\n  Azure login\n  management group hierarchy"
+      "jobs": "job: hierarchy\n  Checkout\n  validate branch and environment\n  get github token\n  Azure login\n  management group hierarchy",
+      "label": "management groups"
     },
     {
       "id": "template-access-control",
       "type": "github-workflow",
       "trigger": "workflow_call",
-      "jobs": "job: accessControl\n  Checkout\n  validate branch and environment\n  get github token\n  Azure login\n  access control at management group level"
+      "jobs": "job: accessControl\n  Checkout\n  validate branch and environment\n  get github token\n  Azure login\n  access control at management group level",
+      "label": "access control"
     },
     {
       "id": "template-landing-zones",
       "type": "github-workflow",
       "trigger": "workflow_call",
-      "jobs": "job: create-landingzone\n  checkout local\n  get github token\n  Convert .bicepparam to JSON\n  fetch JSON values\n  fetch application repo variables\n  echo landing zone variables\n  Azure login\n  Bring Your Own Subscription - rename\n  Bring Your Own Subscription - change invoice section\n  create subscription\n  move subscription to management group\n  create GitHub environment\n  create landingzone\n  Entra ID Roles (classic deployment)\n  Github runners network configuration"
+      "jobs": "job: create-landingzone\n  checkout local\n  get github token\n  Convert .bicepparam to JSON\n  fetch JSON values\n  fetch application repo variables\n  echo landing zone variables\n  Azure login\n  Bring Your Own Subscription - rename\n  Bring Your Own Subscription - change invoice section\n  create subscription\n  move subscription to management group\n  create GitHub environment\n  create landingzone\n  Entra ID Roles (classic deployment)\n  Github runners network configuration",
+      "label": "landing zone template"
     },
     {
       "id": "lz-main",
@@ -194,44 +198,30 @@
       "type": "bicep-module",
       "path": "landing-zones/bicep/modules/base/policyExemption.bicep",
       "snippet": "resource policyExemption 'Microsoft.Authorization/policyExemptions@2024-12-01-preview' = {\r\n  name: policyExemptionName\r\n  properties: {\r\n    exemptionCategory: 'Waiver'\r\n    policyAssignmentId: policyAssignmentId\r\n    policyDefinitionReferenceIds: policyDefinitionReferenceIds\r\n    description: description\r\n  }\r\n}\r"
+    },
+    {
+      "id": "template-GitHub-environment-variables",
+      "type": "github-workflow",
+      "trigger": "workflow_call",
+      "jobs": "job: Config-GitHub-Variables\n  Checkout\n  validate branch and environment\n  get github token\n  create GitHub environment\n  set environment variables\n  GitHub organization databaseId\n  github labels",
+      "label": "GitHub variables"
+    },
+    {
+      "id": "template-push-Docker-images",
+      "type": "github-workflow",
+      "trigger": "workflow_call | workflow_dispatch",
+      "jobs": "job: Publish-Docker-Image\n  get github token\n  Checkout repository\n  validate branch and environment\n  login to ghcr.io\n  Build Docker image\n  Push Docker image",
+      "label": "Docker images"
+    },
+    {
+      "id": "template-trigger-landingzone-workflows",
+      "type": "github-workflow",
+      "trigger": "workflow_call",
+      "jobs": "job: trigger\n  Checkout repository\n  get github token\n  trigger workflows",
+      "label": "trigger landing zones"
     }
   ],
   "links": [
-    {
-      "source": "template-landing-zones",
-      "target": "lz-main",
-      "relationship": "deploys"
-    },
-    {
-      "source": "template-landing-zones",
-      "target": "lz-entra",
-      "relationship": "deploys"
-    },
-    {
-      "source": "template-Azure-Policy",
-      "target": "policy-customDefs",
-      "relationship": "deploys"
-    },
-    {
-      "source": "template-Azure-Policy",
-      "target": "policy-configDiag",
-      "relationship": "deploys"
-    },
-    {
-      "source": "template-Azure-Policy",
-      "target": "policy-oases",
-      "relationship": "deploys"
-    },
-    {
-      "source": "template-Management-Groups",
-      "target": "mgmt-managementGroups",
-      "relationship": "deploys"
-    },
-    {
-      "source": "template-access-control",
-      "target": "rbac-accessControl",
-      "relationship": "deploys"
-    },
     {
       "source": "lz-main",
       "target": "lz-identity",
@@ -376,6 +366,41 @@
       "source": "lz-monitor",
       "target": "lz-logAnalytics",
       "relationship": "uses"
+    },
+    {
+      "source": "template-landing-zones",
+      "target": "lz-main",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-landing-zones",
+      "target": "lz-entra",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Azure-Policy",
+      "target": "policy-customDefs",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Azure-Policy",
+      "target": "policy-configDiag",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Azure-Policy",
+      "target": "policy-oases",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-Management-Groups",
+      "target": "mgmt-managementGroups",
+      "relationship": "deploys"
+    },
+    {
+      "source": "template-access-control",
+      "target": "rbac-accessControl",
+      "relationship": "deploys"
     }
   ]
 }

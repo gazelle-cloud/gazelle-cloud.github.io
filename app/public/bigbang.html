@@ -18,7 +18,7 @@
     import React from 'react';
     import { createRoot } from 'react-dom/client';
     import { forceCollide, forceX, forceY } from 'https://esm.sh/d3-force';
-    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
+    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint, paintNodeColors, FONT_MONO } from './shell.js';
 
     setupLayout();
 
@@ -109,7 +109,7 @@
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    const raw = await fetch('./deployments.json').then(r => r.json());
+    const raw = await fetch('./bigbang.json').then(r => r.json());
 
     const ids = new Set(raw.nodes.map(n => n.id));
     raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
@@ -117,9 +117,12 @@
     normalizeNodeWeights(raw);
 
     const WF_ORDER = [
+      'template-GitHub-environment-variables',
       'template-Management-Groups',
       'template-access-control',
       'template-Azure-Policy',
+      'template-push-Docker-images',
+      'template-trigger-landingzone-workflows',
       'template-landing-zones',
     ];
     const wfSpacing = 130;
@@ -146,6 +149,14 @@
       });
     });
 
+    raw.links.forEach(l => {
+      const [s, t] = linkEnds(l);
+      const src = raw.nodes.find(n => n.id === s);
+      const tgt = raw.nodes.find(n => n.id === t);
+      if (src?.type === 'main-bicep' && tgt?.type === 'bicep-module' && tgt.__xTarget == null)
+        tgt.__xTarget = src.__xTarget ?? 0;
+    });
+
     raw.nodes.forEach(n => {
       if (n.type === 'github-workflow') {
         n.fx = n.__xTarget ?? 0; n.fy = 220;
@@ -153,6 +164,28 @@
       // main-bicep and bicep-module start near the origin;
       // forceY and forceX animate them out to their tier positions.
     });
+
+    // ─── idle panel ──────────────────────────────────────────────────────────
+
+    function IdlePanel({ theme }) {
+      return (
+        <div className={`corner-panel${theme === 'light' ? ' light' : ''}`}>
+          <h1 style={{ margin: '0 0 12px', padding: 0, fontSize: 16, fontWeight: 400, lineHeight: 1.3, color: '#fff' }}>
+            BigBang
+          </h1>
+          <p style={{ margin: '0 0 14px', fontSize: 14, color: 'rgba(155,175,215,0.75)', letterSpacing: '0.03em' }}>
+            Explore platform deployment workflows
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <p className="info-text" style={{ margin: 0 }}>This graph shows how each platform capability is deployed end-to-end — independently, from nothing to production-ready.</p>
+            <hr style={{ border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' }} />
+            <p className="info-text" style={{ margin: 0 }}><span style={{ color: PALETTE.ENTRY }}>Yellow</span> = GitHub workflows</p>
+            <p className="info-text" style={{ margin: 0 }}><span style={{ color: PALETTE.CONNECTOR }}>Green</span> = main Bicep</p>
+            <p className="info-text" style={{ margin: 0 }}><span style={{ color: PALETTE.LEAF }}>Blue</span> = Bicep modules</p>
+          </div>
+        </div>
+      );
+    }
 
     // ─── component ───────────────────────────────────────────────────────────
 
@@ -166,22 +199,24 @@
       const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
       const hoverTimer = React.useRef(null);
 
+      const [searchFocused, setSearchFocused] = React.useState(false);
+
       const physicsProps = useGraphPhysics(fgRef, graph, fg => {
         fg.d3Force('link')
           .distance(l => l.source?.type === 'github-workflow' ? 25 : 70)
           .strength(0.4);
-        fg.d3Force('collision', forceCollide(n => dotRadius(n) + 5));
+        fg.d3Force('collision', forceCollide(n => n.type === 'bicep-module' ? dotRadius(n) + 60 : dotRadius(n) + 5));
         fg.d3Force('y-tier', forceY(n => {
           if (n.type === 'github-workflow') return 220;
           if (n.type === 'main-bicep')      return 140;
-          return -220;
+          return 0;
         }).strength(n => {
           if (n.type === 'github-workflow') return 0.8;
           if (n.type === 'main-bicep')      return 0.5;
-          return 0.25;
+          return 0;
         }));
         fg.d3Force('x-stem', forceX(n => n.__xTarget ?? 0)
-          .strength(n => n.type === 'github-workflow' ? 0.8 : n.type === 'main-bicep' ? 0.6 : 0));
+          .strength(n => n.type === 'github-workflow' ? 0.8 : n.type === 'main-bicep' ? 0.6 : n.type === 'bicep-module' ? 0.3 : 0));
       });
 
       const linkColor = React.useCallback(l => {
@@ -204,8 +239,7 @@
           : searchMatchIds.size > 0 && !isMatch;
         const r           = dotRadius(node) / globalScale;
 
-        const activeColor = theme === 'dark' ? '#fff' : '#1a1b26';
-        const backdrop    = theme === 'dark' ? 'rgba(31,36,48,0.9)' : 'rgba(245,241,232,0.9)';
+        const { activeColor, backdrop } = paintNodeColors(theme);
 
         ctx.globalAlpha = dimmed ? RENDER.dimmedAlpha : 1;
         ctx.beginPath();
@@ -226,7 +260,7 @@
             ly    = node.y;
             align = 'left';
           }
-          drawLabel(ctx, node.id, lx, ly, align, RENDER.labelFontSize, globalScale,
+          drawLabel(ctx, node.label ?? node.id.replaceAll('-', ' '), lx, ly, align, RENDER.labelFontSize, globalScale,
             isActive ? activeColor : COLORS[node.type] ?? '#ccc', backdrop);
         }
 
@@ -235,14 +269,18 @@
       }, [activeId, neighbours, searchMatchIds, theme]);
 
       return <>
-        <NavBar activeHref="./deployments.html">
+        <NavBar activeHref="./bigbang.html">
           <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
-                     setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
+                     setSearchQuery={setSearchQuery} setFocusedId={setFocusedId}
+                     onFocus={() => setSearchFocused(true)}
+                     onBlur={() => setSearchFocused(false)} />
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </NavBar>
 
-        <CornerPanel node={activeNode} theme={theme}>
-          <DetailHeader typeLabel={TYPE_LABELS[activeNode?.type]} nodeId={activeNode?.id} theme={theme} />
+        {!activeNode && !searchFocused && <IdlePanel theme={theme} />}
+
+        {!searchFocused && <CornerPanel node={activeNode} theme={theme}>
+          <DetailHeader typeLabel={TYPE_LABELS[activeNode?.type]} nodeId={activeNode?.label ?? activeNode?.id?.replaceAll('-', ' ')} theme={theme} />
 
           {activeNode?.description && <>
             <div className="info-label">Description</div>
@@ -258,7 +296,7 @@
 
           {activeNode?.path && <>
             <div className="info-label">Path</div>
-            <p className="info-text" style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>
+            <p className="info-text" style={{ fontFamily: FONT_MONO, fontSize: 11, wordBreak: 'break-all' }}>
               {activeNode.path}
             </p>
           </>}
@@ -276,7 +314,7 @@
               dangerouslySetInnerHTML={{ __html: highlightBicep(activeNode.inputs) }}
             />
           </>}
-        </CornerPanel>
+        </CornerPanel>}
 
         <ForceGraph2D
           ref={fgRef}
@@ -298,12 +336,7 @@
           onNodeClick={onNodeClick}
           onBackgroundClick={handleBackgroundClick}
           nodeCanvasObject={paintNode}
-          nodePointerAreaPaint={(node, color, ctx) => {
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, (node.__r ?? 4) + RENDER.hitTestPadding, 0, 2 * Math.PI);
-            ctx.fill();
-          }}
+          nodePointerAreaPaint={nodePointerAreaPaint}
         />
       </>;
     }

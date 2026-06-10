@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 export const NAV = [
   { label: 'Model',       href: './model.html' },
   { label: 'Operations',  href: './operations.html' },
-  { label: 'Deployments', href: './deployments.html' },
+  { label: 'BigBang', href: './bigbang.html' },
 ];
 
 // ── linkEnds ─────────────────────────────────────────────────────────────────
@@ -49,6 +49,11 @@ export function drawLabel(ctx, text, lx, ly, align, fontSize, globalScale, color
   ctx.fillText(text, lx, ly);
 }
 
+// ── FONT_MONO ─────────────────────────────────────────────────────────────────
+// Canonical monospace font stack. Use in inline JSX styles wherever a code-like
+// font is needed (link labels, paths, snippets). Matches --font-mono in shell.css.
+export const FONT_MONO = "'Fira Code', 'Cascadia Code', 'Consolas', monospace";
+
 // ── PALETTE ──────────────────────────────────────────────────────────────────
 // Canonical colour roles shared by every graph page.
 // Pages assign their node types to these roles — never to raw hex values.
@@ -80,6 +85,22 @@ export const RENDER = {
 const BACKDROP = RENDER.bgColor
   .replace(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i,
     (_, r, g, b) => `rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.9)`);
+
+// ── paintNodeColors ───────────────────────────────────────────────────────────
+// Returns the two theme-dependent colour values every paintNode callback needs.
+// Call once per paintNode invocation (inside useCallback, before the loop body).
+//
+// Usage:
+//   const paintNode = React.useCallback((node, ctx, globalScale) => {
+//     const { activeColor, backdrop } = paintNodeColors(theme);
+//     // … draw circle … drawLabel(ctx, …, activeColor, backdrop);
+//   }, [activeId, neighbours, searchMatchIds, theme]);
+export function paintNodeColors(theme) {
+  return {
+    activeColor: theme === 'dark' ? '#fff' : '#1a1b26',
+    backdrop:    theme === 'dark' ? 'rgba(31,36,48,0.9)' : 'rgba(245,241,232,0.9)',
+  };
+}
 
 // ── setupLayout ──────────────────────────────────────────────────────────────
 // Creates the top bar + graph pane DOM structure and appends it to <body>.
@@ -459,6 +480,17 @@ export function NodeTooltip({ node, mousePos, theme, children }) {
     { className: `node-tooltip${theme === 'light' ? ' light' : ''}`, style },
     children,
   );
+}
+
+// ── nodePointerAreaPaint ──────────────────────────────────────────────────────
+// Standard hit-test paint for every graph page. Spread directly onto
+// <ForceGraph2D nodePointerAreaPaint={nodePointerAreaPaint} />.
+// Requires each paintNode callback to store node.__r (the scaled radius).
+export function nodePointerAreaPaint(node, color, ctx) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(node.x, node.y, (node.__r ?? 4) + RENDER.hitTestPadding, 0, 2 * Math.PI);
+  ctx.fill();
 }
 
 // ── CornerPanel ───────────────────────────────────────────────────────────────

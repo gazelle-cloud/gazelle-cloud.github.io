@@ -18,7 +18,7 @@
     import React from 'react';
     import { createRoot } from 'react-dom/client';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { NavBar, SearchBox, DetailHeader, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
+    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint, paintNodeColors, FONT_MONO } from './shell.js';
 
     setupLayout();
 
@@ -85,7 +85,7 @@
             Explore the platform knowledge graph
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p className="info-text" style={{ margin: 0 }}>This model visualizes the guiding principles, design decisions, and operations behind the system, allowing you to explore how the platform is structured and why it's built this way.</p>
+            <p className="info-text" style={{ margin: 0 }}>This graph traces the reasoning behind Gazelle's design — how each design decision works together to give teams autonomy through self-service.</p>
             <hr style={{ border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' }} />
             <p className="info-text" style={{ margin: 0 }}><span style={{ color: '#f0a500' }}>Yellow</span> = guiding principles</p>
             <p className="info-text" style={{ margin: 0 }}><span style={{ color: '#4e8ef7' }}>Blue</span> = design decisions</p>
@@ -102,8 +102,7 @@
 
     function Graph() {
       const fgRef = React.useRef();
-      const theme = 'dark';
-      const bgColor = '#1f2430';
+      const { theme, toggleTheme, bgColor } = useTheme();
 
       const size = useVizPaneSize(fgRef);
 
@@ -159,8 +158,7 @@
           : searchMatchIds.size > 0 && !isMatch;
         const r           = dotRadius(node) / globalScale;
 
-        const activeColor = theme === 'dark' ? '#fff' : '#1a1b26';
-        const backdrop    = theme === 'dark' ? 'rgba(31,36,48,0.9)' : 'rgba(245,241,232,0.9)';
+        const { activeColor, backdrop } = paintNodeColors(theme);
 
         ctx.globalAlpha = dimmed ? RENDER.dimmedAlpha : 1;
         ctx.beginPath();
@@ -197,6 +195,7 @@
                      setSearchQuery={setSearchQuery} setFocusedId={setFocusedId}
                      onFocus={() => setSearchFocused(true)}
                      onBlur={() => setSearchFocused(false)} />
+          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </NavBar>
 
         {!activeNode && !searchFocused && <HeroPanel theme={theme} />}
@@ -222,9 +221,9 @@
                 const [, targetId] = linkEnds(l);
                 return (
                   <div key={i}>
-                    <span style={{ color: OUTBOUND_COLOR, fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace", fontSize: 13, cursor: 'pointer' }}
+                    <span style={{ color: OUTBOUND_COLOR, fontFamily: FONT_MONO, fontSize: 13, cursor: 'pointer' }}
                           onClick={() => setFocusedId(targetId)}>→ {targetId.replaceAll('-', ' ')}</span>
-                    {l.note && <div style={{ color: '#94a3b8', fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace", fontSize: 12, marginTop: 2 }}>{l.note}</div>}
+                    {l.note && <div style={{ color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12, marginTop: 2 }}>{l.note}</div>}
                   </div>
                 );
               })}
@@ -237,9 +236,9 @@
                 const [sourceId] = linkEnds(l);
                 return (
                   <div key={i}>
-                    <span style={{ color: INBOUND_COLOR, fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace", fontSize: 13, cursor: 'pointer' }}
+                    <span style={{ color: INBOUND_COLOR, fontFamily: FONT_MONO, fontSize: 13, cursor: 'pointer' }}
                           onClick={() => setFocusedId(sourceId)}>← {sourceId.replaceAll('-', ' ')}</span>
-                    {l.note && <div style={{ color: '#94a3b8', fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace", fontSize: 12, marginTop: 2 }}>{l.note}</div>}
+                    {l.note && <div style={{ color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12, marginTop: 2 }}>{l.note}</div>}
                   </div>
                 );
               })}
@@ -260,12 +259,7 @@
           onNodeClick={onNodeClick}
           onBackgroundClick={handleBackgroundClick}
           nodeCanvasObject={paintNode}
-          nodePointerAreaPaint={(node, color, ctx) => {
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, (node.__r ?? 4) + RENDER.hitTestPadding, 0, 2 * Math.PI);
-            ctx.fill();
-          }}
+          nodePointerAreaPaint={nodePointerAreaPaint}
         />
       </>;
     }
