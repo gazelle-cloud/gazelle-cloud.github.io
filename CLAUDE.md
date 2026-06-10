@@ -6,9 +6,9 @@ A force-directed graph that visualises the design choices, platform anchors, and
 
 ```
 data/
-  design-choices/       # one JSON per choice
+  model/                # one JSON per choice
   platform-anchors/     # one JSON per anchor
-  platform-operations/  # one JSON per operation
+  operations/           # one JSON per operation
 scripts/
   build-graph.ps1       # reads data/, writes app/public/index.json
 app/public/
@@ -20,7 +20,7 @@ Run `pwsh -File scripts/build-graph.ps1` after any data change to regenerate `in
 
 ## Data schemas
 
-### `data/design-choices/*.json`
+### `data/model/*.json`
 ```json
 {
   "id":        "kebab-case string — matches filename",
@@ -44,7 +44,7 @@ Run `pwsh -File scripts/build-graph.ps1` after any data change to regenerate `in
 ```
 Anchors group decisions by theme. No `mechanism`/`why` — they are named principles, not decisions.
 
-### `data/platform-operations/*.json`
+### `data/operations/*.json`
 ```json
 {
   "id":          "kebab-case string — matches filename",
@@ -79,7 +79,7 @@ Shared infrastructure imported by every page:
 
 ### Adding a new page
 
-1. Create `app/public/my-page.html` — copy the structure from `design-choices.html`.
+1. Create `app/public/my-page.html` — copy the structure from `model.html`.
 2. Call `setupLayout()` once before mounting React.
 3. Use `<CornerPanel node={activeNode} theme={theme}>` for the info panel — populate it with `.info-label` / `.info-text` elements matching your data schema.
 4. Add the page to `NAV` in `shell.js` so it appears in the nav bar.

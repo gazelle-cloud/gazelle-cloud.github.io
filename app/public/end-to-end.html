@@ -34,8 +34,8 @@
 
     const TYPE_LABELS = {
       principle: 'design-principles',
-      operation: 'platform-operations',
-      decision:  'design-choices',
+      operation: 'operations',
+      decision:  'model',
     };
 
     const dotRadius = node =>
@@ -43,7 +43,7 @@
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    const raw = await fetch('./design-choices.json').then(r => r.json());
+    const raw = await fetch('./model.json').then(r => r.json());
 
     raw.nodes = raw.nodes.filter(n => n.type !== 'unknown');
     const ids = new Set(raw.nodes.map(n => n.id));

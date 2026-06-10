@@ -109,7 +109,7 @@
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    const raw = await fetch('./azure-deployments.json').then(r => r.json());
+    const raw = await fetch('./deployments.json').then(r => r.json());
 
     const ids = new Set(raw.nodes.map(n => n.id));
     raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
@@ -235,7 +235,7 @@
       }, [activeId, neighbours, searchMatchIds, theme]);
 
       return <>
-        <NavBar activeHref="./azure-deployments.html">
+        <NavBar activeHref="./deployments.html">
           <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
                      setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
