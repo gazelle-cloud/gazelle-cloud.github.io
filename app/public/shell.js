@@ -1,12 +1,12 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 // ── navigation entries ───────────────────────────────────────────────────────
 // Add one object here whenever you create a new page. That's it.
 export const NAV = [
-  { label: 'Design decisions',    href: './design-decisions.html' },
+  { label: 'Design choices',      href: './design-choices.html' },
   { label: 'Platform operations', href: './platform-operations.html' },
   { label: 'Azure deployments',   href: './azure-deployments.html' },
-  { label: 'GitHub',              href: 'https://github.com/orgs/gazelle-cloud/', external: true },
 ];
 
 // ── linkEnds ─────────────────────────────────────────────────────────────────
@@ -82,9 +82,13 @@ const BACKDROP = RENDER.bgColor
     (_, r, g, b) => `rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.9)`);
 
 // ── setupLayout ──────────────────────────────────────────────────────────────
-// Creates the two-pane split DOM structure and appends it to <body>.
+// Creates the top bar + graph pane DOM structure and appends it to <body>.
 // Call once at the top of each page script, before mounting React.
 export function setupLayout() {
+  const header = document.createElement('header');
+  header.id = 'top-bar';
+  document.body.appendChild(header);
+
   const layout = document.createElement('div');
   layout.id = 'layout';
   layout.innerHTML = '<div id="viz-pane"><div id="graph"></div></div>';
@@ -155,12 +159,11 @@ export function useVizPaneSize(fgRef, padding = _cssPx('--viz-padding')) {
 
 // ── useGraphState ────────────────────────────────────────────────────────────
 // Centralises the repeated state + derived data used by every graph page:
-// visibility set, hover/focus ids, filtered graph, active node, neighbour set,
-// the toggleType handler, and ready-to-use onNodeClick / onBackgroundClick props.
-// Returns { visible, activeId, graph, activeNode, neighbours, toggleType,
+// hover/focus ids, graph data, active node, neighbour set,
+// and ready-to-use onNodeClick / onBackgroundClick props.
+// Returns { activeId, graph, activeNode, neighbours,
 //           setHoveredId, setFocusedId, onNodeClick, onBackgroundClick }.
 export function useGraphState(raw, nodeTypes) {
-  const [visible,   setVisible]   = React.useState(new Set(nodeTypes));
   const [hoveredId, setHoveredId] = React.useState(null);
   const [focusedId, setFocusedId] = React.useState(null);
 
@@ -168,16 +171,10 @@ export function useGraphState(raw, nodeTypes) {
 
   const [searchQuery, setSearchQuery] = React.useState('');
 
-  const graph = React.useMemo(() => {
-    const visIds = new Set(raw.nodes.filter(n => visible.has(n.type)).map(n => n.id));
-    return {
-      nodes: raw.nodes.filter(n => visible.has(n.type)),
-      links: raw.links.filter(l => {
-        const [s, t] = linkEnds(l);
-        return visIds.has(s) && visIds.has(t);
-      }),
-    };
-  }, [visible]);
+  const graph = React.useMemo(() => ({
+    nodes: raw.nodes,
+    links: raw.links,
+  }), [raw]);
 
   const searchMatchIds = React.useMemo(() => {
     if (!searchQuery) return new Set();
@@ -200,21 +197,10 @@ export function useGraphState(raw, nodeTypes) {
     return set;
   }, [activeId, graph.links]);
 
-  const toggleType = type => {
-    setFocusedId(null);
-    setVisible(prev => {
-      const next = new Set(prev);
-      next.has(type) ? next.delete(type) : next.add(type);
-      return next;
-    });
-  };
-
   return {
-    visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId,
+    activeId, graph, activeNode, neighbours, setHoveredId, setFocusedId,
     searchQuery, setSearchQuery, searchMatchIds,
     onNodeClick:       node => {
-      // Close the hamburger menu when interacting with the graph.
-      // The detail panel will open naturally via the focusedId effect.
       window.__closeNavMenu?.();
       setFocusedId(p => p === node.id ? null : node.id);
     },
@@ -258,12 +244,13 @@ export function useBraveClickFix(fgRef, graphNodes, dotRadiusFn, setFocusedId, o
 }
 
 // ── NavBar ───────────────────────────────────────────────────────────────────
-// Renders the #filters overlay: nav links on the left, then `children` (chips
-// wrapped with a dim "show" label) flowing to the right.
+// Portals into #top-bar (created by setupLayout).
+// Desktop: nav links left, children (chips / search / theme) pushed right.
+// Mobile:  hamburger toggles a drop-down panel containing both.
 //
 // Usage inside a page's JSX:
 //   <NavBar activeHref="./index.html">
-//     {optionalFilterChipsOrLegend}
+//     <SearchBox … /> <ThemeToggle … />
 //   </NavBar>
 export function NavBar({ activeHref, children }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -274,35 +261,55 @@ export function NavBar({ activeHref, children }) {
     return () => { delete window.__closeNavMenu; };
   }, []);
 
-  // Close the dropdown when the user taps outside it on mobile.
+  // Sync menu-open class onto #top-bar so CSS can drive the mobile panel.
+  React.useEffect(() => {
+    document.getElementById('top-bar')?.classList.toggle('menu-open', menuOpen);
+  }, [menuOpen]);
+
+  // Close when tapping outside the top bar on mobile.
   React.useEffect(() => {
     if (!menuOpen) return;
     const close = e => {
-      if (!document.getElementById('filters')?.contains(e.target)) setMenuOpen(false);
+      if (!document.getElementById('top-bar')?.contains(e.target)) setMenuOpen(false);
     };
     const id = setTimeout(() => document.addEventListener('pointerdown', close), 0);
     return () => { clearTimeout(id); document.removeEventListener('pointerdown', close); };
   }, [menuOpen]);
 
-  return React.createElement('div', { id: 'filters', className: menuOpen ? 'menu-open' : '' },
-    React.createElement('button', {
-      id: 'menu-btn',
-      onClick: () => setMenuOpen(m => !m),
-      'aria-label': menuOpen ? 'Close menu' : 'Open menu',
-      'aria-expanded': String(menuOpen),
-    }, menuOpen ? '✕' : '☰'),
-    React.createElement('div', { className: 'nav-menu' },
-      React.createElement('div', { className: 'nav-stack' },
-        ...NAV.map(({ label, href, external }) => {
-          if (href === activeHref)
-            return React.createElement('span', { key: label, className: 'nav-link nav-active' }, label);
+  const container = document.getElementById('top-bar');
+  if (!container) return null;
+
+  const navLinks = NAV.flatMap(({ label, href, external }, i) => {
+    const isActive = href === activeHref;
+    const link = isActive
+      ? React.createElement('span', { key: label, className: 'nav-link nav-active' }, label)
+      : (() => {
           const props = { key: label, className: 'nav-link', href };
           if (external) { props.target = '_blank'; props.rel = 'noopener noreferrer'; }
           return React.createElement('a', props, label);
-        })
+        })();
+    return i === 0
+      ? [link]
+      : [React.createElement('span', { key: `sep-${i}`, className: 'nav-sep', 'aria-hidden': 'true' }, '|'), link];
+  });
+
+  return createPortal(
+    React.createElement(React.Fragment, null,
+      // .top-bar-panel: display:contents on desktop (children lay out in the bar
+      // directly); flex column dropdown on mobile when #top-bar.menu-open.
+      React.createElement('div', { className: 'top-bar-panel' },
+        React.createElement('nav', { className: 'top-bar-nav' }, ...navLinks),
+        React.createElement('div', { className: 'top-bar-right' }, children),
       ),
-      children,
+      // Hamburger — hidden on desktop, shown on mobile.
+      React.createElement('button', {
+        id: 'menu-btn',
+        onClick: () => setMenuOpen(m => !m),
+        'aria-label': menuOpen ? 'Close menu' : 'Open menu',
+        'aria-expanded': String(menuOpen),
+      }, menuOpen ? '✕' : '☰'),
     ),
+    container,
   );
 }
 
@@ -472,25 +479,3 @@ export function CornerPanel({ node, theme, children }) {
   );
 }
 
-// ── FilterChips ──────────────────────────────────────────────────────────────
-// Renders the type-filter chips inside NavBar.
-// Usage:
-//   <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
-//                colors={COLORS} visible={visible} toggleType={toggleType} />
-export function FilterChips({ nodeTypes, typeLabels, colors, visible, toggleType }) {
-  return React.createElement('div', { className: 'chips-col' },
-    ...nodeTypes.map(type =>
-      React.createElement(
-        'div',
-        {
-          key:       type,
-          className: `chip${visible.has(type) ? '' : ' off'}`,
-          style:     { borderColor: colors[type], color: colors[type] },
-          onClick:   () => toggleType(type),
-        },
-        React.createElement('div', { className: 'chip-dot', style: { background: colors[type] } }),
-        typeLabels[type],
-      )
-    )
-  );
-}

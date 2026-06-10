@@ -18,7 +18,7 @@
     import React from 'react';
     import { createRoot } from 'react-dom/client';
     import { forceCollide, forceX, forceY } from 'https://esm.sh/d3-force';
-    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
+    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
 
     setupLayout();
 
@@ -162,7 +162,7 @@
 
       const size = useVizPaneSize(fgRef);
 
-      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
+      const { activeId, graph, activeNode, neighbours, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
       const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
       const hoverTimer = React.useRef(null);
 
@@ -236,8 +236,6 @@
 
       return <>
         <NavBar activeHref="./azure-deployments.html">
-          <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
-                       colors={COLORS} visible={visible} toggleType={toggleType} />
           <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
                      setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />

@@ -1,12 +1,12 @@
 # Knowledge Graph
 
-A force-directed graph that visualises the design decisions, platform anchors, and platform operations of a landing zone platform. Nodes are dots; edges are relationships between them.
+A force-directed graph that visualises the design choices, platform anchors, and platform operations of a landing zone platform. Nodes are dots; edges are relationships between them.
 
 ## Structure
 
 ```
 data/
-  design-decisions/     # one JSON per decision
+  design-choices/       # one JSON per choice
   platform-anchors/     # one JSON per anchor
   platform-operations/  # one JSON per operation
 scripts/
@@ -20,7 +20,7 @@ Run `pwsh -File scripts/build-graph.ps1` after any data change to regenerate `in
 
 ## Data schemas
 
-### `data/design-decisions/*.json`
+### `data/design-choices/*.json`
 ```json
 {
   "id":        "kebab-case string — matches filename",
@@ -74,12 +74,12 @@ Shared infrastructure imported by every page:
 | `useBraveClickFix(...)` | Geometric hit-test fallback for Brave's canvas restrictions. |
 | `CornerPanel` | **Standard info panel — use this on every page.** Fixed top-right overlay that appears on hover/click; scrolls for long content; reflows to a bottom sheet on mobile. |
 | `NodeTooltip` | Cursor-following tooltip alternative (available but not the default). |
-| `NavBar`, `FilterChips`, `SearchBox`, `ThemeToggle`, `DetailHeader` | Standard UI chrome. |
+| `NavBar`, `SearchBox`, `ThemeToggle`, `DetailHeader` | Standard UI chrome. |
 | `PALETTE`, `RENDER`, `drawLabel`, `linkEnds`, `normalizeNodeWeights` | Shared rendering constants and helpers. |
 
 ### Adding a new page
 
-1. Create `app/public/my-page.html` — copy the structure from `design-decisions.html`.
+1. Create `app/public/my-page.html` — copy the structure from `design-choices.html`.
 2. Call `setupLayout()` once before mounting React.
 3. Use `<CornerPanel node={activeNode} theme={theme}>` for the info panel — populate it with `.info-label` / `.info-text` elements matching your data schema.
 4. Add the page to `NAV` in `shell.js` so it appears in the nav bar.

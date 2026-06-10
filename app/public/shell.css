@@ -5,13 +5,35 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
 :root {
   --bg-color:    #1f2430;
   --viz-padding: 20px;
+  --topbar-h:    48px;
 }
-body { background: var(--bg-color); }
+body { background: var(--bg-color); display: flex; flex-direction: column; }
+
+/* ── top bar ────────────────────────────────────────────────────────────── */
+#top-bar {
+  flex-shrink: 0;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+  background: rgba(20,24,34,0.97);
+  border-bottom: 1px solid rgba(155,175,215,0.12);
+  z-index: 20;
+  position: relative;     /* anchor for mobile dropdown */
+  pointer-events: none;
+}
+#top-bar > * { pointer-events: auto; }
+
+/* Desktop: panel is transparent — its children are direct flex items of #top-bar */
+.top-bar-panel { display: contents; }
+.top-bar-nav   { display: flex; align-items: center; gap: 8px; }
+.top-bar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 
 /* ── layout ─────────────────────────────────────────────────────────────── */
 #layout {
+  flex: 1;
   display: flex;
-  height: 100vh;
   overflow: hidden;
 }
 #viz-pane {
@@ -24,46 +46,19 @@ body { background: var(--bg-color); }
 
 #graph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 
-/* ── overlay container ──────────────────────────────────────────────────── */
-#filters {
-  position: absolute;
-  top: 14px; right: 14px;
-  display: flex; gap: 20px; align-items: flex-start;
-  z-index: 10;
-  pointer-events: none; /* pass clicks through to the canvas behind */
-}
-.nav-link:not(.nav-active), .chip, #menu-btn, .nav-menu { pointer-events: auto; }
-
 /* ── nav ────────────────────────────────────────────────────────────────── */
-.nav-stack { display: flex; flex-direction: column; gap: 14px; }
 .nav-link {
-  font: 14px 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: rgba(218,228,250,0.88);
+  font: 14px/1 'IBM Plex Sans', system-ui, sans-serif;
+  letter-spacing: 0.03em;
+  color: rgba(155,175,215,0.75);
   text-decoration: none;
-  padding: 5px 12px;
-  border: 1.5px solid rgba(155,175,215,0.28);
-  border-radius: 20px;
-  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  transition: color 0.15s;
 }
-.nav-link:hover { color: rgba(235,242,255,0.97); border-color: rgba(218,228,250,0.88); }
-.nav-active {
-  color: rgba(235,242,255,0.97) !important;
-  border-color: rgba(218,228,250,0.88) !important;
-  pointer-events: none;
-}
-
-/* ── chips column (stacked filter chips, parallel to nav-stack) ─────────── */
-.chips-col { display: flex; flex-direction: column; gap: 6px; }
-
-/* ── filter chips ───────────────────────────────────────────────────────── */
-.chip {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 12px; border-radius: 20px; border: 1.5px solid;
-  font: 14px 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; user-select: none;
-  transition: opacity 0.15s;
-}
-.chip.off { opacity: 0.3; }
-.chip-dot { width: 8px; height: 8px; border-radius: 50%; }
+.nav-link:hover { color: rgba(235,242,255,0.97); }
+.nav-active { color: rgba(235,242,255,0.97) !important; pointer-events: none; }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+.nav-sep { color: rgba(155,175,215,0.25); font: 14px 'IBM Plex Sans', system-ui, sans-serif; user-select: none; }
 
 /* ── legend (static, non-interactive) ──────────────────────────────────── */
 .legend { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
@@ -157,7 +152,7 @@ body { background: var(--bg-color); }
   border: 1px solid rgba(155,175,215,0.20);
   border-radius: 8px;
   overflow-y: auto;
-  max-height: 200px;
+  max-height: 360px;
   z-index: 30;
   box-shadow: 0 4px 16px rgba(0,0,0,0.5);
 }
@@ -174,15 +169,12 @@ body { background: var(--bg-color); }
 /* ── hamburger button (mobile only) ─────────────────────────────────────── */
 #menu-btn { display: none; }
 
-/* ── nav-menu: transparent wrapper on desktop ───────────────────────────── */
-.nav-menu { display: contents; }
-
 /* ── corner panel (fixed top-right overlay) ─────────────────────────────── */
 /* Standard info panel for all graph pages. Render <CornerPanel> from shell.js
    and pass node + theme; the panel appears when node is non-null. */
 .corner-panel {
   position: fixed;
-  top: 62px;
+  top: 62px;   /* 48px top-bar + 14px gap */
   right: 14px;
   width: 360px;
   max-height: calc(100vh - 76px);
@@ -236,16 +228,14 @@ body { background: var(--bg-color); }
 
 /* ── mobile ─────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  #viz-pane {
-    overflow: visible; /* allow the nav dropdown to escape the container */
-    padding-right: 0;
-  }
+  #viz-pane { padding-right: 0; }
 
   /* ── hamburger button ───────────────────────────────────────────────── */
   #menu-btn {
     display: flex;
     align-items: center; justify-content: center;
-    width: 40px; height: 40px;
+    width: 36px; height: 36px;
+    margin-left: auto;
     background: rgba(22,26,36,0.92);
     border: 1.5px solid rgba(155,175,215,0.28);
     border-radius: 10px;
@@ -253,38 +243,37 @@ body { background: var(--bg-color); }
     font-size: 18px;
     cursor: pointer; flex-shrink: 0;
     transition: color 0.15s, border-color 0.15s;
+    pointer-events: auto;
   }
   #menu-btn:active { color: rgba(235,242,255,0.99); border-color: rgba(155,175,215,0.48); }
 
-  /* ── nav dropdown ───────────────────────────────────────────────────── */
-  #filters { z-index: 20; gap: 10px; flex-wrap: nowrap; }
-  .nav-menu {
+  /* ── top-bar panel becomes a dropdown ───────────────────────────────── */
+  .top-bar-panel {
     display: none;
     position: absolute;
-    top: 52px; left: 0;
-    flex-direction: column; gap: 10px;
-    min-width: 190px;
+    top: var(--topbar-h); left: 0; right: 0;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
     background: rgba(20,24,34,0.97);
-    border: 1px solid rgba(155,175,215,0.20);
-    border-radius: 12px;
-    padding: 12px;
+    border-bottom: 1px solid rgba(155,175,215,0.20);
     box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-    z-index: 20;
+    z-index: 25;
   }
-  #filters.menu-open .nav-menu { display: flex; }
-  .nav-menu .nav-stack { gap: 6px; }
-  .nav-menu .nav-link,
-  .nav-menu .chip { padding: 8px 14px; font-size: 15px; }
-  .nav-menu .search-box { width: 100%; }
-  .nav-menu .search-input { width: 100%; font-size: 15px; padding: 8px 14px; }
-  .nav-menu .theme-toggle { width: 100%; font-size: 15px; padding: 8px 14px; text-align: left; box-sizing: border-box; }
+  #top-bar.menu-open .top-bar-panel { display: flex; }
+
+  .top-bar-nav { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .top-bar-right { flex-direction: column; align-items: flex-start; gap: 8px; margin-left: 0; }
+  .top-bar-right .search-box { width: 100%; }
+  .top-bar-right .search-input { width: 100%; font-size: 15px; padding: 8px 14px; }
+  .top-bar-right .theme-toggle { width: 100%; font-size: 15px; padding: 8px 14px; text-align: left; box-sizing: border-box; }
 
   [data-theme="light"] #menu-btn {
     background: rgba(245,241,232,0.92);
     border-color: rgba(30,30,50,0.15);
     color: rgba(30,30,50,0.65);
   }
-  [data-theme="light"] .nav-menu {
+  [data-theme="light"] #top-bar.menu-open .top-bar-panel {
     background: rgba(245,241,232,0.98);
     border-color: rgba(30,30,50,0.1);
   }
@@ -292,9 +281,7 @@ body { background: var(--bg-color); }
   /* ── corner panel reflows to a bottom sheet on mobile ───────────────── */
   .corner-panel {
     top: auto;
-    right: 0;
-    left: 0;
-    bottom: 0;
+    right: 0; left: 0; bottom: 0;
     width: 100%;
     max-height: 60vh;
     border-radius: 16px 16px 0 0;

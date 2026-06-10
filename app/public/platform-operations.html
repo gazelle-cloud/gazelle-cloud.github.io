@@ -18,7 +18,7 @@
     import React from 'react';
     import { createRoot } from 'react-dom/client';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { NavBar, FilterChips, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
+    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
 
     setupLayout();
 
@@ -34,7 +34,7 @@
 
     const TYPE_LABELS = {
       operation: 'platform-operations',
-      decision:  'design-decisions',
+      decision:  'design-choices',
       file:      'files',
     };
 
@@ -108,7 +108,7 @@
 
       const size = useVizPaneSize(fgRef);
 
-      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
+      const { activeId, graph, activeNode, neighbours, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
       const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
 
       const physicsProps = useGraphPhysics(fgRef, graph, fg => {
@@ -173,8 +173,6 @@
 
       return <>
         <NavBar activeHref="./platform-operations.html">
-          <FilterChips nodeTypes={NODE_TYPES} typeLabels={TYPE_LABELS}
-                       colors={COLORS} visible={visible} toggleType={toggleType} />
           <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
                      setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />

@@ -18,7 +18,7 @@
     import React from 'react';
     import { createRoot } from 'react-dom/client';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { SearchBox, DetailHeader, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
+    import { NavBar, SearchBox, DetailHeader, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel } from './shell.js';
 
     setupLayout();
 
@@ -33,7 +33,7 @@
 
     const TYPE_LABELS = {
       rule:     'platform-rules',
-      decision: 'design-decisions',
+      decision: 'design-choices',
     };
 
     const dotRadius = node =>
@@ -41,7 +41,7 @@
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    const raw = await fetch('./design-decisions.json').then(r => r.json());
+    const raw = await fetch('./design-choices.json').then(r => r.json());
 
     raw.nodes = raw.nodes.filter(n => n.type !== 'unknown');
     const ids = new Set(raw.nodes.map(n => n.id));
@@ -85,11 +85,15 @@
             Explore the platform knowledge graph
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p className="info-text" style={{ margin: 0 }}>Select any node to understand how the platform works and why it is built this way.</p>
-            <p className="info-text" style={{ margin: 0 }}>Follow connections to trace how decisions propagate across the platform.</p>
+            <p className="info-text" style={{ margin: 0 }}>This map visualizes the guiding principles, design choices, and operations behind the system, allowing you to explore how the platform is structured and why it's built this way.</p>
             <hr style={{ border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' }} />
             <p className="info-text" style={{ margin: 0 }}><span style={{ color: '#f0a500' }}>Yellow</span> = guiding principles</p>
-            <p className="info-text" style={{ margin: 0 }}><span style={{ color: '#4e8ef7' }}>Blue</span> = platform decisions and capabilities</p>
+            <p className="info-text" style={{ margin: 0 }}><span style={{ color: '#4e8ef7' }}>Blue</span> = design choices</p>
+            <p className="info-text" style={{ margin: 0 }}><span style={{ color: '#3dba7f' }}>Green</span> = platform operations</p>
+            <hr style={{ border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' }} />
+            <p className="info-text" style={{ margin: 0 }}>
+              All platform code, including knowledge graph data is available on <a href="https://github.com/orgs/gazelle-cloud/" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(155,175,215,0.85)', textDecoration: 'none', borderBottom: '1px solid rgba(155,175,215,0.3)' }}>GitHub</a>
+            </p>
           </div>
         </div>
       );
@@ -104,7 +108,7 @@
 
       const size = useVizPaneSize(fgRef);
 
-      const { visible, activeId, graph, activeNode, neighbours, toggleType, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
+      const { activeId, graph, activeNode, neighbours, setHoveredId, setFocusedId, onNodeClick, onBackgroundClick, searchQuery, setSearchQuery, searchMatchIds } = useGraphState(raw, NODE_TYPES);
       const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
 
       const [searchFocused, setSearchFocused] = React.useState(false);
@@ -189,14 +193,12 @@
       }, [activeId, neighbours, searchMatchIds, theme]);
 
       return <>
-        <div id="filters">
-          <div style={{ pointerEvents: 'auto', display: 'flex', gap: '8px' }}>
-            <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
-                       setSearchQuery={setSearchQuery} setFocusedId={setFocusedId}
-                       onFocus={() => setSearchFocused(true)}
-                       onBlur={() => setSearchFocused(false)} />
-          </div>
-        </div>
+        <NavBar activeHref="./design-choices.html">
+          <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
+                     setSearchQuery={setSearchQuery} setFocusedId={setFocusedId}
+                     onFocus={() => setSearchFocused(true)}
+                     onBlur={() => setSearchFocused(false)} />
+        </NavBar>
 
         {!activeNode && !searchFocused && <HeroPanel theme={theme} />}
 
