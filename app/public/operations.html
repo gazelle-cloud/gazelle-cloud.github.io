@@ -18,7 +18,7 @@
     import React from 'react';
     import { createRoot } from 'react-dom/client';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint, paintNodeColors, FONT_MONO } from './shell.js';
+    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint, paintNodeColors, FONT_MONO } from './shell.js';
 
     setupLayout();
 
@@ -39,7 +39,7 @@
     };
 
     const dotRadius = node =>
-      node.type === 'operation' ? 6 : 2 + node.__weight * 7;
+      node.type === 'operation' ? 6 : node.type === 'file' ? 3 : 4;
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
@@ -48,14 +48,56 @@
     const ids = new Set(raw.nodes.map(n => n.id));
     raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
 
-    normalizeNodeWeights(raw);
+    const INNER_R = 70;
+    const OUTER_R = 160;
 
-    const rim = raw.nodes.filter(n => n.type === 'operation');
-    rim.forEach((n, i) => {
-      const angle = (2 * Math.PI * i) / rim.length - Math.PI / 2;
-      n.fx = Math.cos(angle) * 280;
-      n.fy = Math.sin(angle) * 280;
+    const ops   = raw.nodes.filter(n => n.type === 'operation').sort((a, b) => a.id.localeCompare(b.id));
+    const outer = raw.nodes.filter(n => n.type !== 'operation').sort((a, b) => a.id.localeCompare(b.id));
+
+    ops.forEach((n, i) => {
+      const angle = (2 * Math.PI * i) / ops.length - Math.PI / 2;
+      n.fx = Math.cos(angle) * INNER_R;
+      n.fy = Math.sin(angle) * INNER_R;
     });
+
+    const decisions = outer.filter(n => n.type === 'decision');
+    const files     = outer.filter(n => n.type === 'file');
+
+    // decisions: top half  (-π → 0), files: bottom half (0 → π)
+    decisions.forEach((n, i) => {
+      const angle = -Math.PI + Math.PI * i / Math.max(decisions.length - 1, 1);
+      n.x = Math.cos(angle) * OUTER_R;
+      n.y = Math.sin(angle) * OUTER_R;
+    });
+    files.forEach((n, i) => {
+      const angle = Math.PI * i / Math.max(files.length - 1, 1);
+      n.x = Math.cos(angle) * OUTER_R;
+      n.y = Math.sin(angle) * OUTER_R;
+    });
+
+    // ── sibling repulsion: pre-compute pairs that share an operation parent ──
+    const opIds = new Set(ops.map(n => n.id));
+    const opChildren = new Map();
+    raw.links.forEach(l => {
+      if (opIds.has(l.source)) { if (!opChildren.has(l.source)) opChildren.set(l.source, []); opChildren.get(l.source).push(l.target); }
+      if (opIds.has(l.target)) { if (!opChildren.has(l.target)) opChildren.set(l.target, []); opChildren.get(l.target).push(l.source); }
+    });
+    const siblingPairs = [];
+    opChildren.forEach(children => {
+      for (let i = 0; i < children.length; i++)
+        for (let j = i + 1; j < children.length; j++)
+          siblingPairs.push([children[i], children[j]]);
+    });
+
+
+    // ─── label helpers ───────────────────────────────────────────────────────
+
+    const nodeLabel = node => {
+      if (node.type !== 'file') return node.id.replaceAll('-', ' ');
+      const parts = node.id.split('/').filter(Boolean);
+      if (parts.length <= 2) return node.id;
+      return `${parts[0]}/\u2026/${parts[parts.length - 1]}`;
+    };
 
     // ─── detail pane helpers ─────────────────────────────────────────────────
 
@@ -81,14 +123,16 @@
             Platform Operations
           </h1>
           <p style={{ margin: '0 0 14px', fontSize: 14, color: 'rgba(155,175,215,0.75)', letterSpacing: '0.03em' }}>
-            Explore how operations are wired to platform decisions
+            Explore standardized platform operations
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p className="info-text" style={{ margin: 0 }}>Each operation is a runbook backed by design decisions. Edges show which decisions constrain how an operation must be executed.</p>
+            <p className="info-text" style={{ margin: 0 }}>This graph maps Gazelle's standard operations — the files each one touches and the design decisions that shape it.</p>
             <hr style={{ border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' }} />
             <p className="info-text" style={{ margin: 0 }}><span style={{ color: PALETTE.ENTRY }}>Yellow</span> = operations</p>
-            <p className="info-text" style={{ margin: 0 }}><span style={{ color: PALETTE.LEAF }}>Blue</span> = model decisions</p>
-            <p className="info-text" style={{ margin: 0 }}><span style={{ color: PALETTE.CONNECTOR }}>Green</span> = files</p>
+            <p className="info-text" style={{ margin: 0 }}><span style={{ color: PALETTE.LEAF }}>Blue</span> = design decisions</p>
+            <p className="info-text" style={{ margin: 0 }}><span style={{ color: PALETTE.CONNECTOR }}>Green</span> = file paths</p>
+            <hr style={{ border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' }} />
+            <p className="info-text" style={{ margin: 0 }}>This entire platform, code and knowledge graph included, is on <a href="https://github.com/orgs/gazelle-cloud/" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(155,175,215,0.85)', textDecoration: 'none', borderBottom: '1px solid rgba(155,175,215,0.3)' }}>GitHub</a>.</p>
           </div>
         </div>
       );
@@ -128,13 +172,56 @@
       const [searchFocused, setSearchFocused] = React.useState(false);
 
       const physicsProps = useGraphPhysics(fgRef, graph, fg => {
-        fg.d3Force('link').distance(60);
-        fg.d3Force('collision', forceCollide(n => dotRadius(n) + 3));
-        // decisions cluster in the center, files orbit in a middle ring
-        fg.d3Force('radial', forceRadial(
-          n => n.type === 'decision' ? 0 : n.type === 'file' ? 160 : 0,
-          0, 0
-        ).strength(n => n.type === 'operation' ? 0 : n.type === 'decision' ? 0.3 : 0.15));
+        fg.d3Force('link').strength(0);
+        fg.d3Force('charge').strength(n => n.type === 'operation' ? 0 : -120);
+        fg.d3Force('collision', forceCollide(n => dotRadius(n) + 8));
+        fg.d3Force('radial', forceRadial(OUTER_R, 0, 0)
+          .strength(n => n.type === 'operation' ? 0 : 0.8));
+        const halfForce = (() => {
+          let nodes = [];
+          const force = alpha => {
+            for (const n of nodes) {
+              if (n.type === 'operation') continue;
+              // decisions attracted to top (-π/2), files to bottom (π/2)
+              const target = n.type === 'file' ? Math.PI / 2 : -Math.PI / 2;
+              let dAngle = target - Math.atan2(n.y, n.x);
+              if (dAngle >  Math.PI) dAngle -= 2 * Math.PI;
+              if (dAngle < -Math.PI) dAngle += 2 * Math.PI;
+              const ang = Math.atan2(n.y, n.x);
+              const f = alpha * 0.3 * dAngle;
+              n.vx += -Math.sin(ang) * f;
+              n.vy +=  Math.cos(ang) * f;
+            }
+          };
+          force.initialize = ns => { nodes = ns; };
+          return force;
+        })();
+        fg.d3Force('half-pull', halfForce);
+        const siblingForce = (() => {
+          let pairs = [];
+          const force = alpha => {
+            for (const [a, b] of pairs) {
+              let dAngle = Math.atan2(a.y, a.x) - Math.atan2(b.y, b.x);
+              if (dAngle >  Math.PI) dAngle -= 2 * Math.PI;
+              if (dAngle < -Math.PI) dAngle += 2 * Math.PI;
+              const sign = Math.sign(dAngle) || 1;
+              const f = alpha * 0.8 / (Math.abs(dAngle) + 0.05);
+              // push purely along each node's tangent — no radial component
+              const angA = Math.atan2(a.y, a.x);
+              a.vx += sign * -Math.sin(angA) * f;
+              a.vy += sign *  Math.cos(angA) * f;
+              const angB = Math.atan2(b.y, b.x);
+              b.vx -= sign * -Math.sin(angB) * f;
+              b.vy -= sign *  Math.cos(angB) * f;
+            }
+          };
+          force.initialize = nodes => {
+            const byId = new Map(nodes.map(n => [n.id, n]));
+            pairs = siblingPairs.map(([idA, idB]) => [byId.get(idA), byId.get(idB)]).filter(([a, b]) => a && b);
+          };
+          return force;
+        })();
+        fg.d3Force('siblings', siblingForce);
       });
 
       const linkColor = React.useCallback(l => {
@@ -163,8 +250,8 @@
         ctx.fillStyle = isActive ? activeColor : COLORS[node.type];
         ctx.fill();
 
-        const isRim     = node.type === 'operation';
-        const showLabel = isRim || isActive || isNeighbour || isMatch;
+        const isRim     = true;
+        const showLabel = node.type === 'operation' || isActive || isNeighbour || isMatch;
         if (showLabel) {
           const gap = r + RENDER.labelGap / globalScale;
           let lx, ly, align;
@@ -178,7 +265,7 @@
             ly    = node.y;
             align = 'left';
           }
-          drawLabel(ctx, node.id.replaceAll('-', ' '), lx, ly, align, RENDER.labelFontSize, globalScale,
+          drawLabel(ctx, nodeLabel(node), lx, ly, align, isRim ? RENDER.labelFontSize + 1 : RENDER.labelFontSize, globalScale,
             isActive ? activeColor : COLORS[node.type] ?? '#ccc', backdrop);
         }
 
@@ -207,7 +294,9 @@
           height={size.height}
           graphData={graph}
           linkColor={linkColor}
+          linkDirectionalArrowLength={0}
           {...physicsProps}
+          cooldownTime={4000}
           backgroundColor={bgColor}
           onNodeHover={node => setHoveredId(node?.id ?? null)}
           onNodeClick={onNodeClick}
