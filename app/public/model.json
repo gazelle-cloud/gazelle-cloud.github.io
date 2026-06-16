@@ -277,6 +277,14 @@
         {
           "id": "landing-zone-application-profile",
           "note": "The Application Profile creates an Entra ID group dedicated to application engineers, providing only the minimum access that does not break Infrastructure-as-Code principles."
+        },
+        {
+          "id": "config-lives-in-the-repo",
+          "note": "The platform-wide engineers group name (APP_ENGINEERS_GROUP_NAME) is sourced from githubVariables.json"
+        },
+        {
+          "id": "landing-zone-lifecycle",
+          "note": "Reader on the subscription bank is what allows engineers to discover subscriptions available for reuse."
         }
       ]
     },
@@ -381,6 +389,10 @@
         {
           "id": "application-teams-own-the-cost",
           "note": "Reused subscription must move to the application's invoice section before provisioning completes."
+        },
+        {
+          "id": "job-function-scoped-roles",
+          "note": "Subscription-bank read access is granted through the app engineer role, allowing to discover reusable subscriptions."
         }
       ]
     },
@@ -991,6 +1003,18 @@
       "note": "The Application Profile creates an Entra ID group dedicated to application engineers, providing only the minimum access that does not break Infrastructure-as-Code principles."
     },
     {
+      "source": "job-function-scoped-roles",
+      "target": "config-lives-in-the-repo",
+      "relationship": "related",
+      "note": "The platform-wide engineers group name (APP_ENGINEERS_GROUP_NAME) is sourced from githubVariables.json"
+    },
+    {
+      "source": "job-function-scoped-roles",
+      "target": "landing-zone-lifecycle",
+      "relationship": "related",
+      "note": "Reader on the subscription bank is what allows engineers to discover subscriptions available for reuse."
+    },
+    {
       "source": "landing-zone-action-group",
       "target": "landing-zone-application-profile",
       "relationship": "related",
@@ -1061,6 +1085,12 @@
       "target": "application-teams-own-the-cost",
       "relationship": "related",
       "note": "Reused subscription must move to the application's invoice section before provisioning completes."
+    },
+    {
+      "source": "landing-zone-lifecycle",
+      "target": "job-function-scoped-roles",
+      "relationship": "related",
+      "note": "Subscription-bank read access is granted through the app engineer role, allowing to discover reusable subscriptions."
     },
     {
       "source": "landing-zone-monitoring",
