@@ -4,9 +4,10 @@ import { createPortal } from 'react-dom';
 // ── navigation entries ───────────────────────────────────────────────────────
 // Add one object here whenever you create a new page. That's it.
 export const NAV = [
-  { label: 'Model',       href: './model.html' },
-  { label: 'Operations',  href: './operations.html' },
-  { label: 'BigBang', href: './bigbang.html' },
+  { label: 'Model',        href: './model.html' },
+  { label: 'Operations',   href: './operations.html' },
+  { label: 'BigBang',      href: './bigbang.html' },
+  { label: 'Landing Zone', href: './landing-zone.html' },
 ];
 
 // ── linkEnds ─────────────────────────────────────────────────────────────────
