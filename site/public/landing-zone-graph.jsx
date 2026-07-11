@@ -1,25 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./shell.css">
-  <script type="importmap">{ "imports": {
-    "react": "https://esm.sh/react",
-    "react/jsx-runtime": "https://esm.sh/react/jsx-runtime",
-    "react-dom": "https://esm.sh/react-dom",
-    "react-dom/client": "https://esm.sh/react-dom/client"
-  }}</script>
-</head>
-
-<body>
-
-  <script src="//cdn.jsdelivr.net/npm/@babel/standalone"></script>
-  <script type="text/jsx" data-type="module">
     import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
     import React from 'react';
     import { createRoot } from 'react-dom/client';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint, paintNodeColors } from './shell.js';
+    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint, paintNodeColors } from '/shell.js';
 
     setupLayout();
 
@@ -44,7 +27,7 @@
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    const raw = await fetch('./landing-zone.json').then(r => r.json());
+    const raw = await fetch('/landing-zone.json').then(r => r.json());
 
     // Deduplicate links by source+target key
     const seen = new Set();
@@ -134,6 +117,14 @@
 
       const [searchFocused, setSearchFocused] = React.useState(false);
 
+      // Auto-focus node from URL hash
+      React.useEffect(() => {
+        const hash = window.location.hash.slice(1);
+        if (hash && graph.nodes.some(n => n.id === hash)) {
+          setFocusedId(hash);
+        }
+      }, []);
+
       const physicsProps = useGraphPhysics(fgRef, graph, fg => {
         fg.d3Force('link')
           .distance(l => {
@@ -210,7 +201,7 @@
       }, [activeId, neighbours, searchMatchIds, theme]);
 
       return <>
-        <NavBar activeHref="./landing-zone.html">
+        <NavBar activeHref="/landing-zone/">
           <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
                      setSearchQuery={setSearchQuery} setFocusedId={setFocusedId}
                      onFocus={() => setSearchFocused(true)}
@@ -249,7 +240,3 @@
     // ─── mount ───────────────────────────────────────────────────────────────
 
     createRoot(document.getElementById('graph')).render(<Graph />);
-  </script>
-  <script defer src="https://cloud.umami.is/script.js" data-website-id="8d6f8fcd-8e1a-4eb4-8c64-1b32c60e82cd"></script>
-</body>
-</html>

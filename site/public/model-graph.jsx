@@ -1,25 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./shell.css">
-  <script type="importmap">{ "imports": {
-    "react": "https://esm.sh/react",
-    "react/jsx-runtime": "https://esm.sh/react/jsx-runtime",
-    "react-dom": "https://esm.sh/react-dom",
-    "react-dom/client": "https://esm.sh/react-dom/client"
-  }}</script>
-</head>
-
-<body>
-
-  <script src="//cdn.jsdelivr.net/npm/@babel/standalone"></script>
-  <script type="text/jsx" data-type="module">
     import ForceGraph2D from 'https://esm.sh/react-force-graph-2d?external=react';
     import React from 'react';
     import { createRoot } from 'react-dom/client';
     import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint, paintNodeColors, FONT_MONO } from './shell.js';
+    import { NavBar, SearchBox, ThemeToggle, DetailHeader, useTheme, setupLayout, useVizPaneSize, useGraphPhysics, RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds, useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint, paintNodeColors, FONT_MONO } from '/shell.js';
 
     setupLayout();
 
@@ -42,7 +25,7 @@
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    const raw = await fetch('./model.json').then(r => r.json());
+    const raw = await fetch('/model.json').then(r => r.json());
 
     raw.nodes = raw.nodes.filter(n => n.type !== 'unknown');
     const ids = new Set(raw.nodes.map(n => n.id));
@@ -50,8 +33,6 @@
 
     normalizeNodeWeights(raw);
 
-    // Enrich related links with notes from source nodes (in case
-    // the JSON was built before notes were added to link objects)
     const nodeMap = new Map(raw.nodes.map(n => [n.id, n]));
     raw.links.forEach(l => {
       if (l.relationship === 'related' && !l.note) {
@@ -78,7 +59,7 @@
 
     function HeroPanel({ theme }) {
       return (
-        <div className={`corner-panel${theme === 'light' ? ' light' : ''}`}>
+        <div className={"corner-panel" + (theme === 'light' ? ' light' : '')}>
           <h1 style={{ margin: '0 0 12px', padding: 0, fontSize: 16, fontWeight: 400, lineHeight: 1.3, color: '#fff' }}>
             Gazelle — Engine for Azure Landing Zones
           </h1>
@@ -111,6 +92,14 @@
       const handleBackgroundClick = useBraveClickFix(fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick);
 
       const [searchFocused, setSearchFocused] = React.useState(false);
+
+      // Auto-focus node from URL hash (e.g. /model/#deny-by-default)
+      React.useEffect(() => {
+        const hash = window.location.hash.slice(1);
+        if (hash && graph.nodes.some(n => n.id === hash)) {
+          setFocusedId(hash);
+        }
+      }, []);
 
       const { outLinks, inLinks } = React.useMemo(() => {
         if (!activeId) return { outLinks: [], inLinks: [] };
@@ -187,11 +176,11 @@
         }
 
         ctx.globalAlpha = 1;
-        node.__r = r; // expose to nodePointerAreaPaint for hit-testing
+        node.__r = r;
       }, [activeId, neighbours, searchMatchIds, theme]);
 
       return <>
-        <NavBar activeHref="./model.html">
+        <NavBar activeHref="/model/">
           <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
                      setSearchQuery={setSearchQuery} setFocusedId={setFocusedId}
                      onFocus={() => setSearchFocused(true)}
@@ -207,9 +196,9 @@
             <div className="info-label">Intent</div>
             <p className="info-text">{activeNode.intent}</p>
           </>}
-          {activeNode?.mechanism && <>
-            <div className="info-label">Mechanism</div>
-            <p className="info-text">{activeNode.mechanism}</p>
+          {activeNode?.decision && <>
+            <div className="info-label">Decision</div>
+            <p className="info-text">{activeNode.decision}</p>
           </>}
           {activeNode?.why && <>
             <div className="info-label">Why</div>
@@ -268,7 +257,3 @@
     // ─── mount ───────────────────────────────────────────────────────────────
 
     createRoot(document.getElementById('graph')).render(<Graph />);
-  </script>
-  <script defer src="https://cloud.umami.is/script.js" data-website-id="8d6f8fcd-8e1a-4eb4-8c64-1b32c60e82cd"></script>
-</body>
-</html>

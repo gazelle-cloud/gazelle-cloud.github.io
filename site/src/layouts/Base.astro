@@ -1,0 +1,55 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Knowledge graph for the Gazelle Cloud landing zone platform.' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — Gazelle Cloud</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="b53d9cb3-f8e5-45a6-b639-cb7e498e498c"></script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Fira+Code:wght@400&family=IBM+Plex+Sans:wght@400;500&display=swap');
+
+  :root {
+    --bg-color: #1f2430;
+    --topbar-h: 48px;
+    --text-primary: #d4daf0;
+  }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+  }
+
+  body {
+    background: var(--bg-color);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    color: var(--text-primary);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

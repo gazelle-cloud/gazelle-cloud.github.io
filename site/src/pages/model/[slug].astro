@@ -1,0 +1,72 @@
+---
+import Base from '../../layouts/Base.astro';
+import model from '../../../public/model.json';
+
+export function getStaticPaths() {
+  return model.nodes.map((n: any) => ({
+    params: { slug: n.id },
+    props: { node: n },
+  }));
+}
+
+const { node } = Astro.props as { node: any };
+const name = node.id;
+---
+<Base title={name}>
+  <script is:inline define:vars={{ name }}>
+    window.location.replace('/model/#' + name);
+  </script>
+
+  <div class="sr-only">
+    <h1>{name}</h1>
+    <p>Type: {node.type}</p>
+
+    {node.intent && (
+      <>
+        <h2>Intent</h2>
+        <p>{node.intent}</p>
+      </>
+    )}
+
+    {node.decision && (
+      <>
+        <h2>Decision</h2>
+        <p>{node.decision}</p>
+      </>
+    )}
+
+    {node.why && (
+      <>
+        <h2>Why</h2>
+        <p>{node.why}</p>
+      </>
+    )}
+
+    {node.violations?.length > 0 && (
+      <>
+        <h2>Violations</h2>
+        <ul>
+          {node.violations.map((v: string) => (
+            <li>{v}</li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {node.links?.length > 0 && (
+      <>
+        <h2>Links</h2>
+        <ul>
+          {node.links.map((l: any) => (
+            <li>
+              <a href={`/model/${l.id}/`}>{l.id}</a>
+              {l.note && <span> — {l.note}</span>}
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    <p><a href="/model/">← Back to all decisions</a></p>
+  </div>
+</Base>
