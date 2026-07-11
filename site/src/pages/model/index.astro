@@ -1,0 +1,32 @@
+---
+import GraphPage from '../../layouts/GraphPage.astro';
+import model from '../../../public/model.json';
+
+const rules = model.nodes.filter((n: any) => n.type === 'rule');
+const decisions = model.nodes.filter((n: any) => n.type === 'decision');
+---
+<GraphPage title="Model" graph="/model-graph.jsx">
+  <div class="sr-only">
+    <h1>Platform Design Model</h1>
+
+    <h2>Rules</h2>
+    <ul>
+      {rules.map((r: any) => (
+        <li>
+          <a href={`/model/${r.id}/`}>{r.id}</a>
+          {r.intent && <span> — {r.intent}</span>}
+        </li>
+      ))}
+    </ul>
+
+    <h2>Decisions</h2>
+    <ul>
+      {decisions.map((d: any) => (
+        <li>
+          <a href={`/model/${d.id}/`}>{d.id}</a>
+          {d.decision && <span> — {d.decision}</span>}
+        </li>
+      ))}
+    </ul>
+  </div>
+</GraphPage>

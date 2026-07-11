@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Not Found">
+  <script is:inline>
+    (function() {
+      var sections = ['model', 'operations', 'bigbang', 'landing-zone'];
+      var parts = window.location.pathname.replace(/^\/|\/$/g, '').split('/');
+      var section = parts[0];
+      var node = parts[1];
+
+      if (sections.indexOf(section) !== -1 && node) {
+        window.location.replace('/' + section + '/#' + node);
+      } else if (sections.indexOf(section) !== -1) {
+        window.location.replace('/' + section + '/');
+      } else {
+        window.location.replace('/model/');
+      }
+    })();
+  </script>
+</Base>

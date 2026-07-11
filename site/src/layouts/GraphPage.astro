@@ -1,0 +1,25 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  graph: string;   // path to the .jsx file in public/, e.g. "/model-graph.jsx"
+}
+
+const { title, description, graph } = Astro.props;
+---
+<Base title={title} description={description}>
+  <link rel="stylesheet" href="/shell.css" />
+  <script is:inline type="importmap">{ "imports": {
+    "react": "https://esm.sh/react",
+    "react/jsx-runtime": "https://esm.sh/react/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom",
+    "react-dom/client": "https://esm.sh/react-dom/client"
+  }}</script>
+
+  <slot />
+
+  <script is:inline src="//cdn.jsdelivr.net/npm/@babel/standalone"></script>
+  <script is:inline type="text/jsx" data-type="module" src={graph}></script>
+</Base>
