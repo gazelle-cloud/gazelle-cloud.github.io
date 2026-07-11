@@ -1,11 +1,6 @@
 ﻿{
   "nodes": [
     {
-      "id": "as-code",
-      "type": "rule",
-      "intent": "Configuration has one source of truth: the repo. Every change flows through a branch, a PR, and a pipeline. Nothing is set manually."
-    },
-    {
       "id": "deny-by-default",
       "type": "rule",
       "intent": "Every resource type is denied until the platform has security controls and observability wired. Approval is the platform's commitment, not a task left to the application team."
@@ -16,6 +11,11 @@
       "intent": "Self-service, self-contained landing zones. The application team owns it end-to-end — what they build and how they run it is their call."
     },
     {
+      "id": "no-human-touch",
+      "type": "rule",
+      "intent": "Configuration has one source of truth: the repo. Every change flows through a branch, a PR, and a pipeline. Nothing is set manually."
+    },
+    {
       "id": "zero-cost-on-idle",
       "type": "rule",
       "intent": "Platform-managed infrastructure carries no flat fees. Every service the platform provisions scales to zero when idle — fixed monthly costs are eliminated by design."
@@ -23,12 +23,12 @@
     {
       "id": "application-teams-own-the-cost",
       "type": "decision",
-      "mechanism": "Each application has a dedicated billing scope; every subscription it provisions bills to it exclusively.",
-      "why": "Tags, filters, and manual splits are allocation logic — they drift. A dedicated billing scope makes cost accuracy structural, not maintained.",
+      "mechanism": "Each application has its own billing scope; every subscription it provisions bills to it exclusively.",
+      "why": "Without knowing what an application actually costs, there is no way to measure the value it provides.",
       "links": [
         {
           "id": "landing-zone-application-profile",
-          "note": "Application profile registration creates the invoice section."
+          "note": "Application Profile registration creates the Azure Invoice Section"
         },
         {
           "id": "landing-zone-action-group",
@@ -40,11 +40,23 @@
       "id": "azure-native-services-only",
       "type": "decision",
       "mechanism": "Only Azure Resource Manager (ARM) reachable services are eligible.",
-      "why": "Without ARM reachability, the control plane has no reach — deny-by-default, declarative lifecycle, and diagnostic coverage all fail at once.",
+      "why": "If a service isn't manageable through ARM, the platform cannot guarantee service integrity.",
       "links": [
         {
           "id": "self-service-policy-exemptions",
           "note": "Self-service exemptions are viable because every resource is within Azure Policy's reach — a non-ARM service sits outside Policy's scope entirely."
+        },
+        {
+          "id": "deny-security-controls",
+          "note": "Security defaults can not be configured for non-Azure services"
+        },
+        {
+          "id": "declarative-resource-lifecycle",
+          "note": "3rd party services would not be managed by the Azure Deployment Stack."
+        },
+        {
+          "id": "landing-zone-diagnostic-settings",
+          "note": "Non ARM services would require additional logic to collect diagnostic settings"
         }
       ]
     },
@@ -52,7 +64,7 @@
       "id": "azure-policy-allowed-resources",
       "type": "decision",
       "mechanism": "Every resource is denied by default. It appears on the allowed list only after the platform has approved it.",
-      "why": "Without whitelisting, deny policies and diagnostic settings are assumed to be wired for every resource type — the approved list is what turns that assumption into a guarantee.",
+      "why": "Without an approved list, the platform cannot guarantee that every resource follows its configuration rules.",
       "links": [
         {
           "id": "azure-policy-naming-convention",
@@ -81,6 +93,10 @@
         {
           "id": "self-service-policy-exemptions-defender-for-cloud",
           "note": "Whitelisting triggers a Defender check — paid-SKU recommendations or remediation that requires cost go on the exemption list."
+        },
+        {
+          "id": "landing-zone-getting-started",
+          "note": "Whitelisting is incomplete until the template has a thin example module"
         }
       ]
     },
@@ -88,7 +104,7 @@
       "id": "azure-policy-custom-definition",
       "type": "decision",
       "mechanism": "When no built-in policy provides the required Deny or DeployIfNotExists effect, a custom definition is authored to close the gap.",
-      "why": "Audit looks like coverage but the violation still occurs — a custom definition with the required effect is the difference between a guardrail that enforces and one that observes.",
+      "why": "Without custom policies, Audit-only coverage looks like enforcement but the violation still occurs.",
       "links": [
         {
           "id": "azure-policy-naming-convention",
@@ -111,12 +127,16 @@
     {
       "id": "azure-policy-reference",
       "type": "decision",
-      "mechanism": "Policy exemptions source assignment IDs from the generated reference file — never a hardcoded ARM ID.",
+      "mechanism": "Policy exemptions source assignment IDs from the generated reference file.",
       "why": "Assignment ARM IDs change when a policy is redeployed; a hardcoded ID silently breaks every exemption that references it.",
       "links": [
         {
           "id": "azure-policy-naming-convention",
           "note": "Stable, predictable names are the keys the reference file is indexed by — they don't change when a policy is redeployed."
+        },
+        {
+          "id": "platform-test-environment",
+          "note": "The reference file must resolve against the correct management group hierarchy (test or prod) — a script determines which one the subscription belongs to"
         }
       ]
     },
@@ -155,12 +175,12 @@
     {
       "id": "declarative-resource-lifecycle",
       "type": "decision",
-      "mechanism": "Deployment Stacks use the deleteAll lifecycle — any Azure resource no longer declared in the Bicep template is deleted on the next deployment. The template is the source of truth: what's in the code is what exists in Azure.",
-      "why": "deleteAll is what makes the template authoritative — without it, decommissioned subscriptions carry ghost resources, reuse is unsafe, and every teardown becomes a manual investigation.",
+      "mechanism": "What's in the code is what exists in Azure — Azure Deployment Stacks delete anything removed from the template on the next deployment.",
+      "why": "Without automatic cleanup, removed resources stay alive in Azure — the code stops being the source of truth",
       "links": [
         {
           "id": "platform-test-environment",
-          "note": "deleteAll in test verifies code produces the expected Azure state before promotion to prod."
+          "note": "'deleteAll' in test verifies code produces the expected Azure state before promotion to prod."
         },
         {
           "id": "landing-zone-lifecycle",
@@ -189,14 +209,22 @@
         {
           "id": "azure-policy-custom-definition",
           "note": "Custom definitions close gaps where built-ins only offer Audit."
+        },
+        {
+          "id": "landing-zone-allowed-public-ip",
+          "note": "A platform-provided public IP exists for teams that need human access to the data plane."
+        },
+        {
+          "id": "landing-zone-getting-started",
+          "note": "Getting-started modules must comply with active deny policies"
         }
       ]
     },
     {
       "id": "deployment-logic-reusable-workflow",
       "type": "decision",
-      "mechanism": "Gating and execution are separate workflow layers — triggers own conditions, branch rules, and environment gates; templates own deployment logic.",
-      "why": "Mixing the two duplicates deploy logic per environment, turning a bug fix into a multi-file change.",
+      "mechanism": "Deployment logic is written once in reusable workflows — each environment only controls when to run it.",
+      "why": "Without reuse, a fix to deployment logic has to be repeated in every environment workflow.",
       "links": [
         {
           "id": "end-to-end-deployment",
@@ -211,8 +239,8 @@
     {
       "id": "end-to-end-deployment",
       "type": "decision",
-      "mechanism": "Each platform capability owns its Bicep modules and GitHub workflows end-to-end, so changes are fully isolated.",
-      "why": "Without isolation, a change to one capability risks triggering or breaking another's deployment — the blast radius of every PR becomes unpredictable.",
+      "mechanism": "Each platform concern (policy, access control, management groups) owns its Bicep and workflows end-to-end.",
+      "why": "Without isolation, changing one concern can trigger or break another's deployment.",
       "links": [
         {
           "id": "declarative-resource-lifecycle",
@@ -301,18 +329,42 @@
       ]
     },
     {
+      "id": "landing-zone-allowed-public-ip",
+      "type": "decision",
+      "mechanism": "The platform provides an approved public IP address, so getting-started deployment pipelines can enable/disable network access to Azure resources.",
+      "why": "Without this, application teams cannot access Azure data-plane resources from their laptops.",
+      "links": [
+        {
+          "id": "config-lives-in-the-repo",
+          "note": "The IP is defined in githubVariables.json and propagated as an org variable."
+        },
+        {
+          "id": "deny-security-controls",
+          "note": "Deny policies are unchanged — firewall configuration is the application team's responsibility."
+        },
+        {
+          "id": "job-function-scoped-roles",
+          "note": "RBAC roles already grant the authorization — the public IP provides the missing network path."
+        },
+        {
+          "id": "landing-zone-getting-started",
+          "note": "Getting-started modules use this IP to open and close firewall access."
+        }
+      ]
+    },
+    {
       "id": "landing-zone-application-profile",
       "type": "decision",
       "mechanism": "Registering an Application Profile is how an application joins the platform and gains the ability to provision its own landing zones.",
-      "why": "Registration is the anchor — without it there is no billing scope for cost ownership, no contact details for notifications, and no repo for self-service. Everything downstream assumes it exists.",
+      "why": "Without it, there is no billing scope, no contact details, and no repo - everything downstream assumes it exists.",
       "links": [
         {
           "id": "landing-zone-lifecycle",
-          "note": "At landing zone creation, the subscription from the bank moves to this profile's invoice section."
+          "note": "At landing zone creation, the subscription from the bank moves to application's invoice section."
         },
         {
-          "id": "config-lives-in-the-repo",
-          "note": "The IDs created at registration (Entra group, invoice section) live as GitHub Variables on the application repo."
+          "id": "landing-zone-repo",
+          "note": "The IDs created at Application Registration (Entra group, invoice section) live as GitHub Variables on the application repo."
         },
         {
           "id": "platform-identity-github",
@@ -349,9 +401,33 @@
       ]
     },
     {
+      "id": "landing-zone-getting-started",
+      "type": "decision",
+      "mechanism": "The template provides a minimal example to manage resources in Azure using the same principles as the platform itself.",
+      "why": "Without a working example, the platform cannot validate that a landing zone works end-to-end, and app teams have no starting point",
+      "links": [
+        {
+          "id": "landing-zone-repo",
+          "note": "The getting-started modules live in the application repo"
+        },
+        {
+          "id": "declarative-resource-lifecycle",
+          "note": "Examples use deployment stacks with deleteAll"
+        },
+        {
+          "id": "deployment-logic-reusable-workflow",
+          "note": "Examples follow the same trigger/template separation"
+        },
+        {
+          "id": "branch-gated-environment-promotion",
+          "note": "Examples use the same test-then-prod promotion"
+        }
+      ]
+    },
+    {
       "id": "landing-zone-github-runners",
       "type": "decision",
-      "mechanism": "The platform provisions a delegated subnet for GitHub-hosted runners within the landing zone VNet — not a private endpoint.",
+      "mechanism": "The platform provisions a delegated subnet for GitHub-hosted runners within the landing zone VNet.",
       "why": "Public network access is denied on every service — a public GitHub runner has no network path to the data plane.",
       "links": [
         {
@@ -365,6 +441,18 @@
         {
           "id": "platform-identity-github",
           "note": "GitHub App permissions are used for runner registration and configuration."
+        },
+        {
+          "id": "landing-zone-allowed-public-ip",
+          "note": "Runners provide the network path for automation — human access requires configuring the approved public IP on PaaS firewalls."
+        },
+        {
+          "id": "landing-zone-template",
+          "note": "PRIVATE_GITHUB_RUNNERS is computed and propagated as an environment variable during landing zone provisioning."
+        },
+        {
+          "id": "config-lives-in-the-repo",
+          "note": "PUBLIC_GITHUB_RUNNERS is defined in githubVariables.json and seeded to application repos at creation."
         }
       ]
     },
@@ -384,7 +472,7 @@
       "id": "landing-zone-lifecycle",
       "type": "decision",
       "mechanism": "Landing zone provisioning draws from a subscription bank, returning the subscription to it when the landing zone is sunset.",
-      "why": "MCA quota counts active and cancelled subscriptions equally. Always creating new subscriptions exhausts the quota ceiling — reuse is the only sustainable path.",
+      "why": "Azure subscription limit (MCA quota) counts cancelled subscriptions the same as active - it never frees up.",
       "links": [
         {
           "id": "application-teams-own-the-cost",
@@ -413,6 +501,30 @@
         {
           "id": "single-region",
           "note": "Log Analytics workspace is regional."
+        }
+      ]
+    },
+    {
+      "id": "landing-zone-repo",
+      "type": "decision",
+      "mechanism": "Each application gets a GitHub repository that serves as the control and deployment plane for all its landing zones",
+      "why": "Without the repo, platform has no place to write application configuration details.",
+      "links": [
+        {
+          "id": "landing-zone-application-profile",
+          "note": "repository is configured during application registration flow."
+        },
+        {
+          "id": "landing-zone-identity",
+          "note": "The landing zone identity's OIDC federation is scoped to this repo and environment"
+        },
+        {
+          "id": "landing-zone-template",
+          "note": "Each landing zone maps 1:1 to a GitHub environment on this repo."
+        },
+        {
+          "id": "platform-identity-github",
+          "note": "The GitHub App creates this repo, provisions GitHub environments, and seeds variables — without it, the repo has no provisioning mechanism."
         }
       ]
     },
@@ -485,6 +597,10 @@
         {
           "id": "platform-identity-graph",
           "note": "The landing zone identity receives Directory.Read.All at landing zone creation time."
+        },
+        {
+          "id": "landing-zone-repo",
+          "note": "landing zone provisioning writes environment scoped variables (resource ID) to the application repo."
         }
       ]
     },
@@ -527,7 +643,7 @@
     {
       "id": "platform-identity-azure",
       "type": "decision",
-      "mechanism": "A single Entra ID app registration serves as the platform identity, used to provision and configure both the platform and its landing zones.",
+      "mechanism": "Entra ID app registration serves as the platform identity, used to provision and configure both the platform and its landing zones.",
       "why": "A managed identity requires an Azure resource as its host, but the platform has no subscription of its own — an app registration exists in Entra ID independently of any Azure infrastructure.",
       "links": [
         {
@@ -562,7 +678,7 @@
     {
       "id": "platform-test-environment",
       "type": "decision",
-      "mechanism": "Platform changes deploy to a prod-identical test environment.",
+      "mechanism": "Every platform change is validated in a test environment before it reaches production.",
       "why": "Without a parallel hierarchy, platform changes would hit production directly, with failures landing on live landing zones.",
       "links": [
         {
@@ -594,8 +710,8 @@
     {
       "id": "self-service-policy-exemptions-defender-for-cloud",
       "type": "decision",
-      "mechanism": "The platform provides a set of Defender for Cloud exemptions, covering recommendations where remediation would require a paid SKU or other fixed-cost infrastructure.",
-      "why": "Recommendations with no free remediation path, left unexempted, inflate the compliance backlog with items nobody can act on — the score becomes noise.",
+      "mechanism": "Defender for Cloud recommendations that require a paid SKU are exempted by the platform.",
+      "why": "The platform's security appetite does not require paid SKUs — recommendations with no free remediation path are exempted rather than left as unactionable noise.",
       "links": [
         {
           "id": "self-service-policy-exemptions",
@@ -622,7 +738,7 @@
     {
       "id": "single-region",
       "type": "decision",
-      "mechanism": "A single region keeps the availability model, network topology, deployments, and service parity consistent across all landing zones.",
+      "mechanism": "All landing zones deploy to a single region — the platform guarantees service parity by eliminating regional variation.",
       "why": "Without that constraint, every deployment would carry its own region decision, and service parity would depend on each engineer's choice rather than being a platform guarantee.",
       "links": [
         {
@@ -637,41 +753,6 @@
     }
   ],
   "links": [
-    {
-      "source": "as-code",
-      "target": "end-to-end-deployment",
-      "relationship": "groups"
-    },
-    {
-      "source": "as-code",
-      "target": "declarative-resource-lifecycle",
-      "relationship": "groups"
-    },
-    {
-      "source": "as-code",
-      "target": "config-lives-in-the-repo",
-      "relationship": "groups"
-    },
-    {
-      "source": "as-code",
-      "target": "landing-zone-template",
-      "relationship": "groups"
-    },
-    {
-      "source": "as-code",
-      "target": "deployment-logic-reusable-workflow",
-      "relationship": "groups"
-    },
-    {
-      "source": "as-code",
-      "target": "platform-test-environment",
-      "relationship": "groups"
-    },
-    {
-      "source": "as-code",
-      "target": "branch-gated-environment-promotion",
-      "relationship": "groups"
-    },
     {
       "source": "deny-by-default",
       "target": "azure-policy-allowed-resources",
@@ -778,6 +859,41 @@
       "relationship": "groups"
     },
     {
+      "source": "no-human-touch",
+      "target": "end-to-end-deployment",
+      "relationship": "groups"
+    },
+    {
+      "source": "no-human-touch",
+      "target": "declarative-resource-lifecycle",
+      "relationship": "groups"
+    },
+    {
+      "source": "no-human-touch",
+      "target": "config-lives-in-the-repo",
+      "relationship": "groups"
+    },
+    {
+      "source": "no-human-touch",
+      "target": "landing-zone-template",
+      "relationship": "groups"
+    },
+    {
+      "source": "no-human-touch",
+      "target": "deployment-logic-reusable-workflow",
+      "relationship": "groups"
+    },
+    {
+      "source": "no-human-touch",
+      "target": "platform-test-environment",
+      "relationship": "groups"
+    },
+    {
+      "source": "no-human-touch",
+      "target": "branch-gated-environment-promotion",
+      "relationship": "groups"
+    },
+    {
       "source": "zero-cost-on-idle",
       "target": "application-teams-own-the-cost",
       "relationship": "groups"
@@ -796,7 +912,7 @@
       "source": "application-teams-own-the-cost",
       "target": "landing-zone-application-profile",
       "relationship": "related",
-      "note": "Application profile registration creates the invoice section."
+      "note": "Application Profile registration creates the Azure Invoice Section"
     },
     {
       "source": "application-teams-own-the-cost",
@@ -809,6 +925,24 @@
       "target": "self-service-policy-exemptions",
       "relationship": "related",
       "note": "Self-service exemptions are viable because every resource is within Azure Policy's reach — a non-ARM service sits outside Policy's scope entirely."
+    },
+    {
+      "source": "azure-native-services-only",
+      "target": "deny-security-controls",
+      "relationship": "related",
+      "note": "Security defaults can not be configured for non-Azure services"
+    },
+    {
+      "source": "azure-native-services-only",
+      "target": "declarative-resource-lifecycle",
+      "relationship": "related",
+      "note": "3rd party services would not be managed by the Azure Deployment Stack."
+    },
+    {
+      "source": "azure-native-services-only",
+      "target": "landing-zone-diagnostic-settings",
+      "relationship": "related",
+      "note": "Non ARM services would require additional logic to collect diagnostic settings"
     },
     {
       "source": "azure-policy-allowed-resources",
@@ -853,6 +987,12 @@
       "note": "Whitelisting triggers a Defender check — paid-SKU recommendations or remediation that requires cost go on the exemption list."
     },
     {
+      "source": "azure-policy-allowed-resources",
+      "target": "landing-zone-getting-started",
+      "relationship": "related",
+      "note": "Whitelisting is incomplete until the template has a thin example module"
+    },
+    {
       "source": "azure-policy-custom-definition",
       "target": "azure-policy-naming-convention",
       "relationship": "related",
@@ -869,6 +1009,12 @@
       "target": "azure-policy-naming-convention",
       "relationship": "related",
       "note": "Stable, predictable names are the keys the reference file is indexed by — they don't change when a policy is redeployed."
+    },
+    {
+      "source": "azure-policy-reference",
+      "target": "platform-test-environment",
+      "relationship": "related",
+      "note": "The reference file must resolve against the correct management group hierarchy (test or prod) — a script determines which one the subscription belongs to"
     },
     {
       "source": "branch-gated-environment-promotion",
@@ -898,7 +1044,7 @@
       "source": "declarative-resource-lifecycle",
       "target": "platform-test-environment",
       "relationship": "related",
-      "note": "deleteAll in test verifies code produces the expected Azure state before promotion to prod."
+      "note": "'deleteAll' in test verifies code produces the expected Azure state before promotion to prod."
     },
     {
       "source": "declarative-resource-lifecycle",
@@ -929,6 +1075,18 @@
       "target": "azure-policy-custom-definition",
       "relationship": "related",
       "note": "Custom definitions close gaps where built-ins only offer Audit."
+    },
+    {
+      "source": "deny-security-controls",
+      "target": "landing-zone-allowed-public-ip",
+      "relationship": "related",
+      "note": "A platform-provided public IP exists for teams that need human access to the data plane."
+    },
+    {
+      "source": "deny-security-controls",
+      "target": "landing-zone-getting-started",
+      "relationship": "related",
+      "note": "Getting-started modules must comply with active deny policies"
     },
     {
       "source": "deployment-logic-reusable-workflow",
@@ -1021,16 +1179,40 @@
       "note": "Contact details sourced from the Application Profile details."
     },
     {
-      "source": "landing-zone-application-profile",
-      "target": "landing-zone-lifecycle",
+      "source": "landing-zone-allowed-public-ip",
+      "target": "config-lives-in-the-repo",
       "relationship": "related",
-      "note": "At landing zone creation, the subscription from the bank moves to this profile's invoice section."
+      "note": "The IP is defined in githubVariables.json and propagated as an org variable."
+    },
+    {
+      "source": "landing-zone-allowed-public-ip",
+      "target": "deny-security-controls",
+      "relationship": "related",
+      "note": "Deny policies are unchanged — firewall configuration is the application team's responsibility."
+    },
+    {
+      "source": "landing-zone-allowed-public-ip",
+      "target": "job-function-scoped-roles",
+      "relationship": "related",
+      "note": "RBAC roles already grant the authorization — the public IP provides the missing network path."
+    },
+    {
+      "source": "landing-zone-allowed-public-ip",
+      "target": "landing-zone-getting-started",
+      "relationship": "related",
+      "note": "Getting-started modules use this IP to open and close firewall access."
     },
     {
       "source": "landing-zone-application-profile",
-      "target": "config-lives-in-the-repo",
+      "target": "landing-zone-lifecycle",
       "relationship": "related",
-      "note": "The IDs created at registration (Entra group, invoice section) live as GitHub Variables on the application repo."
+      "note": "At landing zone creation, the subscription from the bank moves to application's invoice section."
+    },
+    {
+      "source": "landing-zone-application-profile",
+      "target": "landing-zone-repo",
+      "relationship": "related",
+      "note": "The IDs created at Application Registration (Entra group, invoice section) live as GitHub Variables on the application repo."
     },
     {
       "source": "landing-zone-application-profile",
@@ -1057,6 +1239,30 @@
       "note": "Diagnostic settings target only Azure native resources."
     },
     {
+      "source": "landing-zone-getting-started",
+      "target": "landing-zone-repo",
+      "relationship": "related",
+      "note": "The getting-started modules live in the application repo"
+    },
+    {
+      "source": "landing-zone-getting-started",
+      "target": "declarative-resource-lifecycle",
+      "relationship": "related",
+      "note": "Examples use deployment stacks with deleteAll"
+    },
+    {
+      "source": "landing-zone-getting-started",
+      "target": "deployment-logic-reusable-workflow",
+      "relationship": "related",
+      "note": "Examples follow the same trigger/template separation"
+    },
+    {
+      "source": "landing-zone-getting-started",
+      "target": "branch-gated-environment-promotion",
+      "relationship": "related",
+      "note": "Examples use the same test-then-prod promotion"
+    },
+    {
       "source": "landing-zone-github-runners",
       "target": "deny-security-controls",
       "relationship": "related",
@@ -1073,6 +1279,24 @@
       "target": "platform-identity-github",
       "relationship": "related",
       "note": "GitHub App permissions are used for runner registration and configuration."
+    },
+    {
+      "source": "landing-zone-github-runners",
+      "target": "landing-zone-allowed-public-ip",
+      "relationship": "related",
+      "note": "Runners provide the network path for automation — human access requires configuring the approved public IP on PaaS firewalls."
+    },
+    {
+      "source": "landing-zone-github-runners",
+      "target": "landing-zone-template",
+      "relationship": "related",
+      "note": "PRIVATE_GITHUB_RUNNERS is computed and propagated as an environment variable during landing zone provisioning."
+    },
+    {
+      "source": "landing-zone-github-runners",
+      "target": "config-lives-in-the-repo",
+      "relationship": "related",
+      "note": "PUBLIC_GITHUB_RUNNERS is defined in githubVariables.json and seeded to application repos at creation."
     },
     {
       "source": "landing-zone-identity",
@@ -1109,6 +1333,30 @@
       "target": "single-region",
       "relationship": "related",
       "note": "Log Analytics workspace is regional."
+    },
+    {
+      "source": "landing-zone-repo",
+      "target": "landing-zone-application-profile",
+      "relationship": "related",
+      "note": "repository is configured during application registration flow."
+    },
+    {
+      "source": "landing-zone-repo",
+      "target": "landing-zone-identity",
+      "relationship": "related",
+      "note": "The landing zone identity's OIDC federation is scoped to this repo and environment"
+    },
+    {
+      "source": "landing-zone-repo",
+      "target": "landing-zone-template",
+      "relationship": "related",
+      "note": "Each landing zone maps 1:1 to a GitHub environment on this repo."
+    },
+    {
+      "source": "landing-zone-repo",
+      "target": "platform-identity-github",
+      "relationship": "related",
+      "note": "The GitHub App creates this repo, provisions GitHub environments, and seeds variables — without it, the repo has no provisioning mechanism."
     },
     {
       "source": "landing-zone-resource-group",
@@ -1181,6 +1429,12 @@
       "target": "platform-identity-graph",
       "relationship": "related",
       "note": "The landing zone identity receives Directory.Read.All at landing zone creation time."
+    },
+    {
+      "source": "landing-zone-template",
+      "target": "landing-zone-repo",
+      "relationship": "related",
+      "note": "landing zone provisioning writes environment scoped variables (resource ID) to the application repo."
     },
     {
       "source": "landing-zone-vnet",
