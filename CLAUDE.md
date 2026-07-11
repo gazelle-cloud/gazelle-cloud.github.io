@@ -5,87 +5,66 @@ A force-directed graph that visualises the design choices, platform anchors, and
 ## Structure
 
 ```
-data/
-  model/                # one JSON per choice
-  platform-anchors/     # one JSON per anchor
-  operations/           # one JSON per operation
-scripts/
-  build-graph.ps1       # reads data/, writes app/public/index.json
-app/public/
-  index.html            # single-file React app (JSX via Babel standalone)
-  index.json            # generated — do not edit by hand
+site/
+  public/
+    shell.css, shell.js          # shared UI chrome and React hooks
+    model.json                   # model data (decisions, rules)
+    operations.json              # operations data
+    bigbang.json                 # deployment workflows data
+    landing-zone.json            # landing zone design areas data
+    model-graph.jsx              # graph script per page
+    operations-graph.jsx
+    bigbang-graph.jsx
+    landing-zone-graph.jsx
+  src/
+    layouts/
+      Base.astro                 # root HTML layout (fonts, sr-only, analytics)
+      GraphPage.astro            # shared graph page layout (importmap, Babel, shell.css)
+    pages/
+      model/index.astro          # graph page + sr-only links for crawlers
+      model/[slug].astro         # detail page per node (sr-only content + redirect)
+      operations/index.astro
+      operations/[...slug].astro
+      bigbang/index.astro
+      bigbang/[...slug].astro
+      landing-zone/index.astro
+      landing-zone/[...slug].astro
+      404.astro                  # smart redirect to correct section
 ```
 
-Run `pwsh -File scripts/build-graph.ps1` after any data change to regenerate `index.json`.
+## How it works
 
-## Data schemas
+- **Humans** see the interactive force-directed graph (React + Babel standalone, client-side)
+- **Crawlers/LLMs** see sr-only HTML with real `<a>` tags and text content
+- **Detail pages** (`/model/ipam/`) have sr-only content for SEO + JS redirect to `/model/#ipam` for humans
 
-### `data/model/*.json`
-```json
-{
-  "id":        "kebab-case string — matches filename",
-  "mechanism": "How the decision is implemented (1–2 sentences)",
-  "scope":     ["landing-zone | platform | ..."],
-  "why":       "Problem this decision solves (1–2 sentences)",
-  "related": [
-    { "id": "other-decision-id", "relationship": "enables | constrains | ...", "note": "..." }
-  ],
-  "violations": ["Example of what breaks this decision"]
-}
-```
+## Editing content
 
-### `data/platform-anchors/*.json`
-```json
-{
-  "id":        "kebab-case string — matches filename",
-  "priority":  1,
-  "decisions": ["decision-id", "..."]
-}
-```
-Anchors group decisions by theme. No `mechanism`/`why` — they are named principles, not decisions.
+Edit the JSON file in `site/public/`. Run `npm run build` in `site/`. That's it.
 
-### `data/operations/*.json`
-```json
-{
-  "id":          "kebab-case string — matches filename",
-  "prerequisite": "operation-id (optional)",
-  "workflow":    "GitHub workflow name",
-  "reasoning":   ["decision-id", "..."],
-  "steps":       ["Instruction for the agent executing this operation"],
-  "files":       ["path/to/relevant/directory/"]
-}
-```
-Operations are runbooks. `reasoning[]` links to the decisions that constrain the operation; those edges appear in the graph.
+## Adding a new graph page
 
-## Visualization (`app/public/*.html`)
+1. Create `site/public/my-page-graph.jsx` — copy from an existing graph JSX file
+2. Create `site/src/pages/my-page/index.astro` — use `GraphPage` layout, import JSON, render sr-only links
+3. Create `site/src/pages/my-page/[...slug].astro` — detail pages with sr-only content + hash redirect
+4. Add the page to `NAV` in `shell.js`
 
-Each page is a self-contained React app (JSX via Babel standalone) that renders into `#graph`.
+## Shell (`shell.js` + `shell.css`)
 
-### Shell (`app/public/shell.js` + `shell.css`)
-
-Shared infrastructure imported by every page:
+Shared infrastructure imported by every graph page:
 
 | Export | Purpose |
 |--------|---------|
-| `setupLayout()` | Creates `#layout > #viz-pane > #graph` DOM structure. Call once at top of each page, before mounting React. |
+| `setupLayout()` | Creates `#layout > #viz-pane > #graph` DOM structure. Call once before mounting React. |
 | `useGraphState(raw, nodeTypes)` | Centralises hover/focus/visibility/search state. |
 | `useGraphPhysics(fgRef, graph, setupFn)` | Applies standard D3 forces and camera lifecycle. |
 | `useVizPaneSize(fgRef)` | Tracks `#viz-pane` size via ResizeObserver. |
 | `useBraveClickFix(...)` | Geometric hit-test fallback for Brave's canvas restrictions. |
-| `CornerPanel` | **Standard info panel — use this on every page.** Fixed top-right overlay that appears on hover/click; scrolls for long content; reflows to a bottom sheet on mobile. |
-| `NodeTooltip` | Cursor-following tooltip alternative (available but not the default). |
+| `CornerPanel` | Standard info panel — fixed top-right overlay, scrolls, reflows to bottom sheet on mobile. |
 | `NavBar`, `SearchBox`, `ThemeToggle`, `DetailHeader` | Standard UI chrome. |
-| `PALETTE`, `RENDER`, `drawLabel`, `linkEnds`, `normalizeNodeWeights` | Shared rendering constants and helpers. |
+| `PALETTE`, `RENDER`, `drawLabel`, `linkEnds`, `normalizeNodeWeights` | Rendering constants and helpers. |
 
-### Adding a new page
-
-1. Create `app/public/my-page.html` — copy the structure from `model.html`.
-2. Call `setupLayout()` once before mounting React.
-3. Use `<CornerPanel node={activeNode} theme={theme}>` for the info panel — populate it with `.info-label` / `.info-text` elements matching your data schema.
-4. Add the page to `NAV` in `shell.js` so it appears in the nav bar.
-5. Serve locally or push — no build step needed for the HTML/JS layer.
-
-### Node colour roles
+## Node colour roles
 
 | `PALETTE` key | Colour | Typical use |
 |---------------|--------|-------------|

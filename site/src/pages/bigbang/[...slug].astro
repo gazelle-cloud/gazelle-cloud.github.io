@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import data from '../../../public/bigbang.json';
+
+export function getStaticPaths() {
+  return data.nodes.map((n: any) => ({
+    params: { slug: n.id.replace(/\/+$/, '') },
+    props: { node: n },
+  }));
+}
+
+const { node } = Astro.props as { node: any };
+const name = node.id;
+---
+<Base title={name}>
+  <script is:inline define:vars={{ name }}>
+    window.location.replace('/bigbang/#' + name);
+  </script>
+
+  <div class="sr-only">
+    <h1>{node.label || name}</h1>
+    <p>Type: {node.type}</p>
+
+    {node.trigger && (
+      <>
+        <h2>Trigger</h2>
+        <p>{node.trigger}</p>
+      </>
+    )}
+
+    {node.jobs && (
+      <>
+        <h2>Jobs</h2>
+        <p>{node.jobs}</p>
+      </>
+    )}
+
+    {node.snippet && (
+      <>
+        <h2>Snippet</h2>
+        <p>{node.snippet}</p>
+      </>
+    )}
+
+    {node.path && (
+      <>
+        <h2>Path</h2>
+        <p>{node.path}</p>
+      </>
+    )}
+
+    <p><a href="/bigbang/">← Back to bigbang</a></p>
+  </div>
+</Base>

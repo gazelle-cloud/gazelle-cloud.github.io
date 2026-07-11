@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import data from '../../../public/operations.json';
+
+export function getStaticPaths() {
+  return data.nodes.map((n: any) => ({
+    params: { slug: n.id.replace(/\/+$/, '') },
+    props: { node: n },
+  }));
+}
+
+const { node } = Astro.props as { node: any };
+const name = node.id;
+---
+<Base title={name}>
+  <script is:inline define:vars={{ name }}>
+    window.location.replace('/operations/#' + name);
+  </script>
+
+  <div class="sr-only">
+    <h1>{node.label || name}</h1>
+    <p>Type: {node.type}</p>
+    <p><a href="/operations/">← Back to operations</a></p>
+  </div>
+</Base>

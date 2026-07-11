@@ -1,9 +1,17 @@
 ---
 import GraphPage from '../../layouts/GraphPage.astro';
+import data from '../../../public/bigbang.json';
 ---
 <GraphPage title="BigBang" graph="/bigbang-graph.jsx">
   <div class="sr-only">
     <h1>BigBang — Platform Deployment Workflows</h1>
     <p>How each platform capability is deployed end-to-end — from GitHub workflows through main Bicep files to individual modules.</p>
+    <ul>
+      {data.nodes.map((n: any) => (
+        <li>
+          <a href={`/bigbang/${n.id}/`}>{n.label || n.id}</a>
+        </li>
+      ))}
+    </ul>
   </div>
 </GraphPage>
