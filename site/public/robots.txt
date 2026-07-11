@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /operations/
+Disallow: /bigbang/
 
 Sitemap: https://gazelle.cloud/sitemap-0.xml

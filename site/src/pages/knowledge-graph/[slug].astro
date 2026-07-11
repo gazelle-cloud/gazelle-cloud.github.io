@@ -1,9 +1,9 @@
 ---
 import Base from '../../layouts/Base.astro';
-import model from '../../../public/model.json';
+import graph from '../../../public/knowledge-graph.json';
 
 export function getStaticPaths() {
-  return model.nodes.map((n: any) => ({
+  return graph.nodes.map((n: any) => ({
     params: { slug: n.id },
     props: { node: n },
   }));
@@ -14,7 +14,7 @@ const name = node.id;
 ---
 <Base title={name}>
   <script is:inline define:vars={{ name }}>
-    window.location.replace('/model/#' + name);
+    window.location.replace('/knowledge-graph/#' + name);
   </script>
 
   <div class="sr-only">
@@ -59,7 +59,7 @@ const name = node.id;
         <ul>
           {node.links.map((l: any) => (
             <li>
-              <a href={`/model/${l.id}/`}>{l.id}</a>
+              <a href={`/knowledge-graph/${l.id}/`}>{l.id}</a>
               {l.note && <span> — {l.note}</span>}
             </li>
           ))}
@@ -67,6 +67,6 @@ const name = node.id;
       </>
     )}
 
-    <p><a href="/model/">← Back to all decisions</a></p>
+    <p><a href="/knowledge-graph/">← Back to all decisions</a></p>
   </div>
 </Base>

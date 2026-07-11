@@ -2,9 +2,10 @@
 interface Props {
   title: string;
   description?: string;
+  noindex?: boolean;
 }
 
-const { title, description = 'Knowledge graph for the Gazelle Cloud landing zone platform.' } = Astro.props;
+const { title, description = 'Knowledge graph for the Gazelle Cloud landing zone platform.', noindex = false } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
@@ -13,8 +14,9 @@ const { title, description = 'Knowledge graph for the Gazelle Cloud landing zone
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} — Gazelle Cloud</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="b53d9cb3-f8e5-45a6-b639-cb7e498e498c"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="8d6f8fcd-8e1a-4eb4-8c64-1b32c60e82cd"></script>
   </head>
   <body>
     <slot />

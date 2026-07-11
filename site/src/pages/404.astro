@@ -4,7 +4,7 @@ import Base from '../layouts/Base.astro';
 <Base title="Not Found">
   <script is:inline>
     (function() {
-      var sections = ['model', 'operations', 'bigbang', 'landing-zone'];
+      var sections = ['knowledge-graph', 'operations', 'bigbang'];
       var parts = window.location.pathname.replace(/^\/|\/$/g, '').split('/');
       var section = parts[0];
       var node = parts[1];
@@ -14,7 +14,7 @@ import Base from '../layouts/Base.astro';
       } else if (sections.indexOf(section) !== -1) {
         window.location.replace('/' + section + '/');
       } else {
-        window.location.replace('/model/');
+        window.location.replace('/');
       }
     })();
   </script>

@@ -8,27 +8,23 @@ A force-directed graph that visualises the design choices, platform anchors, and
 site/
   public/
     shell.css, shell.js          # shared UI chrome and React hooks
-    model.json                   # model data (decisions, rules)
+    knowledge-graph.json         # knowledge graph data (decisions, rules)
     operations.json              # operations data
     bigbang.json                 # deployment workflows data
-    landing-zone.json            # landing zone design areas data
-    model-graph.jsx              # graph script per page
+    knowledge-graph-graph.jsx    # graph script per page
     operations-graph.jsx
     bigbang-graph.jsx
-    landing-zone-graph.jsx
   src/
     layouts/
       Base.astro                 # root HTML layout (fonts, sr-only, analytics)
       GraphPage.astro            # shared graph page layout (importmap, Babel, shell.css)
     pages/
-      model/index.astro          # graph page + sr-only links for crawlers
-      model/[slug].astro         # detail page per node (sr-only content + redirect)
+      knowledge-graph/index.astro          # graph page + sr-only links for crawlers
+      knowledge-graph/[slug].astro         # detail page per node (sr-only content + redirect)
       operations/index.astro
       operations/[...slug].astro
       bigbang/index.astro
       bigbang/[...slug].astro
-      landing-zone/index.astro
-      landing-zone/[...slug].astro
       404.astro                  # smart redirect to correct section
 ```
 
@@ -36,7 +32,7 @@ site/
 
 - **Humans** see the interactive force-directed graph (React + Babel standalone, client-side)
 - **Crawlers/LLMs** see sr-only HTML with real `<a>` tags and text content
-- **Detail pages** (`/model/ipam/`) have sr-only content for SEO + JS redirect to `/model/#ipam` for humans
+- **Detail pages** (`/knowledge-graph/ipam/`) have sr-only content for SEO + JS redirect to `/knowledge-graph/#ipam` for humans
 
 ## Editing content
 

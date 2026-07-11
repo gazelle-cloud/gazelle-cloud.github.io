@@ -4,12 +4,13 @@ import Base from './Base.astro';
 interface Props {
   title: string;
   description?: string;
-  graph: string;   // path to the .jsx file in public/, e.g. "/model-graph.jsx"
+  graph: string;   // path to the .jsx file in public/, e.g. "/knowledge-graph-graph.jsx"
+  noindex?: boolean;
 }
 
-const { title, description, graph } = Astro.props;
+const { title, description, graph, noindex = false } = Astro.props;
 ---
-<Base title={title} description={description}>
+<Base title={title} description={description} noindex={noindex}>
   <link rel="stylesheet" href="/shell.css" />
   <script is:inline type="importmap">{ "imports": {
     "react": "https://esm.sh/react",

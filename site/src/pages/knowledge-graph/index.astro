@@ -1,19 +1,19 @@
 ---
 import GraphPage from '../../layouts/GraphPage.astro';
-import model from '../../../public/model.json';
+import graph from '../../../public/knowledge-graph.json';
 
-const rules = model.nodes.filter((n: any) => n.type === 'rule');
-const decisions = model.nodes.filter((n: any) => n.type === 'decision');
+const rules = graph.nodes.filter((n: any) => n.type === 'rule');
+const decisions = graph.nodes.filter((n: any) => n.type === 'decision');
 ---
-<GraphPage title="Model" graph="/model-graph.jsx">
+<GraphPage title="Knowledge Graph" graph="/knowledge-graph-graph.jsx">
   <div class="sr-only">
-    <h1>Platform Design Model</h1>
+    <h1>Platform Design Knowledge Graph</h1>
 
     <h2>Rules</h2>
     <ul>
       {rules.map((r: any) => (
         <li>
-          <a href={`/model/${r.id}/`}>{r.id}</a>
+          <a href={`/knowledge-graph/${r.id}/`}>{r.id}</a>
           {r.intent && <span> — {r.intent}</span>}
         </li>
       ))}
@@ -23,7 +23,7 @@ const decisions = model.nodes.filter((n: any) => n.type === 'decision');
     <ul>
       {decisions.map((d: any) => (
         <li>
-          <a href={`/model/${d.id}/`}>{d.id}</a>
+          <a href={`/knowledge-graph/${d.id}/`}>{d.id}</a>
           {d.decision && <span> — {d.decision}</span>}
         </li>
       ))}

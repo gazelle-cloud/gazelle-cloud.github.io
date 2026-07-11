@@ -1,0 +1,134 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Home" description="Gazelle Cloud — an interactive knowledge graph for designing and operating Azure landing zone platforms.">
+  <link rel="stylesheet" href="/shell.css" />
+
+  <!-- ── top bar (same structure as graph pages) ──────────────────────── -->
+  <header id="top-bar">
+    <nav class="top-bar-nav">
+      <a class="nav-link nav-active" href="/">Home</a>
+      <span class="nav-sep">|</span>
+      <a class="nav-link" href="/knowledge-graph/">Knowledge Graph</a>
+      <span class="nav-sep">|</span>
+      <a class="nav-link" href="/operations/">Operations</a>
+      <span class="nav-sep">|</span>
+      <a class="nav-link" href="/bigbang/">BigBang</a>
+    </nav>
+  </header>
+
+  <!-- ── page content ─────────────────────────────────────────────────── -->
+  <main class="landing">
+    <section class="hero">
+      <h1>Gazelle <span class="accent">Cloud</span></h1>
+      <p class="tagline">Lightweight Azure landing zone platform</p>
+      <p class="tagline">Interactive map of how the platform is actually built</p>
+    </section>
+
+    <section class="cards">
+      <a href="/knowledge-graph/" class="card card-gold">
+        <h2>Knowledge Graph</h2>
+        <p>How decisions connect to give teams autonomy and keep the platform at zero-cost.</p>
+      </a>
+      <a href="/operations/" class="card card-green">
+        <h2>Operations</h2>
+        <p>Automated landing zone operations — so AI can assist on daily tasks.</p>
+      </a>
+      <a href="/bigbang/" class="card card-blue">
+        <h2>BigBang</h2>
+        <p>One workflow that creates the platform from nothing — see the workflows, jobs, and Bicep it deploys.</p>
+      </a>
+    </section>
+
+  </main>
+</Base>
+
+<style>
+  /* override shell.css: landing page scrolls normally */
+  :global(html), :global(body) { overflow: auto; }
+
+  .landing {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* ── hero ─────────────────────────────────────────────────────────────── */
+  .hero {
+    text-align: center;
+    padding: 64px 0 48px;
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 500;
+    margin: 0 0 12px;
+    color: var(--text-primary, #d4daf0);
+  }
+  .accent { color: #f0a500; }
+  .tagline {
+    font-size: 1.15rem;
+    color: rgba(155, 175, 215, 0.75);
+    margin: 0 0 24px;
+  }
+  .sub-hero {
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.6;
+    color: rgba(212, 218, 240, 0.85);
+  }
+
+  /* ── cards ────────────────────────────────────────────────────────────── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding-bottom: 48px;
+  }
+  .card {
+    display: block;
+    text-decoration: none;
+    color: #d4daf0;
+    background: rgba(155, 175, 215, 0.06);
+    border: 1px solid rgba(155, 175, 215, 0.12);
+    border-radius: 10px;
+    padding: 24px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .card:hover { background: rgba(155, 175, 215, 0.10); }
+  .card h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0 0 8px;
+  }
+  .card p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    color: rgba(155, 175, 215, 0.75);
+  }
+
+  /* card accent borders */
+  .card-gold  { border-top: 3px solid #f0a500; }
+  .card-green { border-top: 3px solid #3dba7f; }
+  .card-blue  { border-top: 3px solid #4e8ef7; }
+  .card-gold:hover  { border-color: #f0a500; }
+  .card-green:hover { border-color: #3dba7f; }
+  .card-blue:hover  { border-color: #4e8ef7; }
+
+  /* ── footer ──────────────────────────────────────────────────────────── */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 0.8rem;
+    color: rgba(155, 175, 215, 0.4);
+    border-top: 1px solid rgba(155, 175, 215, 0.08);
+  }
+  .footer p { margin: 0; }
+
+  /* ── responsive ──────────────────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2rem; }
+    .hero { padding: 40px 0 32px; }
+    .cards { grid-template-columns: 1fr; }
+  }
+</style>

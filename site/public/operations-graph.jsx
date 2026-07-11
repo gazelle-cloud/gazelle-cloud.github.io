@@ -18,7 +18,7 @@
 
     const TYPE_LABELS = {
       operation: 'operations',
-      decision:  'model',
+      decision:  'knowledge graph',
       file:      'files',
     };
 

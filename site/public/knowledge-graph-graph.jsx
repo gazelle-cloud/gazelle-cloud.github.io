@@ -17,7 +17,7 @@
 
     const TYPE_LABELS = {
       rule:     'platform-rules',
-      decision: 'model',
+      decision: 'knowledge graph',
     };
 
     const dotRadius = node =>
@@ -25,7 +25,7 @@
 
     // ─── data prep ───────────────────────────────────────────────────────────
 
-    const raw = await fetch('/model.json').then(r => r.json());
+    const raw = await fetch('/knowledge-graph.json').then(r => r.json());
 
     raw.nodes = raw.nodes.filter(n => n.type !== 'unknown');
     const ids = new Set(raw.nodes.map(n => n.id));
@@ -93,7 +93,7 @@
 
       const [searchFocused, setSearchFocused] = React.useState(false);
 
-      // Auto-focus node from URL hash (e.g. /model/#deny-by-default)
+      // Auto-focus node from URL hash (e.g. /knowledge-graph/#deny-by-default)
       React.useEffect(() => {
         const hash = window.location.hash.slice(1);
         if (hash && graph.nodes.some(n => n.id === hash)) {
@@ -180,7 +180,7 @@
       }, [activeId, neighbours, searchMatchIds, theme]);
 
       return <>
-        <NavBar activeHref="/model/">
+        <NavBar activeHref="/knowledge-graph/">
           <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
                      setSearchQuery={setSearchQuery} setFocusedId={setFocusedId}
                      onFocus={() => setSearchFocused(true)}
