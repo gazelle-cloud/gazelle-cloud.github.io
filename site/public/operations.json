@@ -1,110 +1,442 @@
 {
   "nodes": [
-    { "id": "create-landing-zone", "type": "operation", "label": "Create Landing Zone" },
-    { "id": "decommission-landing-zone", "type": "operation", "label": "Decommission Landing Zone" },
-    { "id": "manage-landing-zone", "type": "operation", "label": "Manage Landing Zone" },
-    { "id": "onboard-application", "type": "operation", "label": "Onboard Application" },
-    { "id": "extend-automation-jobs", "type": "operation", "label": "Extend Automation Jobs" },
-    { "id": "whitelist-resource-type", "type": "operation", "label": "Whitelist Resource Type" },
-
-    { "id": "subscription-reuse-lifecycle", "type": "decision", "label": "Subscription Reuse Lifecycle" },
-    { "id": "application-teams-own-the-cost", "type": "decision", "label": "Application Teams Own the Cost" },
-    { "id": "ipam", "type": "decision", "label": "IPAM" },
-    { "id": "platform-test-hierarchy-environment-tier", "type": "decision", "label": "Platform Test Hierarchy Environment Tier" },
-    { "id": "deployment-logic-scaffolding", "type": "decision", "label": "Deployment Logic Scaffolding" },
-    { "id": "deployment-logic-workflow-prefix", "type": "decision", "label": "Deployment Logic Workflow Prefix" },
-    { "id": "branch-gated-environment-promotion", "type": "decision", "label": "Branch-Gated Environment Promotion" },
-    { "id": "landing-zone-autonomy-automation", "type": "decision", "label": "Landing Zone Autonomy Automation" },
-    { "id": "landing-zone-autonomy-automation-control-plane", "type": "decision", "label": "Landing Zone Autonomy Automation Control Plane" },
-    { "id": "landing-zone-autonomy-identity", "type": "decision", "label": "Landing Zone Autonomy Identity" },
-    { "id": "application-profile", "type": "decision", "label": "Application Profile" },
-    { "id": "group-based-access-assignment", "type": "decision", "label": "Group-Based Access Assignment" },
-    { "id": "job-function-scoped-roles", "type": "decision", "label": "Job Function Scoped Roles" },
-    { "id": "config-lives-in-the-repo", "type": "decision", "label": "Config Lives in the Repo" },
-    { "id": "declarative-resource-lifecycle", "type": "decision", "label": "Declarative Resource Lifecycle" },
-    { "id": "landing-zone-autonomy", "type": "decision", "label": "Landing Zone Autonomy" },
-    { "id": "end-to-end-deployment", "type": "decision", "label": "End-to-End Deployment" },
-    { "id": "self-service-policy-exemptions", "type": "decision", "label": "Self-Service Policy Exemptions" },
-    { "id": "policy-assignment-naming-convention-reference", "type": "decision", "label": "Policy Assignment Naming Convention Reference" },
-    { "id": "allowed-resources", "type": "decision", "label": "Allowed Resources" },
-    { "id": "visibility-out-of-the-box", "type": "decision", "label": "Visibility Out of the Box" },
-    { "id": "deny-public-network-access", "type": "decision", "label": "Deny Public Network Access" },
-    { "id": "deny-local-authentication", "type": "decision", "label": "Deny Local Authentication" },
-    { "id": "deny-weak-tls", "type": "decision", "label": "Deny Weak TLS" },
-    { "id": "deny-cross-tenant-replication", "type": "decision", "label": "Deny Cross-Tenant Replication" },
-    { "id": "self-service-policy-exemptions-defender-for-cloud", "type": "decision", "label": "Self-Service Policy Exemptions Defender for Cloud" },
-    { "id": "custom-policy-definitions", "type": "decision", "label": "Custom Policy Definitions" },
-
-    { "id": "landing-zones/bicep/", "type": "file", "label": "landing-zones/bicep/" },
-    { "id": "landing-zones/oases-prod/", "type": "file", "label": "landing-zones/oases-prod/" },
-    { "id": "landing-zones/oases-test/", "type": "file", "label": "landing-zones/oases-test/" },
-    { "id": "landing-zones/managementGroup-AppName-environment.bicepparam", "type": "file", "label": "landing-zones/managementGroup-AppName-environment.bicepparam" },
-    { "id": "platform-management/automation/", "type": "file", "label": "platform-management/automation/" },
-    { "id": "landing-zones/bicep/modules/landingzone-automation.bicep", "type": "file", "label": "landing-zones/bicep/modules/landingzone-automation.bicep" },
-    { "id": "application-profiles/", "type": "file", "label": "application-profiles/" },
-    { "id": ".github/workflows/", "type": "file", "label": ".github/workflows/" },
-    { "id": ".github/workflows/lz-flow-create-policy-exemption.yml", "type": "file", "label": ".github/workflows/lz-flow-create-policy-exemption.yml" },
-    { "id": "platform-management/policy/parameters/oases/", "type": "file", "label": "platform-management/policy/parameters/oases/" },
-    { "id": "platform-management/policy/parameters/diagnosticSettings.bicepparam", "type": "file", "label": "platform-management/policy/parameters/diagnosticSettings.bicepparam" },
-    { "id": "platform-management/policy/parameters/customDefinitions/", "type": "file", "label": "platform-management/policy/parameters/customDefinitions/" },
-    { "id": "platform-management/access-control/parameters/accessControl.bicepparam", "type": "file", "label": "platform-management/access-control/parameters/accessControl.bicepparam" },
-    { "id": "landing-zones/defenderForCloudExemptions.jsonc", "type": "file", "label": "landing-zones/defenderForCloudExemptions.jsonc" }
+    {
+      "id": "add-automation-job",
+      "type": "operation",
+      "label": "Add Automation Job",
+      "intent": "A new recurring job is added to the platform automation."
+    },
+    {
+      "id": "allow-resource-type",
+      "type": "operation",
+      "label": "Allow Resource Type",
+      "intent": "A resource type is admitted to the platform only after security controls, diagnostic settings, and access roles are fully wired."
+    },
+    {
+      "id": "create-landing-zone",
+      "type": "operation",
+      "label": "Create Landing Zone",
+      "intent": "A new isolated Azure environment is provisioned under the application team's billing scope, with guardrails pre-wired and ready for workload deployment."
+    },
+    {
+      "id": "destroy-landing-zone",
+      "type": "operation",
+      "label": "Destroy Landing Zone",
+      "intent": "A landing zone is permanently torn down, all resources destroyed, and the subscription returned to the subscription-bank — no manual cleanup left behind."
+    },
+    {
+      "id": "register-application-profile",
+      "type": "operation",
+      "label": "Register Application Profile",
+      "intent": "An application team is registered with the platform, giving them a billing scope and a GitHub repo — the prerequisite for full self-service control over their landing zones."
+    },
+    {
+      "id": "update-knowledge-base",
+      "type": "operation",
+      "label": "Update Knowledge Base",
+      "intent": "The knowledge graph remains accurate, consistent, and self-contained — every entry follows the schema, links are organic and directional, and the validation script passes before any PR is opened."
+    },
+    {
+      "id": "update-landing-zone",
+      "type": "operation",
+      "label": "Update Landing Zone",
+      "intent": "An existing landing zone is updated — cost ceiling, tags, or policy exemptions — entirely through the repo, with no portal access required."
+    },
+    {
+      "id": "application-teams-own-the-cost",
+      "type": "decision",
+      "label": "Application Teams Own The Cost",
+      "decision": "Each application has its own billing scope; every subscription it provisions bills to it exclusively."
+    },
+    {
+      "id": "azure-policy-allowed-resources",
+      "type": "decision",
+      "label": "Azure Policy Allowed Resources",
+      "decision": "Every resource is denied by default. It appears on the allowed list only after the platform has approved it."
+    },
+    {
+      "id": "azure-policy-custom-definition",
+      "type": "decision",
+      "label": "Azure Policy Custom Definition",
+      "decision": "When no built-in policy provides the required Deny or DeployIfNotExists effect, a custom definition is authored to close the gap."
+    },
+    {
+      "id": "azure-policy-reference",
+      "type": "decision",
+      "label": "Azure Policy Reference",
+      "decision": "Policy exemptions source assignment IDs from the generated reference file."
+    },
+    {
+      "id": "branch-gated-environment-promotion",
+      "type": "decision",
+      "label": "Branch Gated Environment Promotion",
+      "decision": "Every platform production deployment passes through a test environment first. This is enforced by branch protection rules and workflow structure."
+    },
+    {
+      "id": "declarative-resource-lifecycle",
+      "type": "decision",
+      "label": "Declarative Resource Lifecycle",
+      "decision": "What's in the code is what exists in Azure — Azure Deployment Stacks delete anything removed from the template on the next deployment."
+    },
+    {
+      "id": "deny-security-controls",
+      "type": "decision",
+      "label": "Deny Security Controls",
+      "decision": "Azure Policy enforces hard denies on public network access, local authentication, minimum TLS, and cross-tenant replication, on every resource type that supports them."
+    },
+    {
+      "id": "end-to-end-deployment",
+      "type": "decision",
+      "label": "End To End Deployment",
+      "decision": "Each platform concern (policy, access control, management groups) owns its Bicep and workflows end-to-end."
+    },
+    {
+      "id": "ipam",
+      "type": "decision",
+      "label": "Ipam",
+      "decision": "When a new landing zone is requested, the GitHub workflow queries Azure Resource Graph and finds the next free VNet address space. The address space is written to a landing zone parameter file."
+    },
+    {
+      "id": "job-function-scoped-roles",
+      "type": "decision",
+      "label": "Job Function Scoped Roles",
+      "decision": "Roles are scoped to a job function. A role describes what a person does (e.g., app engineer), not what resources they touch."
+    },
+    {
+      "id": "landing-zone-application-profile",
+      "type": "decision",
+      "label": "Landing Zone Application Profile",
+      "decision": "Registering an Application Profile is how an application joins the platform and gains the ability to provision its own landing zones."
+    },
+    {
+      "id": "landing-zone-automation",
+      "type": "decision",
+      "label": "Landing Zone Automation",
+      "decision": "Each landing zone has automation runtime running inside its own subscription — job definitions and images are centrally managed by the platform, but execution happens locally."
+    },
+    {
+      "id": "landing-zone-diagnostic-settings",
+      "type": "decision",
+      "label": "Landing Zone Diagnostic Settings",
+      "decision": "Every whitelisted resource type has diagnostic settings deployed automatically via DeployIfNotExists policy. Telemetry flows to the landing zone's Log Analytics workspace with no team action required."
+    },
+    {
+      "id": "landing-zone-identity",
+      "type": "decision",
+      "label": "Landing Zone Identity",
+      "decision": "Each landing zone has a single managed identity that serves all its capabilities — GitHub workflows, automation jobs, and Entra ID queries."
+    },
+    {
+      "id": "landing-zone-lifecycle",
+      "type": "decision",
+      "label": "Landing Zone Lifecycle",
+      "decision": "Landing zone provisioning draws from a subscription bank, returning the subscription to it when the landing zone is sunset."
+    },
+    {
+      "id": "landing-zone-template",
+      "type": "decision",
+      "label": "Landing Zone Template",
+      "decision": "Landing zones are stamped from a single shared template, but each is managed through its own dedicated parameter file and workflow."
+    },
+    {
+      "id": "platform-exemptions-automation",
+      "type": "decision",
+      "label": "Platform Exemptions Automation",
+      "decision": "The platform uses GitHub Container Registry as the shared image source for all automation jobs across all landing zones."
+    },
+    {
+      "id": "self-service-policy-exemptions",
+      "type": "decision",
+      "label": "Self Service Policy Exemptions",
+      "decision": "Application teams can request a temporary or long-lived exemption from a specific Azure Policy assignment via a self-service workflow."
+    },
+    {
+      "id": "self-service-policy-exemptions-defender-for-cloud",
+      "type": "decision",
+      "label": "Self Service Policy Exemptions Defender For Cloud",
+      "decision": "Defender for Cloud recommendations that require a paid SKU are exempted by the platform."
+    },
+    {
+      "id": ".github/workflows/",
+      "type": "file",
+      "label": ".github/workflows/"
+    },
+    {
+      "id": ".github/workflows/lz-flow-create-policy-exemption.yml",
+      "type": "file",
+      "label": ".github/workflows/lz-flow-create-policy-exemption.yml"
+    },
+    {
+      "id": "application-profiles/",
+      "type": "file",
+      "label": "application-profiles/"
+    },
+    {
+      "id": "knowledge-graph/decisions/",
+      "type": "file",
+      "label": "knowledge-graph/decisions/"
+    },
+    {
+      "id": "knowledge-graph/guiding-principles/",
+      "type": "file",
+      "label": "knowledge-graph/guiding-principles/"
+    },
+    {
+      "id": "knowledge-graph/operations/",
+      "type": "file",
+      "label": "knowledge-graph/operations/"
+    },
+    {
+      "id": "landing-zones/automation/",
+      "type": "file",
+      "label": "landing-zones/automation/"
+    },
+    {
+      "id": "landing-zones/bicep/modules/landingzone-automation.bicep",
+      "type": "file",
+      "label": "landing-zones/bicep/modules/landingzone-automation.bicep"
+    },
+    {
+      "id": "landing-zones/defenderForCloudExemptions.jsonc",
+      "type": "file",
+      "label": "landing-zones/defenderForCloudExemptions.jsonc"
+    },
+    {
+      "id": "landing-zones/managementGroup-AppName-environment.bicepparam",
+      "type": "file",
+      "label": "landing-zones/managementGroup-AppName-environment.bicepparam"
+    },
+    {
+      "id": "landing-zones/oases-prod/",
+      "type": "file",
+      "label": "landing-zones/oases-prod/"
+    },
+    {
+      "id": "landing-zones/oases-test/",
+      "type": "file",
+      "label": "landing-zones/oases-test/"
+    },
+    {
+      "id": "platform-management/access-control/parameters/accessControl.bicepparam",
+      "type": "file",
+      "label": "platform-management/access-control/parameters/accessControl.bicepparam"
+    },
+    {
+      "id": "platform-management/policy/parameters/customDefinitions/",
+      "type": "file",
+      "label": "platform-management/policy/parameters/customDefinitions/"
+    },
+    {
+      "id": "platform-management/policy/parameters/diagnosticSettings.bicepparam",
+      "type": "file",
+      "label": "platform-management/policy/parameters/diagnosticSettings.bicepparam"
+    },
+    {
+      "id": "platform-management/policy/parameters/oases/",
+      "type": "file",
+      "label": "platform-management/policy/parameters/oases/"
+    }
   ],
   "links": [
-    { "source": "create-landing-zone", "target": "subscription-reuse-lifecycle", "type": "reasoning" },
-    { "source": "create-landing-zone", "target": "application-teams-own-the-cost", "type": "reasoning" },
-    { "source": "create-landing-zone", "target": "ipam", "type": "reasoning" },
-    { "source": "create-landing-zone", "target": "platform-test-hierarchy-environment-tier", "type": "reasoning" },
-    { "source": "create-landing-zone", "target": "deployment-logic-scaffolding", "type": "reasoning" },
-    { "source": "create-landing-zone", "target": "deployment-logic-workflow-prefix", "type": "reasoning" },
-    { "source": "create-landing-zone", "target": "branch-gated-environment-promotion", "type": "reasoning" },
-    { "source": "create-landing-zone", "target": "landing-zones/bicep/", "type": "file" },
-    { "source": "create-landing-zone", "target": "landing-zones/oases-prod/", "type": "file" },
-
-    { "source": "decommission-landing-zone", "target": "declarative-resource-lifecycle", "type": "reasoning" },
-    { "source": "decommission-landing-zone", "target": "subscription-reuse-lifecycle", "type": "reasoning" },
-    { "source": "decommission-landing-zone", "target": "application-teams-own-the-cost", "type": "reasoning" },
-    { "source": "decommission-landing-zone", "target": "landing-zone-autonomy", "type": "reasoning" },
-    { "source": "decommission-landing-zone", "target": "deployment-logic-workflow-prefix", "type": "reasoning" },
-    { "source": "decommission-landing-zone", "target": "end-to-end-deployment", "type": "reasoning" },
-    { "source": "decommission-landing-zone", "target": "landing-zones/oases-prod/", "type": "file" },
-    { "source": "decommission-landing-zone", "target": ".github/workflows/", "type": "file" },
-
-    { "source": "manage-landing-zone", "target": "end-to-end-deployment", "type": "reasoning" },
-    { "source": "manage-landing-zone", "target": "declarative-resource-lifecycle", "type": "reasoning" },
-    { "source": "manage-landing-zone", "target": "self-service-policy-exemptions", "type": "reasoning" },
-    { "source": "manage-landing-zone", "target": "policy-assignment-naming-convention-reference", "type": "reasoning" },
-    { "source": "manage-landing-zone", "target": "landing-zones/oases-prod/", "type": "file" },
-    { "source": "manage-landing-zone", "target": "landing-zones/oases-test/", "type": "file" },
-    { "source": "manage-landing-zone", "target": "landing-zones/managementGroup-AppName-environment.bicepparam", "type": "file" },
-    { "source": "manage-landing-zone", "target": ".github/workflows/lz-flow-create-policy-exemption.yml", "type": "file" },
-
-    { "source": "onboard-application", "target": "application-profile", "type": "reasoning" },
-    { "source": "onboard-application", "target": "application-teams-own-the-cost", "type": "reasoning" },
-    { "source": "onboard-application", "target": "group-based-access-assignment", "type": "reasoning" },
-    { "source": "onboard-application", "target": "job-function-scoped-roles", "type": "reasoning" },
-    { "source": "onboard-application", "target": "config-lives-in-the-repo", "type": "reasoning" },
-    { "source": "onboard-application", "target": "application-profiles/", "type": "file" },
-
-    { "source": "extend-automation-jobs", "target": "landing-zone-autonomy-automation", "type": "reasoning" },
-    { "source": "extend-automation-jobs", "target": "landing-zone-autonomy-automation-control-plane", "type": "reasoning" },
-    { "source": "extend-automation-jobs", "target": "landing-zone-autonomy-identity", "type": "reasoning" },
-    { "source": "extend-automation-jobs", "target": "platform-management/automation/", "type": "file" },
-    { "source": "extend-automation-jobs", "target": "landing-zones/bicep/modules/landingzone-automation.bicep", "type": "file" },
-
-    { "source": "whitelist-resource-type", "target": "allowed-resources", "type": "reasoning" },
-    { "source": "whitelist-resource-type", "target": "visibility-out-of-the-box", "type": "reasoning" },
-    { "source": "whitelist-resource-type", "target": "deny-public-network-access", "type": "reasoning" },
-    { "source": "whitelist-resource-type", "target": "deny-local-authentication", "type": "reasoning" },
-    { "source": "whitelist-resource-type", "target": "deny-weak-tls", "type": "reasoning" },
-    { "source": "whitelist-resource-type", "target": "deny-cross-tenant-replication", "type": "reasoning" },
-    { "source": "whitelist-resource-type", "target": "job-function-scoped-roles", "type": "reasoning" },
-    { "source": "whitelist-resource-type", "target": "self-service-policy-exemptions-defender-for-cloud", "type": "reasoning" },
-    { "source": "whitelist-resource-type", "target": "custom-policy-definitions", "type": "reasoning" },
-    { "source": "whitelist-resource-type", "target": "platform-management/policy/parameters/oases/", "type": "file" },
-    { "source": "whitelist-resource-type", "target": "platform-management/policy/parameters/diagnosticSettings.bicepparam", "type": "file" },
-    { "source": "whitelist-resource-type", "target": "platform-management/policy/parameters/customDefinitions/", "type": "file" },
-    { "source": "whitelist-resource-type", "target": "platform-management/access-control/parameters/accessControl.bicepparam", "type": "file" },
-    { "source": "whitelist-resource-type", "target": "landing-zones/defenderForCloudExemptions.jsonc", "type": "file" }
+    {
+      "source": "add-automation-job",
+      "target": "landing-zone-automation",
+      "type": "reasoning"
+    },
+    {
+      "source": "add-automation-job",
+      "target": "platform-exemptions-automation",
+      "type": "reasoning"
+    },
+    {
+      "source": "add-automation-job",
+      "target": "landing-zone-identity",
+      "type": "reasoning"
+    },
+    {
+      "source": "add-automation-job",
+      "target": "landing-zones/automation/",
+      "type": "file"
+    },
+    {
+      "source": "add-automation-job",
+      "target": "landing-zones/bicep/modules/landingzone-automation.bicep",
+      "type": "file"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "azure-policy-allowed-resources",
+      "type": "reasoning"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "landing-zone-diagnostic-settings",
+      "type": "reasoning"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "deny-security-controls",
+      "type": "reasoning"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "job-function-scoped-roles",
+      "type": "reasoning"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "self-service-policy-exemptions-defender-for-cloud",
+      "type": "reasoning"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "azure-policy-custom-definition",
+      "type": "reasoning"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "platform-management/policy/parameters/oases/",
+      "type": "file"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "platform-management/policy/parameters/diagnosticSettings.bicepparam",
+      "type": "file"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "platform-management/policy/parameters/customDefinitions/",
+      "type": "file"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "platform-management/access-control/parameters/accessControl.bicepparam",
+      "type": "file"
+    },
+    {
+      "source": "allow-resource-type",
+      "target": "landing-zones/defenderForCloudExemptions.jsonc",
+      "type": "file"
+    },
+    {
+      "source": "create-landing-zone",
+      "target": "landing-zone-lifecycle",
+      "type": "reasoning"
+    },
+    {
+      "source": "create-landing-zone",
+      "target": "application-teams-own-the-cost",
+      "type": "reasoning"
+    },
+    {
+      "source": "create-landing-zone",
+      "target": "ipam",
+      "type": "reasoning"
+    },
+    {
+      "source": "create-landing-zone",
+      "target": "landing-zone-template",
+      "type": "reasoning"
+    },
+    {
+      "source": "create-landing-zone",
+      "target": "branch-gated-environment-promotion",
+      "type": "reasoning"
+    },
+    {
+      "source": "create-landing-zone",
+      "target": "application-profiles/",
+      "type": "file"
+    },
+    {
+      "source": "destroy-landing-zone",
+      "target": "declarative-resource-lifecycle",
+      "type": "reasoning"
+    },
+    {
+      "source": "destroy-landing-zone",
+      "target": "landing-zone-lifecycle",
+      "type": "reasoning"
+    },
+    {
+      "source": "destroy-landing-zone",
+      "target": "application-teams-own-the-cost",
+      "type": "reasoning"
+    },
+    {
+      "source": "destroy-landing-zone",
+      "target": "end-to-end-deployment",
+      "type": "reasoning"
+    },
+    {
+      "source": "destroy-landing-zone",
+      "target": "landing-zones/oases-prod/",
+      "type": "file"
+    },
+    {
+      "source": "destroy-landing-zone",
+      "target": ".github/workflows/",
+      "type": "file"
+    },
+    {
+      "source": "register-application-profile",
+      "target": "landing-zone-application-profile",
+      "type": "reasoning"
+    },
+    {
+      "source": "update-knowledge-base",
+      "target": "knowledge-graph/guiding-principles/",
+      "type": "file"
+    },
+    {
+      "source": "update-knowledge-base",
+      "target": "knowledge-graph/decisions/",
+      "type": "file"
+    },
+    {
+      "source": "update-knowledge-base",
+      "target": "knowledge-graph/operations/",
+      "type": "file"
+    },
+    {
+      "source": "update-landing-zone",
+      "target": "end-to-end-deployment",
+      "type": "reasoning"
+    },
+    {
+      "source": "update-landing-zone",
+      "target": "declarative-resource-lifecycle",
+      "type": "reasoning"
+    },
+    {
+      "source": "update-landing-zone",
+      "target": "self-service-policy-exemptions",
+      "type": "reasoning"
+    },
+    {
+      "source": "update-landing-zone",
+      "target": "azure-policy-reference",
+      "type": "reasoning"
+    },
+    {
+      "source": "update-landing-zone",
+      "target": "landing-zones/oases-prod/",
+      "type": "file"
+    },
+    {
+      "source": "update-landing-zone",
+      "target": "landing-zones/oases-test/",
+      "type": "file"
+    },
+    {
+      "source": "update-landing-zone",
+      "target": "landing-zones/managementGroup-AppName-environment.bicepparam",
+      "type": "file"
+    },
+    {
+      "source": "update-landing-zone",
+      "target": ".github/workflows/lz-flow-create-policy-exemption.yml",
+      "type": "file"
+    }
   ]
 }

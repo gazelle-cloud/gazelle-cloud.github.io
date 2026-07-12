@@ -6,38 +6,67 @@ import Base from '../layouts/Base.astro';
 
   <!-- ── top bar (same structure as graph pages) ──────────────────────── -->
   <header id="top-bar">
-    <nav class="top-bar-nav">
-      <a class="nav-link nav-active" href="/">Home</a>
-      <span class="nav-sep">|</span>
-      <a class="nav-link" href="/knowledge-graph/">Knowledge Graph</a>
-      <span class="nav-sep">|</span>
-      <a class="nav-link" href="/operations/">Operations</a>
-      <span class="nav-sep">|</span>
-      <a class="nav-link" href="/bigbang/">BigBang</a>
-    </nav>
+    <div class="top-bar-panel">
+      <nav class="top-bar-nav">
+        <a class="nav-link nav-active" href="/">Home</a>
+        <span class="nav-sep">|</span>
+        <a class="nav-link" href="/knowledge-graph/">Knowledge Graph</a>
+        <span class="nav-sep">|</span>
+        <a class="nav-link" href="/operations/">Operations</a>
+        <span class="nav-sep">|</span>
+        <a class="nav-link" href="/bigbang/">BigBang</a>
+      </nav>
+      <div class="top-bar-right">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Switch theme"></button>
+      </div>
+    </div>
   </header>
+
+  <script is:inline>
+    (function() {
+      const btn = document.getElementById('theme-toggle');
+      const saved = localStorage.getItem('theme');
+      const initial = saved ? saved : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.dataset.theme = initial === 'light' ? 'light' : '';
+      btn.textContent = initial === 'dark' ? '\u2600' : '\u263E';
+      btn.addEventListener('click', () => {
+        const current = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next === 'light' ? 'light' : '';
+        localStorage.setItem('theme', next);
+        btn.textContent = next === 'dark' ? '\u2600' : '\u263E';
+      });
+    })();
+  </script>
 
   <!-- ── page content ─────────────────────────────────────────────────── -->
   <main class="landing">
     <section class="hero">
       <h1>Gazelle <span class="accent">Cloud</span></h1>
-      <p class="tagline">Lightweight Azure landing zone platform</p>
-      <p class="tagline">Interactive map of how the platform is actually built</p>
+      <p class="tagline tagline-primary">An interactive map of a lightweight Azure landing zone —<br/>design decisions that show how the platform actually works.</p>
     </section>
 
     <section class="cards">
       <a href="/knowledge-graph/" class="card card-gold">
-        <h2>Knowledge Graph</h2>
-        <p>How decisions connect to give teams autonomy and keep the platform at zero-cost.</p>
+        <h2>Knowledge Graph <span class="card-arrow">&rarr;</span></h2>
+        <p>Every platform decision and how they connect to each other — visualise what enables zero-cost and self-service landing zone management.</p>
       </a>
       <a href="/operations/" class="card card-green">
-        <h2>Operations</h2>
-        <p>Automated landing zone operations — so AI can assist on daily tasks.</p>
+        <h2>Platform Operations <span class="card-arrow">&rarr;</span></h2>
+        <p>How the platform scales and the constraints it has to deal with — automated operation visualised.</p>
       </a>
       <a href="/bigbang/" class="card card-blue">
-        <h2>BigBang</h2>
-        <p>One workflow that creates the platform from nothing — see the workflows, jobs, and Bicep it deploys.</p>
+        <h2>BigBang <span class="card-arrow">&rarr;</span></h2>
+        <p>One workflow that bootstraps the full platform from scratch — trace every job step and the actual Bicep code it deploys.</p>
       </a>
+      <div class="card card-gold">
+        <h2>Ask AI</h2>
+        <p>Copy the link below into your favourite chatbot and ask anything about the Gazelle platform.</p>
+        <div class="link-box">
+          <a href="/llms-full.txt" class="link-box-url">gazelle.cloud/llms-full.txt</a>
+          <button class="link-box-copy" aria-label="Copy link" onclick="navigator.clipboard.writeText('https://gazelle.cloud/llms-full.txt').then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button>
+        </div>
+      </div>
     </section>
 
   </main>
@@ -46,6 +75,7 @@ import Base from '../layouts/Base.astro';
 <style>
   /* override shell.css: landing page scrolls normally */
   :global(html), :global(body) { overflow: auto; }
+  :global(.top-bar-right) { width: auto !important; }
 
   .landing {
     max-width: 900px;
@@ -58,6 +88,15 @@ import Base from '../layouts/Base.astro';
     text-align: center;
     padding: 64px 0 48px;
   }
+  .hero-label {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #f0a500;
+    margin-bottom: 16px;
+  }
   .hero h1 {
     font-size: 3rem;
     font-weight: 500;
@@ -66,9 +105,15 @@ import Base from '../layouts/Base.astro';
   }
   .accent { color: #f0a500; }
   .tagline {
-    font-size: 1.15rem;
-    color: rgba(155, 175, 215, 0.75);
+    font-size: 1.05rem;
+    color: rgba(155, 175, 215, 0.6);
     margin: 0 0 24px;
+  }
+  .tagline-primary {
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: rgba(212, 218, 240, 0.9);
+    margin-bottom: 8px;
   }
   .sub-hero {
     max-width: 640px;
@@ -80,7 +125,7 @@ import Base from '../layouts/Base.astro';
   /* ── cards ────────────────────────────────────────────────────────────── */
   .cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     padding-bottom: 48px;
   }
@@ -100,6 +145,15 @@ import Base from '../layouts/Base.astro';
     font-weight: 500;
     margin: 0 0 8px;
   }
+  .card-arrow {
+    opacity: 0.4;
+    transition: opacity 0.15s, transform 0.15s;
+    display: inline-block;
+  }
+  .card:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(3px);
+  }
   .card p {
     font-size: 0.9rem;
     line-height: 1.5;
@@ -108,12 +162,46 @@ import Base from '../layouts/Base.astro';
   }
 
   /* card accent borders */
-  .card-gold  { border-top: 3px solid #f0a500; }
-  .card-green { border-top: 3px solid #3dba7f; }
-  .card-blue  { border-top: 3px solid #4e8ef7; }
-  .card-gold:hover  { border-color: #f0a500; }
-  .card-green:hover { border-color: #3dba7f; }
-  .card-blue:hover  { border-color: #4e8ef7; }
+  .card-gold   { border-top: 3px solid #f0a500; }
+  .card-green  { border-top: 3px solid #3dba7f; }
+  .card-blue   { border-top: 3px solid #4e8ef7; }
+  .card-gold:hover   { border-color: #f0a500; }
+  .card-green:hover  { border-color: #3dba7f; }
+  .card-blue:hover   { border-color: #4e8ef7; }
+
+  .link-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: rgba(155, 175, 215, 0.08);
+    border: 1px solid rgba(155, 175, 215, 0.15);
+    border-radius: 6px;
+    font-size: 0.82rem;
+  }
+  .link-box-url {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #f0a500;
+    text-decoration: none;
+  }
+  .link-box-url:hover { text-decoration: underline; }
+  .link-box-copy {
+    flex-shrink: 0;
+    padding: 4px 12px;
+    border: 1px solid rgba(155, 175, 215, 0.2);
+    border-radius: 4px;
+    background: rgba(155, 175, 215, 0.1);
+    color: #d4daf0;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .link-box-copy:hover { background: rgba(155, 175, 215, 0.2); }
 
   /* ── footer ──────────────────────────────────────────────────────────── */
   .footer {
@@ -124,6 +212,34 @@ import Base from '../layouts/Base.astro';
     border-top: 1px solid rgba(155, 175, 215, 0.08);
   }
   .footer p { margin: 0; }
+
+  /* ── light theme ─────────────────────────────────────────────────────── */
+  :global([data-theme="light"]) .hero h1 { color: #1a1b26; }
+  :global([data-theme="light"]) .tagline { color: rgba(26,27,38,0.45); }
+  :global([data-theme="light"]) .tagline-primary { color: rgba(26,27,38,0.8); }
+  :global([data-theme="light"]) .card {
+    color: #1a1b26;
+    background: rgba(0,0,0,0.02);
+    border-left-color: rgba(0,0,0,0.08);
+    border-right-color: rgba(0,0,0,0.08);
+    border-bottom-color: rgba(0,0,0,0.08);
+  }
+  :global([data-theme="light"]) .card:hover { background: rgba(0,0,0,0.04); }
+  :global([data-theme="light"]) .card p { color: rgba(26,27,38,0.55); }
+  :global([data-theme="light"]) .card-gold:hover   { border-color: #f0a500; }
+  :global([data-theme="light"]) .card-green:hover  { border-color: #3dba7f; }
+  :global([data-theme="light"]) .card-blue:hover   { border-color: #4e8ef7; }
+  :global([data-theme="light"]) .link-box {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  :global([data-theme="light"]) .link-box-url { color: #c88d00; }
+  :global([data-theme="light"]) .link-box-copy {
+    color: #1a1b26;
+    border-color: rgba(0, 0, 0, 0.15);
+    background: rgba(0, 0, 0, 0.05);
+  }
+  :global([data-theme="light"]) .link-box-copy:hover { background: rgba(0, 0, 0, 0.1); }
 
   /* ── responsive ──────────────────────────────────────────────────────── */
   @media (max-width: 600px) {
