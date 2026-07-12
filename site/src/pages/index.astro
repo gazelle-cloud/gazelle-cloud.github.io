@@ -6,6 +6,7 @@ import Base from '../layouts/Base.astro';
 
   <!-- ── top bar (same structure as graph pages) ──────────────────────── -->
   <header id="top-bar">
+    <button id="menu-btn" aria-label="Toggle menu">&#9776;</button>
     <div class="top-bar-panel">
       <nav class="top-bar-nav">
         <a class="nav-link nav-active" href="/">Home</a>
@@ -24,6 +25,7 @@ import Base from '../layouts/Base.astro';
 
   <script is:inline>
     (function() {
+      /* ── theme toggle ────────────────────────────────────────────────── */
       const btn = document.getElementById('theme-toggle');
       const saved = localStorage.getItem('theme');
       const initial = saved ? saved : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -35,6 +37,20 @@ import Base from '../layouts/Base.astro';
         document.documentElement.dataset.theme = next === 'light' ? 'light' : '';
         localStorage.setItem('theme', next);
         btn.textContent = next === 'dark' ? '\u2600' : '\u263E';
+      });
+
+      /* ── hamburger menu toggle ───────────────────────────────────────── */
+      var menuBtn = document.getElementById('menu-btn');
+      var topBar = document.getElementById('top-bar');
+      menuBtn.addEventListener('click', function() {
+        var open = topBar.classList.toggle('menu-open');
+        menuBtn.innerHTML = open ? '&#10005;' : '&#9776;';
+      });
+      document.addEventListener('pointerdown', function(e) {
+        if (topBar.classList.contains('menu-open') && !topBar.contains(e.target)) {
+          topBar.classList.remove('menu-open');
+          menuBtn.innerHTML = '&#9776;';
+        }
       });
     })();
   </script>
@@ -74,8 +90,9 @@ import Base from '../layouts/Base.astro';
 
 <style>
   /* override shell.css: landing page scrolls normally */
-  :global(html), :global(body) { overflow: auto; }
+  :global(html), :global(body) { overflow: auto !important; height: auto !important; }
   :global(.top-bar-right) { width: auto !important; }
+  :global(#menu-btn) { display: none; }
 
   .landing {
     max-width: 900px;
