@@ -33,7 +33,7 @@ export function normalizeNodeWeights(raw) {
 // The caller computes the position; this handles font, backdrop, and text.
 //
 // align: 'left' | 'right' | 'center'
-export function drawLabel(ctx, text, lx, ly, align, fontSize, globalScale, color, backdrop = BACKDROP) {
+export function drawLabel(ctx, text, lx, ly, align, fontSize, globalScale, color, backdrop) {
   const fs = fontSize / globalScale;
   ctx.font = `${fs}px 'IBM Plex Sans', system-ui, sans-serif`;
   const tw = ctx.measureText(text).width;
@@ -82,10 +82,6 @@ export const RENDER = {
   linkWidth:      0.5,  // default link stroke width
 };
 
-// Label backdrop uses the same bg colour at reduced opacity.
-const BACKDROP = RENDER.bgColor
-  .replace(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i,
-    (_, r, g, b) => `rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.9)`);
 
 // ── paintNodeColors ───────────────────────────────────────────────────────────
 // Returns the two theme-dependent colour values every paintNode callback needs.
@@ -99,7 +95,7 @@ const BACKDROP = RENDER.bgColor
 export function paintNodeColors(theme) {
   return {
     activeColor: theme === 'dark' ? '#fff' : '#1a1b26',
-    backdrop:    theme === 'dark' ? 'rgba(31,36,48,0.9)' : 'rgba(245,241,232,0.9)',
+    backdrop:    theme === 'dark' ? 'rgba(31,36,48,0.9)' : 'rgba(245,245,240,0.9)',
   };
 }
 
@@ -342,7 +338,7 @@ export function NavBar({ activeHref, children }) {
 export function useTheme() {
   const [theme, setTheme] = React.useState(() => {
     const saved = localStorage.getItem('theme');
-    const initial = saved === 'light' ? 'light' : 'dark';
+    const initial = saved ? saved : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
     document.documentElement.dataset.theme = initial === 'light' ? 'light' : '';
     return initial;
   });

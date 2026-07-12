@@ -6,16 +6,38 @@ import Base from '../layouts/Base.astro';
 
   <!-- ── top bar (same structure as graph pages) ──────────────────────── -->
   <header id="top-bar">
-    <nav class="top-bar-nav">
-      <a class="nav-link nav-active" href="/">Home</a>
-      <span class="nav-sep">|</span>
-      <a class="nav-link" href="/knowledge-graph/">Knowledge Graph</a>
-      <span class="nav-sep">|</span>
-      <a class="nav-link" href="/operations/">Operations</a>
-      <span class="nav-sep">|</span>
-      <a class="nav-link" href="/bigbang/">BigBang</a>
-    </nav>
+    <div class="top-bar-panel">
+      <nav class="top-bar-nav">
+        <a class="nav-link nav-active" href="/">Home</a>
+        <span class="nav-sep">|</span>
+        <a class="nav-link" href="/knowledge-graph/">Knowledge Graph</a>
+        <span class="nav-sep">|</span>
+        <a class="nav-link" href="/operations/">Operations</a>
+        <span class="nav-sep">|</span>
+        <a class="nav-link" href="/bigbang/">BigBang</a>
+      </nav>
+      <div class="top-bar-right">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Switch theme"></button>
+      </div>
+    </div>
   </header>
+
+  <script is:inline>
+    (function() {
+      const btn = document.getElementById('theme-toggle');
+      const saved = localStorage.getItem('theme');
+      const initial = saved ? saved : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.dataset.theme = initial === 'light' ? 'light' : '';
+      btn.textContent = initial === 'dark' ? '\u2600' : '\u263E';
+      btn.addEventListener('click', () => {
+        const current = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next === 'light' ? 'light' : '';
+        localStorage.setItem('theme', next);
+        btn.textContent = next === 'dark' ? '\u2600' : '\u263E';
+      });
+    })();
+  </script>
 
   <!-- ── page content ─────────────────────────────────────────────────── -->
   <main class="landing">
@@ -46,6 +68,7 @@ import Base from '../layouts/Base.astro';
 <style>
   /* override shell.css: landing page scrolls normally */
   :global(html), :global(body) { overflow: auto; }
+  :global(.top-bar-right) { width: auto !important; }
 
   .landing {
     max-width: 900px;
@@ -124,6 +147,22 @@ import Base from '../layouts/Base.astro';
     border-top: 1px solid rgba(155, 175, 215, 0.08);
   }
   .footer p { margin: 0; }
+
+  /* ── light theme ─────────────────────────────────────────────────────── */
+  :global([data-theme="light"]) .hero h1 { color: #1a1b26; }
+  :global([data-theme="light"]) .tagline { color: rgba(26,27,38,0.55); }
+  :global([data-theme="light"]) .card {
+    color: #1a1b26;
+    background: rgba(0,0,0,0.02);
+    border-left-color: rgba(0,0,0,0.08);
+    border-right-color: rgba(0,0,0,0.08);
+    border-bottom-color: rgba(0,0,0,0.08);
+  }
+  :global([data-theme="light"]) .card:hover { background: rgba(0,0,0,0.04); }
+  :global([data-theme="light"]) .card p { color: rgba(26,27,38,0.55); }
+  :global([data-theme="light"]) .card-gold:hover  { border-color: #f0a500; }
+  :global([data-theme="light"]) .card-green:hover { border-color: #3dba7f; }
+  :global([data-theme="light"]) .card-blue:hover  { border-color: #4e8ef7; }
 
   /* ── responsive ──────────────────────────────────────────────────────── */
   @media (max-width: 600px) {
