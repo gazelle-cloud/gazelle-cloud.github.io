@@ -17,7 +17,7 @@
     const NODE_TYPES = ['operation', 'decision', 'file'];
 
     const TYPE_LABELS = {
-      operation: 'operations',
+      operation: 'operation',
       decision:  'knowledge graph',
       file:      'files',
     };
@@ -85,14 +85,15 @@
 
     // ─── detail pane helpers ─────────────────────────────────────────────────
 
-    function ConnectedList({ label, items }) {
+    const FILE_COLOR = '#7dd3fc';
+
+    function ConnectedList({ label, items, color }) {
       if (!items?.length) return null;
       return <>
-        <div className="info-label">{label}</div>
-        <div style={{ margin: '4px 0 8px' }}>
+        <div className="info-label" style={color ? { color } : undefined}>{label}</div>
+        <div className="code-block" style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' }}>
           {items.map((item, i) => (
-            <div key={i} className="info-text"
-              style={{ fontFamily: FONT_MONO, fontSize: 11, wordBreak: 'break-all', margin: '2px 0' }}>
+            <div key={i} style={{ color: color || '#94a3b8', fontFamily: FONT_MONO, fontSize: 13 }}>
               {item}
             </div>
           ))}
@@ -122,6 +123,31 @@
       );
     }
 
+    const nodeById = Object.fromEntries(raw.nodes.map(n => [n.id, n]));
+
+    const DECISION_COLOR = '#fb923c';
+
+    function DecisionList({ label, ids, theme }) {
+      if (!ids?.length) return null;
+      return <>
+        <div className="info-label" style={{ color: DECISION_COLOR }}>{label}</div>
+        <div className="code-block" style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' }}>
+          {ids.map((id, i) => {
+            const d = nodeById[id];
+            return (
+              <div key={i}>
+                <a href={`/knowledge-graph/#${id}`}
+                  style={{ color: DECISION_COLOR, fontFamily: FONT_MONO, fontSize: 13, textDecoration: 'none' }}>
+                  → {id.replaceAll('-', ' ')}
+                </a>
+                {d?.decision && <div style={{ color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12, marginTop: 2 }}>{d.decision}</div>}
+              </div>
+            );
+          })}
+        </div>
+      </>;
+    }
+
     function NodeDetail({ node, links, theme }) {
       const connected = links
         .filter(l => { const [s, t] = linkEnds(l); return s === node.id || t === node.id; })
@@ -136,8 +162,12 @@
 
       return <>
         <DetailHeader typeLabel={TYPE_LABELS[node.type]} nodeId={node.id.replaceAll('-', ' ')} theme={theme} />
-        <ConnectedList label="Reasoning (decisions)" items={reasoning} />
-        <ConnectedList label="Files" items={files} />
+        {node.intent && <>
+          <div className="info-label">Intent</div>
+          <p className="info-text">{node.intent}</p>
+        </>}
+        <DecisionList label="Design constraints" ids={reasoning} theme={theme} />
+        <ConnectedList label="Files to modify" items={files} color={FILE_COLOR} />
         <ConnectedList label="Connected" items={other} />
       </>;
     }

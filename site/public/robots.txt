@@ -1,11 +1,4 @@
 User-agent: *
 Allow: /
 
-Allow: /llms.txt
-Allow: /llms-full.txt
-
-
-Disallow: /operations/
-Disallow: /bigbang/
-
 Sitemap: https://gazelle.cloud/sitemap-0.xml
