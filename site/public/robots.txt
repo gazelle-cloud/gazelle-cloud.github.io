@@ -1,5 +1,10 @@
 User-agent: *
 Allow: /
+
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+
 Disallow: /operations/
 Disallow: /bigbang/
 
