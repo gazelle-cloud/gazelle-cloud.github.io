@@ -5,15 +5,15 @@ interface Props {
   noindex?: boolean;
 }
 
-const { title, description = 'Knowledge graph for the Gazelle Cloud landing zone platform.', noindex = false } = Astro.props;
+const { title, description, noindex = false } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} — Gazelle Cloud</title>
-    <meta name="description" content={description} />
+    <title>Azure Landing Zones - {title}</title>
+    {description && <meta name="description" content={description} />}
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script defer src="https://cloud.umami.is/script.js" data-website-id="8d6f8fcd-8e1a-4eb4-8c64-1b32c60e82cd"></script>

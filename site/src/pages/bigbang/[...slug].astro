@@ -11,8 +11,10 @@ export function getStaticPaths() {
 
 const { node } = Astro.props as { node: any };
 const name = node.id;
+const label = node.label || name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+const desc = (node.intent || node.decision || node.jobs || '').slice(0, 155);
 ---
-<Base title={name}>
+<Base title={label} description={desc || undefined}>
   <script is:inline define:vars={{ name }}>
     window.location.replace('/bigbang/#' + name);
   </script>

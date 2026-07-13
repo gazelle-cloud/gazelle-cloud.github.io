@@ -5,7 +5,7 @@ import graph from '../../../public/knowledge-graph.json';
 const rules = graph.nodes.filter((n: any) => n.type === 'rule');
 const decisions = graph.nodes.filter((n: any) => n.type === 'decision');
 ---
-<GraphPage title="Knowledge Graph" graph="/knowledge-graph-graph.jsx">
+<GraphPage title="Knowledge Graph" description="Platform design rules and decisions that shape the Azure landing zone — how deny-by-default, self-service, and zero-cost-on-idle connect." graph="/knowledge-graph-graph.jsx">
   <div class="sr-only">
     <h1>Platform Design Knowledge Graph</h1>
 
