@@ -3,22 +3,22 @@
     {
       "id": "deny-by-default",
       "type": "rule",
-      "intent": "Every resource type is denied until the platform has security controls and observability wired. Approval is the platform's commitment, not a task left to the application team."
-    },
-    {
-      "id": "landing-zone-self-service",
-      "type": "rule",
-      "intent": "Self-service, self-contained landing zones. The application team owns it end-to-end — what they build and how they run it is their call."
+      "intent": "The allowed list starts empty. A resource type joins the platform only after its security controls, telemetry, and integration patterns are in place — every landing zone inherits that baseline from day one."
     },
     {
       "id": "no-human-touch",
       "type": "rule",
-      "intent": "Configuration has one source of truth: the repo. Every change flows through a branch, a PR, and a pipeline. Nothing is set manually."
+      "intent": "The platform can always be rebuilt from scratch. BigBang proves it — from an initial setup to fully functioning in a single run."
+    },
+    {
+      "id": "team-autonomy",
+      "type": "rule",
+      "intent": "Every team gets a fully wired Azure environment they control end-to-end. The platform provides the guardrails — the team decides what to build and how to run it."
     },
     {
       "id": "zero-cost-on-idle",
       "type": "rule",
-      "intent": "Platform-managed infrastructure carries no flat fees. Every service the platform provisions scales to zero when idle — fixed monthly costs are eliminated by design."
+      "intent": "An empty landing zone costs nothing. Platform-managed infrastructure scales to zero when idle — no flat fees, no baseline spend. What the team deploys is their cost to own."
     },
     {
       "id": "application-teams-own-the-cost",
@@ -665,14 +665,14 @@
       "links": [
         {
           "id": "landing-zone-identity",
-          "note": "Receives Directory.Read.All at landing zone creation time."
+          "note": "Receives User.Read.All, Group.Read.All, and Application.Read.All at landing zone creation time."
         },
         {
           "id": "initial-setup",
           "note": "Graph permissions are granted via admin consent as a manual prerequisite."
         }
       ],
-      "decision": "Landing zone-managed identities receive Microsoft Graph permissions, allowing them to query Entra ID objects."
+      "decision": "Landing zone-managed identities receive granular Microsoft Graph read permissions to query Entra ID objects."
     },
     {
       "id": "platform-test-environment",
@@ -798,66 +798,6 @@
       "relationship": "groups"
     },
     {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-application-profile",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-lifecycle",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "ipam",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-diagnostic-settings",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-vnet",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-resource-group",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-monitoring",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-github-runners",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-tags",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-action-group",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "landing-zone-identity",
-      "relationship": "groups"
-    },
-    {
-      "source": "landing-zone-self-service",
-      "target": "job-function-scoped-roles",
-      "relationship": "groups"
-    },
-    {
       "source": "no-human-touch",
       "target": "end-to-end-deployment",
       "relationship": "groups"
@@ -890,6 +830,101 @@
     {
       "source": "no-human-touch",
       "target": "branch-gated-environment-promotion",
+      "relationship": "groups"
+    },
+    {
+      "source": "no-human-touch",
+      "target": "initial-setup",
+      "relationship": "groups"
+    },
+    {
+      "source": "no-human-touch",
+      "target": "platform-identity-azure",
+      "relationship": "groups"
+    },
+    {
+      "source": "no-human-touch",
+      "target": "platform-identity-github",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-application-profile",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-lifecycle",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "ipam",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-diagnostic-settings",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-vnet",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-resource-group",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-monitoring",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-github-runners",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-tags",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-action-group",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-identity",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "job-function-scoped-roles",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "platform-identity-graph",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-repo",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-getting-started",
+      "relationship": "groups"
+    },
+    {
+      "source": "team-autonomy",
+      "target": "landing-zone-allowed-public-ip",
       "relationship": "groups"
     },
     {
