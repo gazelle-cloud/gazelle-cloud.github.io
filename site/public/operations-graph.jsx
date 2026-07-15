@@ -85,7 +85,7 @@
 
     // ─── detail pane helpers ─────────────────────────────────────────────────
 
-    const FILE_COLOR = '#7dd3fc';
+    const FILE_COLOR = PALETTE.CONNECTOR;
 
     function ConnectedList({ label, items, color }) {
       if (!items?.length) return null;
@@ -125,7 +125,7 @@
 
     const nodeById = Object.fromEntries(raw.nodes.map(n => [n.id, n]));
 
-    const DECISION_COLOR = '#fb923c';
+    const DECISION_COLOR = PALETTE.LEAF;
 
     function DecisionList({ label, ids, theme }) {
       if (!ids?.length) return null;
@@ -160,13 +160,20 @@
       const files     = connected.filter(c => c.type === 'file').map(c => c.id);
       const other     = connected.filter(c => c.type !== 'reasoning' && c.type !== 'file').map(c => c.id);
 
+      const isDecision = node.type === 'decision';
+
       return <>
         <DetailHeader typeLabel={TYPE_LABELS[node.type]} nodeId={node.id.replaceAll('-', ' ')} theme={theme} />
         {node.intent && <>
           <div className="info-label">Intent</div>
           <p className="info-text">{node.intent}</p>
         </>}
-        <DecisionList label="Design constraints" ids={reasoning} theme={theme} />
+        {node.decision && <>
+          <div className="info-label" style={{ color: DECISION_COLOR }}>Design constraint</div>
+          <p className="info-text">{node.decision}</p>
+        </>}
+        {!isDecision && <DecisionList label="Design constraints" ids={reasoning} theme={theme} />}
+        {isDecision && <ConnectedList label="Used by" items={reasoning} />}
         <ConnectedList label="Files to modify" items={files} color={FILE_COLOR} />
         <ConnectedList label="Connected" items={other} />
       </>;
