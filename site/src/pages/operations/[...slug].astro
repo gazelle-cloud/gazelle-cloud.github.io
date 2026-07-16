@@ -1,18 +1,30 @@
 ---
 import Base from '../../layouts/Base.astro';
-import data from '../../../public/operations.json';
 
-export function getStaticPaths() {
-  return data.nodes.map((n: any) => ({
+export async function getStaticPaths() {
+  const DATA_REPO = 'gazelle-cloud/data';
+  const BASE_PATH = 'knowledge-graph';
+
+  const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/operations`);
+  const listing: any[] = await res.json();
+  if (!Array.isArray(listing)) return [];
+
+  const operations: any[] = await Promise.all(
+    listing
+      .filter((f: any) => f.type === 'file' && f.name.endsWith('.json'))
+      .map((f: any) => fetch(f.download_url).then(r => r.json()).then((obj: any) => ({ ...obj, type: 'operation' })))
+  );
+
+  return operations.map((n: any) => ({
     params: { slug: n.id.replace(/\/+$/, '') },
-    props: { node: n },
+    props:  { node: n },
   }));
 }
 
 const { node } = Astro.props as { node: any };
-const name = node.id;
+const name  = node.id;
 const label = node.label || name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
-const desc = (node.intent || node.decision || '').slice(0, 155);
+const desc  = (node.intent || '').slice(0, 155);
 ---
 <Base title={label} description={desc || undefined}>
   <script is:inline define:vars={{ name }}>
@@ -20,8 +32,54 @@ const desc = (node.intent || node.decision || '').slice(0, 155);
   </script>
 
   <div class="sr-only">
-    <h1>{node.label || name}</h1>
+    <h1>{label}</h1>
     <p>Type: {node.type}</p>
+
+    {node.intent && (
+      <>
+        <h2>Intent</h2>
+        <p>{node.intent}</p>
+      </>
+    )}
+
+    {node.decisions?.length > 0 && (
+      <>
+        <h2>Design Decisions</h2>
+        <ul>
+          {node.decisions.map((id: string) => (
+            <li><a href={`/knowledge-graph/${id}/`}>{id}</a></li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {node.steps?.length > 0 && (
+      <>
+        <h2>Steps</h2>
+        <ol>
+          {node.steps.map((s: string) => <li>{s}</li>)}
+        </ol>
+      </>
+    )}
+
+    {node.files?.length > 0 && (
+      <>
+        <h2>Files</h2>
+        <ul>
+          {node.files.map((f: string) => <li>{f}</li>)}
+        </ul>
+      </>
+    )}
+
+    {node.violations?.length > 0 && (
+      <>
+        <h2>Violations</h2>
+        <ul>
+          {node.violations.map((v: string) => <li>{v}</li>)}
+        </ul>
+      </>
+    )}
+
     <p><a href="/operations/">← Back to operations</a></p>
   </div>
 </Base>

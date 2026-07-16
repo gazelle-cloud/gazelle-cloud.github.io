@@ -1,18 +1,36 @@
 ---
 import Base from '../../layouts/Base.astro';
-import graph from '../../../public/knowledge-graph.json';
 
-export function getStaticPaths() {
-  return graph.nodes.map((n: any) => ({
+export async function getStaticPaths() {
+  const DATA_REPO = 'gazelle-cloud/data';
+  const BASE_PATH = 'knowledge-graph';
+
+  async function fetchCategory(category: string, type: string): Promise<any[]> {
+    const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/${category}`);
+    const listing: any[] = await res.json();
+    if (!Array.isArray(listing)) return [];
+    return Promise.all(
+      listing
+        .filter((f: any) => f.type === 'file' && f.name.endsWith('.json'))
+        .map((f: any) => fetch(f.download_url).then(r => r.json()).then((obj: any) => ({ ...obj, type })))
+    );
+  }
+
+  const [principles, decisions] = await Promise.all([
+    fetchCategory('guiding-principles', 'guiding-principle'),
+    fetchCategory('decisions', 'decision'),
+  ]);
+  const nodes = [...principles, ...decisions];
+  return nodes.map((n: any) => ({
     params: { slug: n.id },
-    props: { node: n },
+    props:  { node: n },
   }));
 }
 
 const { node } = Astro.props as { node: any };
-const name = node.id;
+const name  = node.id;
 const label = node.label || name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
-const desc = (node.intent || node.decision || node.why || '').slice(0, 155);
+const desc  = (node.intent || node.decision || node.why || '').slice(0, 155);
 ---
 <Base title={label} description={desc || undefined}>
   <script is:inline define:vars={{ name }}>
@@ -55,6 +73,17 @@ const desc = (node.intent || node.decision || node.why || '').slice(0, 155);
       </>
     )}
 
+    {node.decisions?.length > 0 && (
+      <>
+        <h2>Decisions</h2>
+        <ul>
+          {node.decisions.map((id: string) => (
+            <li><a href={`/knowledge-graph/${id}/`}>{id}</a></li>
+          ))}
+        </ul>
+      </>
+    )}
+
     {node.links?.length > 0 && (
       <>
         <h2>Links</h2>
@@ -69,6 +98,6 @@ const desc = (node.intent || node.decision || node.why || '').slice(0, 155);
       </>
     )}
 
-    <p><a href="/knowledge-graph/">← Back to all decisions</a></p>
+    <p><a href="/knowledge-graph/">← Back to knowledge graph</a></p>
   </div>
 </Base>

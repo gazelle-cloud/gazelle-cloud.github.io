@@ -2,31 +2,46 @@
   Guiding Principles
 ===============================================================================
 
-# Deny By Default
+# No Fixed Cost
 
-Intent: Every resource type is denied until the platform has security controls and observability wired. Approval is the platform's commitment, not a task left to the application team.
+Intent: Every platform component is free; if it can't be, it must be consumption-based — never a flat cost.
 
 Decisions:
-- azure-policy-allowed-resources
-- azure-native-services-only
-- azure-policy-custom-definition
-- deny-security-controls
-- self-service-policy-exemptions
-- self-service-policy-exemptions-defender-for-cloud
-- azure-policy-naming-convention
+- application-teams-own-the-cost
+- landing-zone-automation
 - single-region
-- azure-policy-reference
+- platform-exemptions-automation
 
 Violations:
-- Resource type added to the allowed list before Deny policies and diagnostic settings are wired.
-# Landing Zone Self Service
+- Platform-provisioned service with a fixed monthly cost adopted.
+- Applying no-fixed-cost constraints to application team.
+# No Human Touch
 
-Intent: Self-service, self-contained landing zones. The application team owns it end-to-end — what they build and how they run it is their call.
+Intent: BigBang brings the platform alive — from that point, no human touch. Code is the only path to production — and the proof that the platform can always be rebuilt from scratch.
+
+Decisions:
+- deployment-end-to-end
+- deployment-declarative-lifecycle
+- deployment-config-in-repo
+- landing-zone-template
+- deployment-logic-reusable-workflow
+- platform-test-environment
+- deployment-branch-gated-promotion
+- initial-setup
+- platform-identity-azure
+- platform-identity-github
+
+Violations:
+- Configuration value set manually instead of sourced from the repo.
+- Deployment that bypasses the branch-gated promotion flow.
+# No Platform Ops
+
+Intent: The platform gets more and more sufficient, landing zones own more and more, and the platform team is needed less and less.
 
 Decisions:
 - landing-zone-application-profile
 - landing-zone-lifecycle
-- ipam
+- landing-zone-ipam
 - landing-zone-diagnostic-settings
 - landing-zone-vnet
 - landing-zone-resource-group
@@ -36,49 +51,41 @@ Decisions:
 - landing-zone-action-group
 - landing-zone-identity
 - job-function-scoped-roles
+- platform-identity-graph
+- landing-zone-repo
+- landing-zone-getting-started
+- landing-zone-allowed-public-ip
 
 Violations:
 - Platform team operating resources inside a landing zone on behalf of the application team.
-# No Human Touch
+# No Unapproved Resources
 
-Intent: Configuration has one source of truth: the repo. Every change flows through a branch, a PR, and a pipeline. Nothing is set manually.
-
-Decisions:
-- end-to-end-deployment
-- declarative-resource-lifecycle
-- config-lives-in-the-repo
-- landing-zone-template
-- deployment-logic-reusable-workflow
-- platform-test-environment
-- branch-gated-environment-promotion
-
-Violations:
-- Configuration value set manually instead of sourced from the repo.
-- Deployment that bypasses the branch-gated promotion flow.
-# Zero Cost On Idle
-
-Intent: Platform-managed infrastructure carries no flat fees. Every service the platform provisions scales to zero when idle — fixed monthly costs are eliminated by design.
+Intent: The allowed list starts empty. A resource type joins the platform only after its security controls, telemetry, and integration patterns are in place — once it is, app teams can use it freely within the boundaries Azure Policy guarantees.
 
 Decisions:
-- application-teams-own-the-cost
-- landing-zone-automation
-- platform-exemptions-automation
+- azure-policy-allowed-resources
+- azure-native-services-only
+- azure-policy-custom-definition
+- azure-policy-hard-deny
+- self-service-policy-exemptions
+- self-service-policy-exemptions-defender-for-cloud
+- azure-policy-naming-convention
+- azure-policy-reference
 
 Violations:
-- Platform-provisioned service with a fixed monthly cost adopted.
-- Applying zero-cost-on-idle constraints to application team.
+- Resource type added to the allowed list before Deny policies and diagnostic settings are wired.
 ===============================================================================
   Decisions
 ===============================================================================
 
 # Application Teams Own The Cost
 
-Decision: Each application has its own billing scope; every subscription it provisions bills to it exclusively.
+Decision: Each application has its own billing scope; every subscription it provisions bills to it.
 
-Why: Without knowing what an application actually costs, there is no way to measure the value it provides.
+Why: Without billing scope isolation, the platform cannot guarantee that an application's spend lands on its own bill.
 
 Related:
-- landing-zone-application-profile: Application Profile registration creates the Azure Invoice Section
+- landing-zone-application-profile: Application Profile registration creates the Azure Invoice Section.
 - landing-zone-action-group: Landing zone budget alerts are routed via the action group to the team that owns the spend.
 
 Violations:
@@ -95,8 +102,8 @@ Why: If a service isn't manageable through ARM, the platform cannot guarantee se
 
 Related:
 - self-service-policy-exemptions: Self-service exemptions are viable because every resource is within Azure Policy's reach — a non-ARM service sits outside Policy's scope entirely.
-- deny-security-controls: Security defaults can not be configured for non-Azure services
-- declarative-resource-lifecycle: 3rd party services would not be managed by the Azure Deployment Stack.
+- azure-policy-hard-deny: Security defaults can not be configured for non-Azure services
+- deployment-declarative-lifecycle: 3rd party services would not be managed by the Azure Deployment Stack.
 - landing-zone-diagnostic-settings: Non ARM services would require additional logic to collect diagnostic settings
 
 Violations:
@@ -106,7 +113,7 @@ Files:
 - platform-management/policy/parameters/oases/allowedResources.json
 # Azure Policy Allowed Resources
 
-Decision: Every resource is denied by default. It appears on the allowed list only after the platform has approved it.
+Decision: Every resource type is denied until the platform has validated its security controls, telemetry, and integration pattern
 
 Why: Without an approved list, the platform cannot guarantee that every resource follows its configuration rules.
 
@@ -128,7 +135,7 @@ Files:
 - platform-management/policy/bicep/oases.bicep
 # Azure Policy Custom Definition
 
-Decision: When no built-in policy provides the required Deny or DeployIfNotExists effect, a custom definition is authored to close the gap.
+Decision: When no built-in policy provides a `Deny` or `DeployIfNotExists` effect, the platform authors a custom definition to close the gap
 
 Why: Without custom policies, Audit-only coverage looks like enforcement but the violation still occurs.
 
@@ -142,96 +149,9 @@ Files:
 - platform-management/policy/bicep/customPolicyDefinitions.bicep
 - platform-management/policy/parameters/customDefinitions/policyDefinitions.bicepparam
 - platform-management/policy/parameters/customDefinitions/*.json
-# Azure Policy Naming Convention
+# Azure Policy Hard Deny
 
-Decision: Azure Policy assignment names are [deny|config|allowed]-[Requirement].
-
-Why: Without a predictable pattern, teams can't find the right assignment without a portal lookup, and self-service breaks down.
-
-Related:
-- self-service-policy-exemptions: Predictable names are what make exemptions self-service — teams can identify the correct assignment by name, no portal access required.
-
-Violations:
-- Effect prefix outside deny, config, or allowed.
-
-Files:
-- platform-management/policy/bicep/oases.bicep
-- platform-management/policy/bicep/modules/assignment.bicep
-# Azure Policy Reference
-
-Decision: Policy exemptions source assignment IDs from the generated reference file.
-
-Why: Assignment ARM IDs change when a policy is redeployed; a hardcoded ID silently breaks every exemption that references it.
-
-Related:
-- azure-policy-naming-convention: Stable, predictable names are the keys the reference file is indexed by — they don't change when a policy is redeployed.
-- platform-test-environment: The reference file must resolve against the correct management group hierarchy (test or prod) — a script determines which one the subscription belongs to
-
-Violations:
-- Manually editing policy-assignment-reference.json.
-
-Files:
-- lz-flow-create-policy-exemption.yml
-- landing-zones/*/policy-assignment-reference.json
-- .github/utils/get-policyAssignmentsReference.ps1
-- landing-zones/managementGroup-AppName-environment.bicepparam
-# Branch Gated Environment Promotion
-
-Decision: Every platform production deployment passes through a test environment first. This is enforced by branch protection rules and workflow structure.
-
-Why: Without an enforced gate, a single push can change production infrastructure with no prior validation.
-
-Related:
-- platform-test-environment: Promotion gate targets oases-test for validation.
-
-Violations:
-- Workflow deploying to prod from a non-main branch.
-
-Files:
-- .github/workflows/platform-Azure-Policy.yml
-- .github/workflows/platform-access-control.yml
-- .github/workflows/platform-Management-Groups.yml
-- .github/workflows/platform-automation.yml
-# Config Lives In The Repo
-
-Decision: Configuration has one committed source of truth — a single JSON file in the repo. Values are propagated to GitHub variables and Bicep parameters at deployment time. Nothing is set manually in the UI or injected out of band.
-
-Why: Without one committed source, environments drift. Onboarding a new engineer means tracing values through the GitHub UI instead of reading a file.
-
-Related:
-- landing-zone-application-profile: New repos receive a subset of platform variables at creation.
-- platform-identity-azure: Per-environment client IDs sourced from this file.
-- initial-setup: githubVariables.json must be committed with initial platform config values before BigBang first runs.
-
-Violations:
-- Bicep parameter with hardcoded tenant ID or location instead of readEnvironmentVariable().
-- GitHub variable created in UI.
-
-Files:
-- githubVariables.json
-# Declarative Resource Lifecycle
-
-Decision: What's in the code is what exists in Azure — Azure Deployment Stacks delete anything removed from the template on the next deployment.
-
-Why: Without automatic cleanup, removed resources stay alive in Azure — the code stops being the source of truth
-
-Related:
-- platform-test-environment: 'deleteAll' in test verifies code produces the expected Azure state before promotion to prod.
-- landing-zone-lifecycle: A subscription is guaranteed empty after deleteAll, which makes subscription reuse safe.
-- azure-native-services-only: Only ARM-native resources are stack-managed — azure-native-services-only is the prerequisite for deleteAll lifecycle enforcement.
-
-Violations:
-- Deployment Stack configured with detachAll removed resources persist with no cleanup path.
-- Resources created directly in Azure are not managed by the Deployment Stack.
-
-Files:
-- .github/workflows/template-landing-zones.yml
-- .github/workflows/template-access-control.yml
-- .github/workflows/template-Azure-Policy.yml
-- .github/workflows/template-Management-Groups.yml
-# Deny Security Controls
-
-Decision: Azure Policy enforces hard denies on public network access, local authentication, minimum TLS, and cross-tenant replication, on every resource type that supports them.
+Decision: Security controls are enforced through hard deny policies — misconfiguration is blocked, not just reported.
 
 Why: Without enforcement, misconfiguration is invisible.
 
@@ -252,15 +172,120 @@ Violations:
 Files:
 - platform-management/policy/parameters/oases/*.json
 - platform-management/policy/bicep/oases.bicep
+# Azure Policy Naming Convention
+
+Decision: Azure Policy assignment names are prefixed by effect — [deny|config|allowed] — followed by the requirement name.
+
+Why: Without a predictable pattern, teams can't find the right assignment without a portal lookup, and self-service breaks down.
+
+Related:
+- self-service-policy-exemptions: Predictable names are what make exemptions self-service — teams can identify the correct assignment by name, no portal access required.
+
+Violations:
+- Effect prefix outside deny, config, or allowed.
+
+Files:
+- platform-management/policy/bicep/oases.bicep
+- platform-management/policy/bicep/modules/assignment.bicep
+# Azure Policy Reference
+
+Decision: Policy exemptions resolve assignment IDs from a platform-generated reference — never from hardcoded ARM IDs.
+
+Why: Assignment ARM IDs change when a policy is redeployed; a hardcoded ID silently breaks every exemption that references it.
+
+Related:
+- azure-policy-naming-convention: Stable, predictable names are the keys the reference file is indexed by — they don't change when a policy is redeployed.
+- platform-test-environment: The reference file must resolve against the correct management group hierarchy (test or prod) — a script determines which one the subscription belongs to
+
+Violations:
+- Manually editing policy-assignment-reference.json.
+
+Files:
+- lz-flow-create-policy-exemption.yml
+- landing-zones/*/policy-assignment-reference.json
+- .github/utils/get-policyAssignmentsReference.ps1
+- landing-zones/managementGroup-AppName-environment.bicepparam
+# Deployment Branch Gated Promotion
+
+Decision: No platform change reaches production without passing through the test environment first.
+
+Why: Without an enforced gate, a single push can change production infrastructure with no prior validation.
+
+Related:
+- platform-test-environment: Promotion gate targets oases-test for validation.
+
+Violations:
+- Workflow deploying to prod from a non-main branch.
+
+Files:
+- .github/workflows/platform-Azure-Policy.yml
+- .github/workflows/platform-access-control.yml
+- .github/workflows/platform-Management-Groups.yml
+- .github/workflows/platform-automation.yml
+# Deployment Config In Repo
+
+Decision: Repo-specific configuration is driven through GitHub variables — no value is set manually.
+
+Why: GitHub environments are destroyed and recreated during BigBang — without variables committed to the repo, the platform state cannot be reproduced.
+
+Related:
+- landing-zone-application-profile: New repos receive a subset of platform variables at creation.
+- platform-identity-azure: Per-environment client IDs sourced from this file.
+- initial-setup: githubVariables.json must be committed with initial platform config values before BigBang first runs.
+
+Violations:
+- Bicep parameter with hardcoded tenant ID or location instead of readEnvironmentVariable().
+- GitHub variable created in UI.
+
+Files:
+- githubVariables.json
+# Deployment Declarative Lifecycle
+
+Decision: Within a deployment stack, what is not declared in code is deleted on the next deployment.
+
+Why: Without this, resources removed from the stack's code persist in Azure — the code stops being the source of truth.
+
+Related:
+- platform-test-environment: 'deleteAll' in test verifies code produces the expected Azure state before promotion to prod.
+- landing-zone-lifecycle: A subscription is guaranteed empty after deleteAll, which makes subscription reuse safe.
+- azure-native-services-only: Only ARM-native resources are stack-managed — azure-native-services-only is the prerequisite for deleteAll lifecycle enforcement.
+
+Violations:
+- Deployment Stack configured with detachAll removed resources persist with no cleanup path.
+- Resources created directly in Azure are not managed by the Deployment Stack.
+
+Files:
+- .github/workflows/template-landing-zones.yml
+- .github/workflows/template-access-control.yml
+- .github/workflows/template-Azure-Policy.yml
+- .github/workflows/template-Management-Groups.yml
+# Deployment End To End
+
+Decision: Each platform capability owns its code and deployment pipeline end-to-end, with no shared pipelines crossing capability boundaries.
+
+Why: Without isolation, changing one capability can trigger or break another's functionality.
+
+Related:
+- deployment-declarative-lifecycle: deleteAll on each capability's stack ensures no orphaned resources after a declaration is removed.
+- deployment-branch-gated-promotion: Main branch is protected by branch policies.
+- deployment-config-in-repo: Capability configuration is sourced from the repo.
+- platform-test-environment: Each platform capability deploys to the test hierarchy before production.
+
+Violations:
+- Resource created or modified directly in Azure portal or CLI outside a Deployment Stack.
+- Configuration value hardcoded in Bicep instead of injected from GitHub variables.
+
+Files:
+- .github/workflows/platform-BigBang.yml
 # Deployment Logic Reusable Workflow
 
-Decision: Deployment logic is written once in reusable workflows — each environment only controls when to run it.
+Decision: Deployment logic is written once in reusable workflows — each environment only controls when and with what inputs to run it.
 
 Why: Without reuse, a fix to deployment logic has to be repeated in every environment workflow.
 
 Related:
-- end-to-end-deployment: Reusable workflows give each platform capability its end-to-end deployment structure.
-- branch-gated-environment-promotion: Gating lives in the trigger layer only.
+- deployment-end-to-end: Reusable workflows give each platform capability its end-to-end deployment structure.
+- deployment-branch-gated-promotion: Gating lives in the trigger layer only.
 
 Files:
 - .github/workflows/template-landing-zones.yml
@@ -275,24 +300,6 @@ Files:
 - .github/workflows/template-new-application-profile.yml
 - .github/workflows/template-cancel-landing-zone.yml
 - .github/workflows/template-destroy-landing-zone.yml
-# End To End Deployment
-
-Decision: Each platform concern (policy, access control, management groups) owns its Bicep and workflows end-to-end.
-
-Why: Without isolation, changing one concern can trigger or break another's deployment.
-
-Related:
-- declarative-resource-lifecycle: deleteAll on each capability's stack ensures no orphaned resources after a declaration is removed.
-- branch-gated-environment-promotion: Main branch is protected by branch policies.
-- config-lives-in-the-repo: Capability configuration is sourced from the repo.
-- platform-test-environment: Each platform capability deploys to the test hierarchy before production.
-
-Violations:
-- Resource created or modified directly in Azure portal or CLI outside a Deployment Stack.
-- Configuration value hardcoded in Bicep instead of injected from GitHub variables.
-
-Files:
-- .github/workflows/platform-BigBang.yml
 # Initial Setup
 
 Decision: The platform has a one-time manual setup process to configure the Azure management group hierarchy and billing, Entra ID authentication, and the GitHub organization.
@@ -307,32 +314,16 @@ Related:
 
 Violations:
 - Automating initial, one-time setup.
-# Ipam
-
-Decision: When a new landing zone is requested, the GitHub workflow queries Azure Resource Graph and finds the next free VNet address space. The address space is written to a landing zone parameter file.
-
-Why: Without an on-demand query, IPAM would need a dedicated registry to keep track of allocated addresses.
-
-Related:
-- single-region: Address space is allocated without regional segmentation.
-
-Violations:
-- VNet with a manually assigned address space.
-
-Files:
-- githubVariables.json
-- .github/workflows/template-calculate-vnet-address-space.yml
-- landing-zones/managementGroup-AppName-environment.bicepparam
 # Job Function Scoped Roles
 
-Decision: Roles are scoped to a job function. A role describes what a person does (e.g., app engineer), not what resources they touch.
+Decision: Access is granted by job function, not by resource type — adding a new resource type never requires a new role.
 
-Why: Resource-specific roles multiply with every newly whitelisted resource type, frequently requiring team members to apply for new roles.
+Why: Resource-scoped roles couple access control to the allowed resources list — every new resource type forces a role review and team re-onboarding.
 
 Related:
 - landing-zone-application-profile: The Application Profile creates an Entra ID group dedicated to application engineers, providing only the minimum access that does not break Infrastructure-as-Code principles.
-- config-lives-in-the-repo: The platform-wide engineers group name (APP_ENGINEERS_GROUP_NAME) is sourced from githubVariables.json
-- landing-zone-lifecycle: Reader on the subscription bank is what allows engineers to discover subscriptions available for reuse.
+- deployment-config-in-repo: The platform-wide engineers group name (APP_ENGINEERS_GROUP_NAME) is sourced from githubVariables.json
+- landing-zone-lifecycle: Reader on the 'Subscription Bank' is what allows engineers to discover subscriptions available for reuse.
 
 Violations:
 - Custom role with wildcard write permissions.
@@ -342,12 +333,12 @@ Files:
 - platform-management/access-control/bicep/modules/customRoleDefinitions.bicep
 # Landing Zone Action Group
 
-Decision: Platform-managed notifications are scoped to the action group and target the landing zone's engineers.
+Decision: Alerts are never hardcoded to a person — they route through the landing zone's action group, which is always sourced from the application profile.
 
 Why: Hardcoded contacts go stale as teams change — alerts fire to former members, incidents go unanswered, and nobody notices until production is affected.
 
 Related:
-- landing-zone-application-profile: Contact details sourced from the Application Profile details.
+- landing-zone-application-profile: Application Profile is an authorative source for application contact details.
 
 Violations:
 - Budget alert without an action group.
@@ -357,13 +348,13 @@ Files:
 - landing-zones/bicep/modules/monitor.bicep
 # Landing Zone Allowed Public Ip
 
-Decision: The platform provides an approved public IP address, so getting-started deployment pipelines can enable/disable network access to Azure resources.
+Decision: The platform provides an approved public IP that teams use to open firewall access to their Azure resources.
 
 Why: Without this, application teams cannot access Azure data-plane resources from their laptops.
 
 Related:
-- config-lives-in-the-repo: The IP is defined in githubVariables.json and propagated as an org variable.
-- deny-security-controls: Deny policies are unchanged — firewall configuration is the application team's responsibility.
+- deployment-config-in-repo: The IP is defined in githubVariables.json and propagated as an org variable.
+- azure-policy-hard-deny: Deny policies are unchanged — firewall configuration is the application team's responsibility.
 - job-function-scoped-roles: RBAC roles already grant the authorization — the public IP provides the missing network path.
 - landing-zone-getting-started: Getting-started modules use this IP to open and close firewall access.
 
@@ -374,9 +365,9 @@ Files:
 - githubVariables.json
 # Landing Zone Application Profile
 
-Decision: Registering an Application Profile is how an application joins the platform and gains the ability to provision its own landing zones.
+Decision: Registering an Application Profile is what establishes the fundamentals to enable self-service and autonomy for landing zones.
 
-Why: Without it, there is no billing scope, no contact details, and no repo - everything downstream assumes it exists.
+Why: Without a registered profile, the platform has no application to provision landing zones for.
 
 Related:
 - landing-zone-lifecycle: At landing zone creation, the subscription from the bank moves to application's invoice section.
@@ -392,9 +383,9 @@ Files:
 - .github/workflows/template-new-application-profile.yml
 # Landing Zone Automation
 
-Decision: Each landing zone has automation runtime running inside its own subscription — job definitions and images are centrally managed by the platform, but execution happens locally.
+Decision: Automation runs inside each landing zone's own subscription, not in a shared platform subscription.
 
-Why: Centralized automation would require a shared management subscription with baseline cost and team dependency.
+Why: The platform has no management subscription - there is no place to host shared automation runtime.
 
 Related:
 - platform-identity-graph: Automation jobs query Entra ID, so landing zone identities receive Graph permissions.
@@ -408,9 +399,9 @@ Files:
 - landing-zones/bicep/modules/base/managedEnvironments.bicep
 # Landing Zone Diagnostic Settings
 
-Decision: Every whitelisted resource type has diagnostic settings deployed automatically via DeployIfNotExists policy. Telemetry flows to the landing zone's Log Analytics workspace with no team action required.
+Decision: The platform centrally defines what diagnostic settings have to be enabled, but applies them at the landing zone level — telemetry stays local to the application environment.
 
-Why: Opt-in telemetry produces gaps that surface only during an incident.
+Why: Without centrally defined diagnostic settings, the platform cannot guarantee that application data is routed to a Log Analytics workspace.
 
 Related:
 - azure-policy-naming-convention: Must use a Config-prefixed assignment for diagnostic settings.
@@ -425,31 +416,31 @@ Files:
 - landing-zones/bicep/modules/base/logAnalyticsWorkspace.bicep
 # Landing Zone Getting Started
 
-Decision: The template provides a minimal example to manage resources in Azure using the same principles as the platform itself.
+Decision: The platform ships every application repo with a 'hello-world' deployment pipeline, enough to prove it works end-to-end.
 
-Why: Without a working example, the platform cannot validate that a landing zone works end-to-end, and app teams have no starting point
+Why: Without it, there is no way to verify that a freshly provisioned landing zone is wired correctly end-to-end
 
 Related:
 - landing-zone-repo: The getting-started modules live in the application repo
-- declarative-resource-lifecycle: Examples use deployment stacks with deleteAll
+- deployment-declarative-lifecycle: Examples use deployment stacks with deleteAll
 - deployment-logic-reusable-workflow: Examples follow the same trigger/template separation
-- branch-gated-environment-promotion: Examples use the same test-then-prod promotion
+- deployment-branch-gated-promotion: Examples use the same test-then-prod promotion
 
 Violations:
 - getting-started modules tailored for a specific application requirements
 # Landing Zone Github Runners
 
-Decision: The platform provisions a delegated subnet for GitHub-hosted runners within the landing zone VNet.
+Decision: Every landing zone has its own private GitHub runners provisioned inside the landing zone VNet.
 
-Why: Public network access is denied on every service — a public GitHub runner has no network path to the data plane.
+Why: Public runners have no network path to PaaS data plane once public access is denied.
 
 Related:
-- deny-security-controls: Public runners have no data-plane path once public network access is denied.
+- azure-policy-hard-deny: Public runners have no data-plane path once public network access is denied.
 - landing-zone-vnet: Runners get a dedicated /28 subnet, delegated for runner integration, within the landing zone VNet.
 - platform-identity-github: GitHub App permissions are used for runner registration and configuration.
 - landing-zone-allowed-public-ip: Runners provide the network path for automation — human access requires configuring the approved public IP on PaaS firewalls.
 - landing-zone-template: PRIVATE_GITHUB_RUNNERS is computed and propagated as an environment variable during landing zone provisioning.
-- config-lives-in-the-repo: PUBLIC_GITHUB_RUNNERS is defined in githubVariables.json and seeded to application repos at creation.
+- deployment-config-in-repo: PUBLIC_GITHUB_RUNNERS is defined in githubVariables.json and seeded to application repos at creation.
 
 Violations:
 - Application team using a separate VNet for runner integration.
@@ -460,9 +451,9 @@ Files:
 - .github/workflows/template-landing-zones.yml
 # Landing Zone Identity
 
-Decision: Each landing zone has a single managed identity that serves all its capabilities — GitHub workflows, automation jobs, and Entra ID queries.
+Decision: Each landing zone has a single managed identity — shared across all its workflows, jobs, and service integrations.
 
-Why: Without a single identity, each capability needs its own RBAC and OIDC config — the permission surface multiplies with every new capability and auditing becomes impractical.
+Why: Without a single identity, every new capability multiplies the permission surface — RBAC and OIDC config sprawl with no clean audit boundary.
 
 Related:
 - landing-zone-automation: Automation jobs authenticate as the landing zone's managed identity.
@@ -473,6 +464,22 @@ Violations:
 Files:
 - landing-zones/bicep/modules/identity.bicep
 - landing-zones/bicep/modules/base/appRoleAssignedTo.bicep
+# Landing Zone Ipam
+
+Decision: VNet address spaces are allocated by querying the live Azure environment, not by maintaining a registry of what has been assigned.
+
+Why: The platform has no management subscription — there is no place to host ad-hoc tooling like a registry
+
+Related:
+- single-region: Address space is allocated without regional segmentation.
+
+Violations:
+- VNet with a manually assigned address space.
+
+Files:
+- githubVariables.json
+- .github/workflows/template-calculate-vnet-address-space.yml
+- landing-zones/managementGroup-AppName-environment.bicepparam
 # Landing Zone Lifecycle
 
 Decision: Landing zone provisioning draws from a subscription bank, returning the subscription to it when the landing zone is sunset.
@@ -511,9 +518,9 @@ Files:
 - landing-zones/bicep/modules/base/ActivityLogAlerts.bicep
 # Landing Zone Repo
 
-Decision: Each application gets a GitHub repository that serves as the control and deployment plane for all its landing zones
+Decision: Each application has its own GitHub repository — the single control and deployment plane for all its landing zones.
 
-Why: Without the repo, platform has no place to write application configuration details.
+Why: Without a repo, the platform has no deployment mechanism and nowhere to write configuration for the application.
 
 Related:
 - landing-zone-application-profile: repository is configured during application registration flow.
@@ -525,13 +532,13 @@ Violations:
 - Bring-your-own-Repo for landing zone creation
 # Landing Zone Resource Group
 
-Decision: Platform-managed landing zone resources live in a single resource group, protected by an Azure Deployment Stack.
+Decision: All platform-managed resources in a landing zone live in a single dedicated resource group, separate from application resources.
 
-Why: A shared resource group blends platform and application resources. No clean boundary exists for teardown, RBAC, or incident management when both share the same scope.
+Why: Without a dedicated resource group, there is no clean boundary for teardown, RBAC, or incident management.
 
 Related:
 - landing-zone-identity: Managed identity is provisioned inside this resource group and managed by Azure Deployment Stack.
-- declarative-resource-lifecycle: Resource group is the Deployment Stack scope — deleteAll tears down every platform-managed resource in one operation.
+- deployment-declarative-lifecycle: Resource group is the Deployment Stack scope — deleteAll tears down every platform-managed resource in one operation.
 - landing-zone-monitoring: Log Analytics workspace lives inside this resource group and managed by Azure Deployment Stack.
 - landing-zone-vnet: VNet is provisioned inside this resource group and managed by platform Deployment Stack
 - landing-zone-automation: Container Apps environment and jobs are provisioned inside this resource group and managed by Azure Deployment Stack
@@ -543,9 +550,9 @@ Files:
 - landing-zones/bicep/main.bicep
 # Landing Zone Tags
 
-Decision: The platform configures tags to identify application engineers and owners.
+Decision: The platform enforces tags on every landing zone, sourced from the application profile.
 
-Why: Manually applied tags drift within weeks — when an incident fires, the email points to someone who left the team, and the alert goes unanswered.
+Why: Manually applied tags drift — when an incident fires, the email points to someone who left the team, and the alert goes unanswered.
 
 Related:
 - landing-zone-automation: Nightly tag remediation runs as a Container App Job.
@@ -560,7 +567,7 @@ Files:
 - landing-zones/managementGroup-AppName-environment.bicepparam
 # Landing Zone Template
 
-Decision: Landing zones are stamped from a single shared template, but each is managed through its own dedicated parameter file and workflow.
+Decision: LEvery landing zone is provisioned from a single shared template, but each has its own dedicated parameter file and workflow.
 
 Why: Without per-zone parameter files and workflows, a team couldn't act on their landing zone without risking triggering another's redeployment.
 
@@ -568,7 +575,7 @@ Related:
 - landing-zone-application-profile: Landing zone initial values come from the application profile.
 - deployment-logic-reusable-workflow: Each landing zone has a dedicated workflow that passes parameters to the centralized template.
 - platform-identity-azure: The platform identity is used to create and configure landing zone resources.
-- platform-identity-graph: The landing zone identity receives Directory.Read.All at landing zone creation time.
+- platform-identity-graph: The landing zone identity receives Microsoft Graph permissions at landing zone creation time.
 - landing-zone-repo: landing zone provisioning writes environment scoped variables (resource ID) to the application repo.
 
 Violations:
@@ -580,13 +587,13 @@ Files:
 - .github/workflows/requestNew-Landing-Zone.yml
 # Landing Zone Vnet
 
-Decision: Each landing zone gets an isolated VNet, with no connectivity to other landing zones or on-premises networks.
+Decision: Each landing zone has its own isolated VNet with no connectivity to other landing zones or on-premises networks
 
-Why: A shared networking solution would introduce fixed costs, breaking the zero-cost-on-idle principle.
+Why: A shared networking solution would introduce fixed costs, breaking the no-fixed-cost principle.
 
 Related:
-- deny-security-controls: PaaS service firewalls must restrict public network access.
-- ipam: IPAM allocates the VNet's address space, defaulting to a /24.
+- azure-policy-hard-deny: PaaS service firewalls must restrict public network access.
+- landing-zone-ipam: IPAM allocates the VNet's address space, defaulting to a /24.
 - landing-zone-github-runners: Each VNet hosts its own runner subnet, registered with GitHub as a dedicated runner group.
 - single-region: The VNet is provisioned in AZURE_DEFAULT_LOCATION; a second region would require a new VNet and a separate regional IPAM allocation.
 
@@ -598,9 +605,9 @@ Files:
 - landing-zones/bicep/modules/base/virtualNetwork.bicep
 # Platform Exemptions Automation
 
-Decision: The platform uses GitHub Container Registry as the shared image source for all automation jobs across all landing zones.
+Decision: Automation images are hosted outside Azure to avoid a fixed cost.
 
-Why: Azure Container Registry carries a flat monthly cost, breaking the zero-cost-on-idle guarantee.
+Why: Azure Container Registry carries a flat fee, breaking the no-fixed-cost guarantee.
 
 Related:
 - azure-native-services-only: GitHub Container Registry is a deliberate exception to azure-native-services-only — its cost profile outweighs the native-services preference here.
@@ -614,7 +621,7 @@ Files:
 - landing-zones/bicep/modules/base/managedEnvironments.bicep
 # Platform Identity Azure
 
-Decision: Entra ID app registration serves as the platform identity, used to provision and configure both the platform and its landing zones.
+Decision: The platform authenticates as an Entra ID app registration, not a managed identity
 
 Why: A managed identity requires an Azure resource as its host, but the platform has no subscription of its own — an app registration exists in Entra ID independently of any Azure infrastructure.
 
@@ -631,7 +638,7 @@ Files:
 
 Decision: All platform and landing zone workflows authenticate to GitHub using a single, shared GitHub App identity.
 
-Why: Have not found a solution to create a GitHub App per application/environment.
+Why: Without a shared GitHub App, the platform has no mechanism to provision and configure application repos and environments.
 
 Violations:
 - GITHUB_TOKEN used to write org-level variables or trigger other workflows.
@@ -641,23 +648,24 @@ Files:
 - .github/workflows/template-landing-zones.yml
 # Platform Identity Graph
 
-Decision: Landing zone-managed identities receive Microsoft Graph permissions, allowing them to query Entra ID objects.
+Decision: Landing zone identities receive granular Microsoft Graph read permissions — never broad directory access.
 
 Why: Without these permissions, landing zone automation can't detect Entra ID users, groups and applications.
 
 Related:
-- landing-zone-identity: Receives Directory.Read.All at landing zone creation time.
+- landing-zone-identity: Receives User.Read.All, Group.Read.All, and Application.Read.All at landing zone creation time.
 - initial-setup: Graph permissions are granted via admin consent as a manual prerequisite.
 
 Violations:
 - Landing zone identity granted write permissions to Microsoft Graph
+- Landing zone identity granted Directory.Read.All instead of granular read permissions.
 
 Files:
 - landing-zones/bicep/entra.bicep
 - landing-zones/bicep/modules/base/appRoleAssignedTo.bicep
 # Platform Test Environment
 
-Decision: Every platform change is validated in a test environment before it reaches production.
+Decision: Every platform change passes through a parallel test environment before reaching production.
 
 Why: Without a parallel hierarchy, platform changes would hit production directly, with failures landing on live landing zones.
 
@@ -680,9 +688,9 @@ Files:
 - .github/workflows/platform-BigBang.yml
 # Self Service Policy Exemptions Defender For Cloud
 
-Decision: Defender for Cloud recommendations that require a paid SKU are exempted by the platform.
+Decision: The platform pre-exempts Defender for Cloud recommendations that have no free remediation path
 
-Why: The platform's security appetite does not require paid SKUs — recommendations with no free remediation path are exempted rather than left as unactionable noise.
+Why: A recommendation with no free remediation path is unactionable noise that erodes trust in the dashboards.
 
 Related:
 - self-service-policy-exemptions: Defender exemptions follow the same long-lived exemption mechanism — the PR is the review and audit record.
@@ -697,9 +705,9 @@ Files:
 - landing-zones/managementGroup-AppName-environment.bicepparam
 # Self Service Policy Exemptions
 
-Decision: Application teams can request a temporary or long-lived exemption from a specific Azure Policy assignment via a self-service workflow.
+Decision: Application teams can exempt themselves from any policy assignment via Pull Request.
 
-Why: The hard deny is only sustainable if teams can unblock themselves — without that, deny-by-default erodes under operational pressure.
+Why: The hard deny is only sustainable if teams can unblock themselves — without that, it erodes under operational pressure.
 
 Related:
 - azure-policy-reference: Exemptions reference a JSON file to look up the policy assignment ID — never a hardcoded ARM ID.
@@ -714,12 +722,12 @@ Files:
 - .github/workflows/lz-flow-create-policy-exemption.yml
 # Single Region
 
-Decision: All landing zones deploy to a single region — the platform guarantees service parity by eliminating regional variation.
+Decision: All landing zones deploy to a single region — the platform, owns the region decision.
 
-Why: Without that constraint, every deployment would carry its own region decision, and service parity would depend on each engineer's choice rather than being a platform guarantee.
+Why: Without a single region, every deployment carries its own region decision — service parity depends on each engineer's choice rather than being a platform default.
 
 Related:
-- config-lives-in-the-repo: The region is defined once in githubVariables.json — all deployments read it from there.
+- deployment-config-in-repo: The region is defined once in githubVariables.json — all deployments read it from there.
 - landing-zone-github-runners: GitHub runner VNet integration is region-gated, so the platform's chosen region must support it.
 
 Violations:
@@ -767,7 +775,7 @@ Workflow: platform-Azure-Policy
 Decisions:
 - azure-policy-allowed-resources
 - landing-zone-diagnostic-settings
-- deny-security-controls
+- azure-policy-hard-deny
 - job-function-scoped-roles
 - self-service-policy-exemptions-defender-for-cloud
 - azure-policy-custom-definition
@@ -804,9 +812,9 @@ Workflow: requestNew-Landing-Zone
 Decisions:
 - landing-zone-lifecycle
 - application-teams-own-the-cost
-- ipam
+- landing-zone-ipam
 - landing-zone-template
-- branch-gated-environment-promotion
+- deployment-branch-gated-promotion
 
 Steps:
 1. Confirm the application profile exists under application-profiles/ — if not, the register-application-profile operation must be completed first.
@@ -827,10 +835,10 @@ Intent: A landing zone is permanently torn down, all resources destroyed, and th
 Workflow: lz-flow-destroy-landing-zone
 
 Decisions:
-- declarative-resource-lifecycle
+- deployment-declarative-lifecycle
 - landing-zone-lifecycle
 - application-teams-own-the-cost
-- end-to-end-deployment
+- deployment-end-to-end
 
 Steps:
 1. Read all design decisions in decisions[] to understand what is being destroyed and what constraints apply.
@@ -900,8 +908,8 @@ Prerequisite: create-landing-zone
 Workflow: lz-oasis-{appName}-{env}
 
 Decisions:
-- end-to-end-deployment
-- declarative-resource-lifecycle
+- deployment-end-to-end
+- deployment-declarative-lifecycle
 - self-service-policy-exemptions
 - azure-policy-reference
 

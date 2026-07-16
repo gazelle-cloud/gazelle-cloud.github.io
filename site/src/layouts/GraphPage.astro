@@ -3,14 +3,15 @@ import Base from './Base.astro';
 
 interface Props {
   title: string;
+  fullTitle?: boolean;
   description?: string;
-  graph: string;   // path to the .jsx file in public/, e.g. "/knowledge-graph-graph.jsx"
+  page: string;    // path to the .page.js file in public/, e.g. "/knowledge-graph.page.js"
   noindex?: boolean;
 }
 
-const { title, description, graph, noindex = false } = Astro.props;
+const { title, fullTitle = false, description, page, noindex = false } = Astro.props;
 ---
-<Base title={title} description={description} noindex={noindex}>
+<Base title={title} fullTitle={fullTitle} description={description} noindex={noindex}>
   <link rel="stylesheet" href="/shell.css" />
   <script is:inline type="importmap">{ "imports": {
     "react": "https://esm.sh/react",
@@ -21,6 +22,5 @@ const { title, description, graph, noindex = false } = Astro.props;
 
   <slot />
 
-  <script is:inline src="//cdn.jsdelivr.net/npm/@babel/standalone"></script>
-  <script is:inline type="text/jsx" data-type="module" src={graph}></script>
+  <script is:inline type="module" src={page}></script>
 </Base>
