@@ -1,15 +1,31 @@
 ---
 import GraphPage from '../../layouts/GraphPage.astro';
-import data from '../../../public/operations.json';
+
+const DATA_REPO = 'gazelle-cloud/data';
+const BASE_PATH = 'knowledge-graph';
+
+async function fetchCategory(category: string, type: string): Promise<any[]> {
+  const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/${category}`);
+  const listing: any[] = await res.json();
+  if (!Array.isArray(listing)) return [];
+  return Promise.all(
+    listing
+      .filter((f: any) => f.type === 'file' && f.name.endsWith('.json'))
+      .map((f: any) => fetch(f.download_url).then(r => r.json()).then((obj: any) => ({ ...obj, type })))
+  );
+}
+
+const operations = await fetchCategory('operations', 'operation');
 ---
-<GraphPage title="Operations" description="Standardised operations that manage the Azure landing zone platform — the files each one touches and the design decisions that shape it." graph="/operations-graph.jsx">
+<GraphPage title="Gazelle — How decisions become actions" fullTitle description="Standardised operations that manage the Azure landing zone platform — the files each one touches and the design decisions that shape it." page="/operations.page.js">
   <div class="sr-only">
     <h1>Platform Operations</h1>
     <p>Standardized operations that manage the Gazelle Cloud platform — the files each one touches and the design decisions that shape it.</p>
     <ul>
-      {data.nodes.map((n: any) => (
+      {operations.map((n: any) => (
         <li>
-          <a href={`/operations/${n.id}/`}>{n.label || n.id}</a>
+          <a href={`/operations/${n.id}/`}>{n.id}</a>
+          {n.intent && <span> — {n.intent}</span>}
         </li>
       ))}
     </ul>

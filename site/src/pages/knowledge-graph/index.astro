@@ -1,17 +1,33 @@
 ---
 import GraphPage from '../../layouts/GraphPage.astro';
-import graph from '../../../public/knowledge-graph.json';
 
-const rules = graph.nodes.filter((n: any) => n.type === 'rule');
-const decisions = graph.nodes.filter((n: any) => n.type === 'decision');
+const DATA_REPO = 'gazelle-cloud/data';
+const BASE_PATH = 'knowledge-graph';
+
+async function fetchCategory(category: string): Promise<any[]> {
+  const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/${category}`);
+  const listing: any[] = await res.json();
+  if (!Array.isArray(listing)) return [];
+  const type = category === 'guiding-principles' ? 'guiding-principle' : category.replace(/s$/, '');
+  return Promise.all(
+    listing
+      .filter((f: any) => f.type === 'file' && f.name.endsWith('.json'))
+      .map((f: any) => fetch(f.download_url).then(r => r.json()).then((obj: any) => ({ ...obj, type })))
+  );
+}
+
+const [principles, decisions] = await Promise.all([
+  fetchCategory('guiding-principles'),
+  fetchCategory('decisions'),
+]);
 ---
-<GraphPage title="Knowledge Graph" description="Platform design rules and decisions that shape the Azure landing zone — how deny-by-default, self-service, and zero-cost-on-idle connect." graph="/knowledge-graph-graph.jsx">
+<GraphPage title="Gazelle — The decisions behind the platform" fullTitle description="Platform design rules and decisions that shape the Azure landing zone — how deny-by-default, self-service, and zero-cost-on-idle connect." page="/knowledge-graph.page.js">
   <div class="sr-only">
     <h1>Platform Design Knowledge Graph</h1>
 
-    <h2>Rules</h2>
+    <h2>Guiding Principles</h2>
     <ul>
-      {rules.map((r: any) => (
+      {principles.map((r: any) => (
         <li>
           <a href={`/knowledge-graph/${r.id}/`}>{r.id}</a>
           {r.intent && <span> — {r.intent}</span>}
