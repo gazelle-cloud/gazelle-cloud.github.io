@@ -9,88 +9,12 @@ import {
   paintNodeColors,
 } from '/shell.js';
 
-// ── categoryToType ────────────────────────────────────────────────────────────
-function categoryToType(category) {
-  const map = {
-    'guiding-principles': 'guiding-principle',
-    'decisions':          'decision',
-    'operations':         'operation',
-  };
-  return map[category] ?? category;
-}
-
-// ── fetchCategory ─────────────────────────────────────────────────────────────
-async function fetchCategory(dataRepo, basePath, category) {
-  const apiUrl = `https://api.github.com/repos/${dataRepo}/contents/${basePath}/${category}`;
-  const listing = await fetch(apiUrl).then(r => r.json());
-  if (!Array.isArray(listing)) return [];
-
-  const type = categoryToType(category);
-  return Promise.all(
-    listing
-      .filter(f => f.type === 'file' && f.name.endsWith('.json'))
-      .map(f => fetch(f.download_url).then(r => r.json()).then(obj => ({ ...obj, type })))
-  );
-}
-
-// ── deriveGraph ───────────────────────────────────────────────────────────────
-// Builds { nodes, links } from raw entities using edgeFields config.
-// edgeFields values: string[] fields produce edges by id;
-//                    {id,note}[] fields produce edges from obj.id;
-//                    'files' fields synthesize file nodes.
-function deriveGraph(entities, edgeFields) {
-  const nodeMap = new Map();
-  for (const e of entities) nodeMap.set(e.id, e);
-
-  const links = [];
-
-  for (const entity of entities) {
-    const fields = edgeFields[entity.type] ?? [];
-    for (const field of fields) {
-      const value = entity[field];
-      if (!value) continue;
-
-      if (field === 'files') {
-        for (const filePath of value) {
-          if (!nodeMap.has(filePath)) nodeMap.set(filePath, { id: filePath, type: 'file' });
-          links.push({ source: entity.id, target: filePath, type: 'file' });
-        }
-      } else if (Array.isArray(value)) {
-        for (const item of value) {
-          const targetId = typeof item === 'string' ? item : item.id;
-          const note     = typeof item === 'object' ? item.note : undefined;
-          if (!nodeMap.has(targetId)) continue;
-          links.push({ source: entity.id, target: targetId, relationship: 'related', note });
-        }
-      }
-    }
-  }
-
-  const ids = new Set(nodeMap.keys());
-  return {
-    nodes: [...nodeMap.values()],
-    links: links.filter(l => ids.has(l.source) && ids.has(l.target)),
-  };
-}
-
 // ── mount ─────────────────────────────────────────────────────────────────────
 export async function mount(config) {
   setupLayout();
 
   // ── fetch data ──────────────────────────────────────────────────────────────
-  let raw;
-
-  if (config.localJson) {
-    raw = await fetch(config.localJson).then(r => r.json());
-    const ids = new Set(raw.nodes.map(n => n.id));
-    raw.links = raw.links.filter(l => ids.has(l.source) && ids.has(l.target));
-  } else {
-    const { dataRepo, basePath, categories, edgeFields } = config;
-    const arrays = await Promise.all(
-      categories.map(cat => fetchCategory(dataRepo, basePath, cat))
-    );
-    raw = deriveGraph(arrays.flat(), edgeFields);
-  }
+  const raw = await fetch(config.localJson).then(r => r.json());
 
   normalizeNodeWeights(raw);
   if (config.prepare) config.prepare(raw);

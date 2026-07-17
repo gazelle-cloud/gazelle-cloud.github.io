@@ -10,8 +10,6 @@ function IdlePanel({ theme }) {
   },
     React.createElement('h1', { style: { margin: '0 0 12px', padding: 0, fontSize: 16, fontWeight: 400, lineHeight: 1.3, color: '#fff' } },
       'Gazelle — Engine for Azure Landing Zones'),
-    React.createElement('p', { style: { margin: '0 0 14px', fontSize: 14, color: 'rgba(155,175,215,0.75)', letterSpacing: '0.03em' } },
-      'Explore the platform knowledge graph'),
     React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         "This graph traces the reasoning behind Gazelle's design — how each design decision works together to give teams autonomy through self-service."),
@@ -20,14 +18,6 @@ function IdlePanel({ theme }) {
         React.createElement('span', { style: { color: PALETTE.ENTRY } }, 'Yellow'), ' = guiding principles'),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.LEAF } }, 'Blue'), ' = design decisions'),
-      React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' } }),
-      React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-        'This entire platform, code and knowledge graph included, is on ',
-        React.createElement('a', {
-          href: 'https://github.com/orgs/gazelle-cloud/',
-          target: '_blank', rel: 'noopener noreferrer',
-          style: { color: 'rgba(155,175,215,0.85)', textDecoration: 'none', borderBottom: '1px solid rgba(155,175,215,0.3)' },
-        }, 'GitHub'), '.'),
     ),
   );
 }
@@ -106,14 +96,7 @@ function panel(node, graph, { setFocusedId, theme }) {
 mount({
   activeHref: '/knowledge-graph/',
 
-  dataRepo:   'gazelle-cloud/data',
-  basePath:   'knowledge-graph',
-  categories: ['guiding-principles', 'decisions'],
-
-  edgeFields: {
-    'guiding-principle': ['decisions'],
-    'decision':          ['links'],
-  },
+  localJson: '/knowledge-graph.json',
 
   types: {
     'guiding-principle': { palette: 'ENTRY', label: 'guiding principle' },

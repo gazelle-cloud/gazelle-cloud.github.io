@@ -13,8 +13,6 @@ function IdlePanel({ theme }) {
   },
     React.createElement('h1', { style: { margin: '0 0 12px', padding: 0, fontSize: 16, fontWeight: 400, lineHeight: 1.3, color: '#fff' } },
       'Platform Operations'),
-    React.createElement('p', { style: { margin: '0 0 14px', fontSize: 14, color: 'rgba(155,175,215,0.75)', letterSpacing: '0.03em' } },
-      'Explore standardized platform operations'),
     React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         "This graph maps Gazelle's standard operations — the files each one touches and the design decisions that shape it."),
@@ -25,14 +23,6 @@ function IdlePanel({ theme }) {
         React.createElement('span', { style: { color: PALETTE.LEAF } }, 'Blue'), ' = design decisions'),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.CONNECTOR } }, 'Green'), ' = file paths'),
-      React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' } }),
-      React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-        'This entire platform, code and knowledge graph included, is on ',
-        React.createElement('a', {
-          href: 'https://github.com/orgs/gazelle-cloud/',
-          target: '_blank', rel: 'noopener noreferrer',
-          style: { color: 'rgba(155,175,215,0.85)', textDecoration: 'none', borderBottom: '1px solid rgba(155,175,215,0.3)' },
-        }, 'GitHub'), '.'),
     ),
   );
 }
@@ -141,14 +131,7 @@ function nodeLabel(node) {
 mount({
   activeHref: '/operations/',
 
-  dataRepo:   'gazelle-cloud/data',
-  basePath:   'knowledge-graph',
-  categories: ['operations', 'decisions'],
-
-  edgeFields: {
-    'operation': ['decisions', 'files'],
-    'decision':  ['links'],
-  },
+  localJson: '/operations.json',
 
   types: {
     'operation': { palette: 'ENTRY',     label: 'operation'      },

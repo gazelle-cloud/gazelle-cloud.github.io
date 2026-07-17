@@ -65,8 +65,6 @@ function IdlePanel({ theme }) {
   },
     React.createElement('h1', { style: { margin: '0 0 12px', padding: 0, fontSize: 16, fontWeight: 400, lineHeight: 1.3, color: '#fff' } },
       'BigBang'),
-    React.createElement('p', { style: { margin: '0 0 14px', fontSize: 14, color: 'rgba(155,175,215,0.75)', letterSpacing: '0.03em' } },
-      'Explore platform deployment workflows'),
     React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         'This graph shows how each platform capability is deployed end-to-end — independently, from nothing to production-ready.'),
@@ -77,14 +75,6 @@ function IdlePanel({ theme }) {
         React.createElement('span', { style: { color: PALETTE.CONNECTOR } }, 'Green'), ' = main Bicep'),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.LEAF } }, 'Blue'), ' = Bicep modules'),
-      React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' } }),
-      React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-        'This entire platform, code and knowledge graph included, is on ',
-        React.createElement('a', {
-          href: 'https://github.com/orgs/gazelle-cloud/',
-          target: '_blank', rel: 'noopener noreferrer',
-          style: { color: 'rgba(155,175,215,0.85)', textDecoration: 'none', borderBottom: '1px solid rgba(155,175,215,0.3)' },
-        }, 'GitHub'), '.'),
     ),
   );
 }
