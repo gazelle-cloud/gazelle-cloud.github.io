@@ -63,34 +63,38 @@ function panel(node, graph, { setFocusedId, theme }) {
     React.createElement('p',   { key: 'wv', className: 'info-text' }, node.why),
   );
 
+  const nodeById = Object.fromEntries(graph.nodes.map(n => [n.id, n]));
+
+  function LinkedNode({ id, note, arrow, color }) {
+    const linked = nodeById[id];
+    const isYellowInvolved = node.type === 'guiding-principle' || linked?.type === 'guiding-principle';
+    const summary = linked?.decision || linked?.intent;
+    return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 4, paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
+      React.createElement('span', {
+        style: { color, fontFamily: FONT_MONO, fontSize: 13, cursor: 'pointer' },
+        onClick: () => setFocusedId(id),
+      }, arrow + ' ' + id.replaceAll('-', ' ')),
+      note && React.createElement('div', { style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12 } }, note),
+      isYellowInvolved && summary && React.createElement('div', { style: { color: 'rgba(155,175,215,0.65)', fontSize: 12, lineHeight: 1.45 } }, summary),
+    );
+  }
+
   if (outLinks.length > 0) children.push(
     React.createElement('div', { key: 'ol', className: 'info-label', style: { color: OUTBOUND_COLOR } }, 'Outbound Links →'),
-    React.createElement('div', { key: 'ov', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' } },
+    React.createElement('div', { key: 'ov', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
       ...outLinks.map((l, i) => {
         const [, targetId] = linkEnds(l);
-        return React.createElement('div', { key: i },
-          React.createElement('span', {
-            style: { color: OUTBOUND_COLOR, fontFamily: FONT_MONO, fontSize: 13, cursor: 'pointer' },
-            onClick: () => setFocusedId(targetId),
-          }, '→ ' + targetId.replaceAll('-', ' ')),
-          l.note && React.createElement('div', { style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12, marginTop: 2 } }, l.note),
-        );
+        return React.createElement(LinkedNode, { key: i, id: targetId, note: l.note, arrow: '→', color: OUTBOUND_COLOR });
       }),
     ),
   );
 
   if (inLinks.length > 0) children.push(
     React.createElement('div', { key: 'inl', className: 'info-label', style: { color: INBOUND_COLOR } }, 'Inbound Links ←'),
-    React.createElement('div', { key: 'inv', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 8, overflowX: 'hidden', whiteSpace: 'normal' } },
+    React.createElement('div', { key: 'inv', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
       ...inLinks.map((l, i) => {
         const [sourceId] = linkEnds(l);
-        return React.createElement('div', { key: i },
-          React.createElement('span', {
-            style: { color: INBOUND_COLOR, fontFamily: FONT_MONO, fontSize: 13, cursor: 'pointer' },
-            onClick: () => setFocusedId(sourceId),
-          }, '← ' + sourceId.replaceAll('-', ' ')),
-          l.note && React.createElement('div', { style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12, marginTop: 2 } }, l.note),
-        );
+        return React.createElement(LinkedNode, { key: i, id: sourceId, note: l.note, arrow: '←', color: INBOUND_COLOR });
       }),
     ),
   );
