@@ -16,10 +16,6 @@ The graph is not meant to be read as raw data. Any entry point — a node on the
 
 Links are one-way by design. A node only knows what it points to, never what points back at it. Both representations reconstruct the missing direction at consumption time, so the data stays simple and the view stays complete.
 
-### Evergreen
-
-The visualization holds no state. It renders directly from source — without any sync step.
-
 ### Density is where clarity lives
 
 The more nodes that reference a decision, the more fully that decision is understood — not through its own words, but through the accumulated intent of everything that depends on it.
