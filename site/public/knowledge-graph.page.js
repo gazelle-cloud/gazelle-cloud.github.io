@@ -64,7 +64,7 @@ function panel(node, graph, { setFocusedId, theme }) {
         onClick: () => setFocusedId(id),
       }, arrow + ' ' + id.replaceAll('-', ' ')),
       note && React.createElement('div', { style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12 } }, note),
-      isYellowInvolved && summary && React.createElement('div', { style: { color: 'rgba(155,175,215,0.65)', fontSize: 12, lineHeight: 1.45 } }, summary),
+      isYellowInvolved && summary && React.createElement('div', { style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12 } }, summary),
     );
   }
 
