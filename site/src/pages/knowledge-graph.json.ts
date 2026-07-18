@@ -1,20 +1,16 @@
 const DATA_REPO = 'gazelle-cloud/data';
 const BASE_PATH = 'knowledge-graph';
 
-const TOKEN = import.meta.env.GITHUB_TOKEN;
-const headers: HeadersInit = TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {};
-
 async function fetchCategory(category: string, type: string): Promise<any[]> {
   const res = await fetch(
     `https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/${category}`,
-    { headers },
   );
   const listing: any[] = await res.json();
   if (!Array.isArray(listing)) return [];
   return Promise.all(
     listing
       .filter((f: any) => f.type === 'file' && f.name.endsWith('.json'))
-      .map((f: any) => fetch(f.download_url, { headers }).then(r => r.json()).then((obj: any) => ({ ...obj, type }))),
+      .map((f: any) => fetch(f.download_url).then(r => r.json()).then((obj: any) => ({ ...obj, type }))),
   );
 }
 

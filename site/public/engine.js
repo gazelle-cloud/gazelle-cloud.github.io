@@ -24,9 +24,6 @@ export async function mount(config) {
   const typeColors = Object.fromEntries(
     Object.entries(config.types).map(([t, cfg]) => [t, PALETTE[cfg.palette]])
   );
-  const typeLabels = Object.fromEntries(
-    Object.entries(config.types).map(([t, cfg]) => [t, cfg.label])
-  );
 
   const dotRadius = node =>
     config.dotRadius ? config.dotRadius(node) : 4;
@@ -109,7 +106,7 @@ export async function mount(config) {
     }, [activeId, neighbours, searchMatchIds, theme]);
 
     const panelContent = activeNode
-      ? config.panel(activeNode, graph, { setFocusedId, theme, typeColors, typeLabels })
+      ? config.panel(activeNode, graph, { setFocusedId, theme, typeColors })
       : null;
 
     return React.createElement(React.Fragment, null,
@@ -129,11 +126,9 @@ export async function mount(config) {
       !searchFocused && activeNode &&
         React.createElement(CornerPanel, { node: activeNode, theme },
           React.createElement(DetailHeader, {
-            typeLabel: typeLabels[activeNode.type] ?? activeNode.type,
             nodeId: config.nodeLabel
               ? config.nodeLabel(activeNode)
               : activeNode.id.replaceAll('-', ' '),
-            theme,
           }),
           panelContent,
         ),

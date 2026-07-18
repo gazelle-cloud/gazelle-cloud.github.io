@@ -380,11 +380,13 @@ export function ThemeToggle({ theme, toggleTheme }) {
 //              setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
 export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId, onFocus, onBlur }) {
   const [open, setOpen] = React.useState(false);
+  const inputRef = React.useRef(null);
   const q       = searchQuery.toLowerCase();
   const matches = q.length > 0 ? nodes.filter(n => n.id.toLowerCase().includes(q)) : nodes;
 
   return React.createElement('div', { className: 'search-box' },
     React.createElement('input', {
+      ref:         inputRef,
       className:   'search-input',
       type:        'text',
       placeholder: 'Search…',
@@ -405,6 +407,7 @@ export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId, on
             setFocusedId(n.id);
             setSearchQuery('');
             setOpen(false);
+            inputRef.current?.blur();
           },
         }, n.id)
       )
@@ -418,14 +421,8 @@ export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId, on
 //   - a bold node ID           (info-text, high-contrast)
 // Usage:
 //   <DetailHeader typeLabel={TYPE_LABELS[activeNode.type]} nodeId={activeNode.id} theme={theme} />
-export function DetailHeader({ typeLabel, nodeId, theme }) {
-  return React.createElement(React.Fragment, null,
-    React.createElement('div', { className: 'info-id' }, typeLabel),
-    React.createElement('p', {
-      className: 'info-text',
-      style: { color: theme === 'dark' ? '#fff' : '#1a1b26', margin: '0 0 8px' },
-    }, nodeId),
-  );
+export function DetailHeader({ nodeId }) {
+  return React.createElement('div', { className: 'info-label', style: { marginTop: 0 } }, nodeId);
 }
 
 // ── useMousePos ───────────────────────────────────────────────────────────────

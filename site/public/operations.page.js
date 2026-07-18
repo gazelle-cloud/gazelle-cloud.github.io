@@ -11,11 +11,11 @@ function IdlePanel({ theme }) {
   return React.createElement('div', {
     className: 'corner-panel' + (theme === 'light' ? ' light' : ''),
   },
-    React.createElement('h1', { style: { margin: '0 0 12px', padding: 0, fontSize: 16, fontWeight: 400, lineHeight: 1.3, color: '#fff' } },
+    React.createElement('h1', { style: { margin: '0 0 12px', padding: 0, fontSize: 16, fontWeight: 400, lineHeight: 1.3 } },
       'Platform Operations'),
     React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-        "This graph maps Gazelle's standard operations — the files each one touches and the design decisions that shape it."),
+        "Operations bring knowledge to the graph — they add intent. Decisions explain why the platform is built the way it is. Operations explain how it moves. Together, the picture is complete."),
       React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' } }),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.ENTRY } }, 'Yellow'), ' = operations'),
@@ -53,8 +53,7 @@ function panel(node, graph, { setFocusedId, theme }) {
   const children = [];
 
   if (node.intent) children.push(
-    React.createElement('div', { key: 'il', className: 'info-label' }, 'Intent'),
-    React.createElement('p',   { key: 'iv', className: 'info-text' }, node.intent),
+    React.createElement('p', { key: 'iv', className: 'info-text' }, node.intent),
   );
 
   if (node.decision) children.push(
