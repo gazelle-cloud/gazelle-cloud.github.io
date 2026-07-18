@@ -82,7 +82,7 @@ Violations:
 
 Decision: Each application has its own billing scope; every subscription it provisions bills to it.
 
-Why: Without billing scope isolation, the platform cannot guarantee that an application's spend lands on its own bill.
+Why: Tag-based cost attribution doesn't scale — the aggregation logic grows with every resource and drifts as tags fall out of sync.
 
 Related:
 - landing-zone-application-profile: Application Profile registration creates the Azure Invoice Section.
@@ -743,7 +743,7 @@ Files:
 
 # Add Automation Job
 
-Intent: A new recurring job is added to the platform automation.
+Intent: The platform recognizes a repeating operational pattern and eliminates it — no landing zone ever needs a human for that task again.
 
 Workflow: platform-automation
 
@@ -768,7 +768,7 @@ Files:
 - landing-zones/bicep/modules/landingzone-automation.bicep
 # Allow Resource Type
 
-Intent: A resource type is admitted to the platform only after security controls, diagnostic settings, and access roles are fully wired.
+Intent: What was blocked is now validated and available to every landing zone at once.
 
 Workflow: platform-Azure-Policy
 
@@ -801,7 +801,7 @@ Files:
 - landing-zones/defenderForCloudExemptions.jsonc
 # Create Landing Zone
 
-Intent: A new isolated Azure environment is provisioned under the application team's billing scope, with guardrails pre-wired and ready for workload deployment.
+Intent: The platform hands over an isolated environment — from this point, the application team operates independently.
 
 Triggers: create landing zone, provision environment, new environment, add azure subscription
 
@@ -830,7 +830,7 @@ Files:
 - application-profiles/
 # Destroy Landing Zone
 
-Intent: A landing zone is permanently torn down, all resources destroyed, and the subscription returned to the subscription-bank — no manual cleanup left behind.
+Intent: The platform reclaims what it gave — the subscription returns to the Subscription Bank.
 
 Workflow: lz-flow-destroy-landing-zone
 
@@ -855,7 +855,7 @@ Files:
 - .github/workflows/
 # Register Application Profile
 
-Intent: An application team is registered with the platform, giving them a billing scope and a GitHub repo — the prerequisite for full self-service control over their landing zones.
+Intent: The platform extends its reach to a new team — from this point, they provision and manage their own landing zones.
 
 Triggers: register application, new application team, onboard team, new team, add application, create application profile
 
@@ -873,7 +873,7 @@ Violations:
 - implementing before reading all decisions
 # Update Knowledge Base
 
-Intent: The knowledge graph remains accurate, consistent, and self-contained — every entry follows the schema, links are organic and directional, and the validation script passes before any PR is opened.
+Intent: What was unclear becomes a clear picture — the more the graph grows, the fewer questions need a human to answer.
 
 Triggers: add a decision, update a decision, add an operation, update an operation, refine reasoning, add a link, update knowledge graph
 
@@ -899,7 +899,7 @@ Files:
 - knowledge-graph/operations/
 # Update Landing Zone
 
-Intent: An existing landing zone is updated — cost ceiling, tags, or policy exemptions — entirely through the repo, with no portal access required.
+Intent: The application team reshapes their landing zone on demand — within the boundaries the parameter file defines.
 
 Triggers: temporary policy exemption, policy exclusion, update budget, cost alert
 
