@@ -6,8 +6,17 @@
     llms-full.txt using a flat, LLM-friendly markdown format.
 #>
 
+param(
+    [string]$DataPath = $env:DATA_PATH
+)
+
 $root = Split-Path $PSScriptRoot -Parent
-$kgPath = Join-Path (Split-Path $root -Parent) 'AzurePlatform' 'knowledge-graph'
+
+if (-not $DataPath) {
+    $DataPath = Join-Path (Split-Path $root -Parent) 'AzurePlatform' 'knowledge-graph'
+}
+
+$kgPath = $DataPath
 $outFile = Join-Path $root 'site' 'public' 'llms-full.txt'
 
 function Format-Title ([string]$id) {
