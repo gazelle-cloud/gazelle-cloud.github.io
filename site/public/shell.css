@@ -221,6 +221,8 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
   z-index: 10;
 }
+.corner-panel h1          { color: #fff; }
+.corner-panel.light h1    { color: #1a1b26; }
 .corner-panel .info-id    { margin-bottom: 8px; color: rgba(155,175,215,0.55); }
 .corner-panel .info-label { margin-top: 12px; margin-bottom: 3px; color: rgba(155,175,215,0.55); }
 .corner-panel .info-text  { margin: 0; color: #d4daf0; }
