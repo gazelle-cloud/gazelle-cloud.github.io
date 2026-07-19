@@ -372,6 +372,22 @@ export function ThemeToggle({ theme, toggleTheme }) {
   }, theme === 'dark' ? '☀' : '☾');
 }
 
+// ── OpenSourceNote ────────────────────────────────────────────────────────────
+// info-label–styled footer note. Rendered at the bottom of every panel.
+export function OpenSourceNote() {
+  return React.createElement(React.Fragment, null,
+    React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '12px 0 0' } }),
+    React.createElement('div', { className: 'info-label', style: { textTransform: 'none' } },
+    React.createElement('a', {
+      href: 'https://github.com/gazelle-cloud/Azure-landing-zones',
+      target: '_blank',
+      rel: 'noopener noreferrer',
+      style: { color: 'inherit', textDecoration: 'underline' },
+    }, 'Open source — view on GitHub'),
+    ),
+  );
+}
+
 // ── SearchBox ─────────────────────────────────────────────────────────────────
 // Renders a search input + live dropdown of matching node IDs.
 // Clicking a result focuses the node and clears the query.
@@ -502,6 +518,7 @@ export function CornerPanel({ node, theme, children }) {
     'div',
     { className: `corner-panel${theme === 'light' ? ' light' : ''}` },
     children,
+    React.createElement(OpenSourceNote),
   );
 }
 

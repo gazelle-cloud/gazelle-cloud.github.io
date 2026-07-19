@@ -1,6 +1,6 @@
 import { mount } from '/engine.js';
 import { forceCollide, forceX, forceY } from 'https://esm.sh/d3-force';
-import { PALETTE, RENDER, FONT_MONO, linkEnds } from '/shell.js';
+import { PALETTE, RENDER, FONT_MONO, linkEnds, OpenSourceNote } from '/shell.js';
 import React from 'react';
 
 // ── syntax highlighters ───────────────────────────────────────────────────────
@@ -76,6 +76,7 @@ function IdlePanel({ theme }) {
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.LEAF } }, 'Blue'), ' = Bicep modules'),
     ),
+    React.createElement(OpenSourceNote),
   );
 }
 

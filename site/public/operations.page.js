@@ -1,6 +1,6 @@
 import { mount } from '/engine.js';
 import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
-import { PALETTE, FONT_MONO, linkEnds } from '/shell.js';
+import { PALETTE, FONT_MONO, linkEnds, OpenSourceNote } from '/shell.js';
 import React from 'react';
 
 const INNER_R = 70;
@@ -24,6 +24,7 @@ function IdlePanel({ theme }) {
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.CONNECTOR } }, 'Green'), ' = file paths'),
     ),
+    React.createElement(OpenSourceNote),
   );
 }
 
