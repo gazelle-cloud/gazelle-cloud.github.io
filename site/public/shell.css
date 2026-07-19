@@ -127,6 +127,22 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
 }
 .theme-toggle:hover { color: rgba(235,242,255,0.99); border-color: rgba(218,228,250,0.88); }
 
+/* ── github link ─────────────────────────────────────────────────────────── */
+.gh-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(155,175,215,0.10);
+  border: 1.5px solid rgba(155,175,215,0.28);
+  border-radius: 20px;
+  padding: 5px 10px;
+  color: rgba(218,228,250,0.88);
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+  line-height: 1;
+}
+.gh-link:hover { color: rgba(235,242,255,0.99); border-color: rgba(218,228,250,0.88); }
+
 /* ── light theme ─────────────────────────────────────────────────────────── */
 [data-theme="light"] { --bg-color: #f5f5f0; }
 [data-theme="light"] body { background: var(--bg-color); }
@@ -144,6 +160,8 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
   color: #1a1b26;
 }
 [data-theme="light"] .theme-toggle:hover { color: #1a1b26; border-color: rgba(0,0,0,0.25); }
+[data-theme="light"] .gh-link { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); color: #1a1b26; }
+[data-theme="light"] .gh-link:hover { color: #1a1b26; border-color: rgba(0,0,0,0.25); }
 [data-theme="light"] .search-input {
   background: rgba(0,0,0,0.04);
   border-color: rgba(0,0,0,0.12);
@@ -221,6 +239,7 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
   z-index: 10;
 }
+.corner-panel a           { font: inherit; }
 .corner-panel h1          { color: #fff; }
 .corner-panel.light h1    { color: #1a1b26; }
 .corner-panel .info-id    { margin-bottom: 8px; color: rgba(155,175,215,0.55); }
@@ -312,6 +331,7 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
   .top-bar-right .search-box { width: 100%; }
   .top-bar-right .search-input { width: 100%; font-size: 15px; padding: 8px 14px; }
   .top-bar-right .theme-toggle { width: 100%; font-size: 15px; padding: 8px 14px; text-align: left; box-sizing: border-box; }
+  .top-bar-right .gh-link { width: 100%; font-size: 15px; padding: 8px 14px; justify-content: flex-start; box-sizing: border-box; }
 
   [data-theme="light"] #menu-btn {
     background: rgba(245,245,240,0.92);
