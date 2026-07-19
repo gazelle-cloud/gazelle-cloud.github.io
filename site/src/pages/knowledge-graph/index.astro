@@ -1,8 +1,7 @@
 ---
 import GraphPage from '../../layouts/GraphPage.astro';
 
-const DATA_REPO = 'gazelle-cloud/data';
-const BASE_PATH = 'knowledge-graph';
+import { DATA_REPO, BASE_PATH } from '../../data';
 
 async function fetchCategory(category: string): Promise<any[]> {
   const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/${category}`);
