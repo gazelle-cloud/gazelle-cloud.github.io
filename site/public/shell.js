@@ -377,7 +377,7 @@ export function ThemeToggle({ theme, toggleTheme }) {
 export function OpenSourceNote() {
   return React.createElement(React.Fragment, null,
     React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '12px 0 0' } }),
-    React.createElement('div', { className: 'info-label', style: { textTransform: 'none' } },
+    React.createElement('div', { className: 'info-label', style: { textTransform: 'none', fontSize: 'inherit' } },
     React.createElement('a', {
       href: 'https://github.com/gazelle-cloud/Azure-landing-zones',
       target: '_blank',
