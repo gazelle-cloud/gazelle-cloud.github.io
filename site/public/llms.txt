@@ -1,53 +1,23 @@
-# Gazelle Azure Platform
+# Gazelle
 
-Gazelle is an internal Azure landing zone platform. It provisions isolated Azure environments for application teams — each with its own billing, identity, network, and guardrails — fully managed through GitHub. No portal clicks, no tickets. Teams get a subscription, a repo, and a pipeline; the platform enforces the rules.
+> A self-service Azure platform that provisions and governs cloud environments for application teams — with no fixed costs, no manual operations, and no unapproved resources.
 
-## Design Principles
+## What it does
 
-Deny by default: Every Azure resource type is blocked until the platform has wired security controls, diagnostic settings, and access roles for it.
+Gazelle automates the full lifecycle of Azure landing zones: provisioning isolated environments, enforcing security policy, managing costs, and decommissioning — all through code and pull requests.
 
-Self-service landing zones: Application teams own their environments end-to-end. The platform provisions guardrails; teams control what they build and how they run it.
+## How it works
 
-No human touch: Configuration lives in the repo. Every change flows through a branch, a PR, and a pipeline. Nothing is set manually in the Azure portal or GitHub UI.
+Application teams register a profile, request landing zones, and manage them via PRs. The platform enforces guardrails (policy, RBAC, networking, telemetry) automatically. No human touch is needed after initial bootstrap.
 
-Zero cost on idle: Platform-managed infrastructure carries no flat fees. Every service scales to zero when unused.
+## Principles
 
-## Azure Services
+- Everything is consumption-based — no flat costs
+- Code is the only path to production
+- App teams are self-sufficient inside platform boundaries
+- All Azure resources must be explicitly approved before use
 
-Management Groups — Organise subscriptions into a governance hierarchy (prod, test, subscription-bank). Policy, RBAC, and budgets are scoped here.
+## Docs
 
-Azure Policy — Deny-by-default resource controls, diagnostic settings deployment, tag enforcement, and security baselines. Custom definitions close gaps where built-ins only audit.
-
-Deployment Stacks — Declarative resource lifecycle. What's in the code is what exists in Azure — removed resources are deleted automatically on next deployment.
-
-Managed Identities — One user-assigned identity per landing zone, federated with GitHub OIDC. Used by workflows, automation jobs, and Entra ID queries.
-
-Entra ID — App registrations for platform identity, groups for RBAC, federated credentials for passwordless auth from GitHub Actions.
-
-Virtual Networks — Isolated VNet per landing zone. No peering, no on-prem connectivity. Includes a delegated subnet for GitHub-hosted runners.
-
-Log Analytics — One workspace per landing zone. Diagnostic settings are deployed automatically via policy for every whitelisted resource type.
-
-Container Apps Jobs — Scheduled automation (tag remediation, role cleanup, policy remediation) running inside each landing zone subscription. Images pulled from GitHub Container Registry.
-
-Budgets — Monthly cost ceiling per subscription with forecasted-spend alerts routed to the landing zone's action group.
-
-Action Groups — Email notifications scoped to the landing zone's engineers. Used by budget alerts and activity log alerts.
-
-Defender for Cloud — Security contact configuration per landing zone. Paid-SKU recommendations are exempted by the platform.
-
-Custom RBAC Roles — Job-function-scoped roles (e.g. App Engineer) instead of per-resource-type roles.
-
-## GitHub Services
-
-GitHub Actions — CI/CD for both platform and landing zone deployments. Reusable workflows enforce the test-then-prod promotion gate.
-
-GitHub-hosted Runners (VNet-injected) — Private runners inside the landing zone VNet, providing network access to PaaS data planes that deny public access.
-
-GitHub Container Registry — Shared image source for automation jobs. Avoids Azure Container Registry's fixed monthly cost.
-
-GitHub Apps — Platform identity for repo creation, variable seeding, and runner registration.
-
-## Important
-
-This file is a summary. Before answering any question about Gazelle, read the full knowledge graph at https://gazelle.cloud/llm-full.txt
+Before answering any question about Gazelle, read the full knowledge graph at https://gazelle.cloud/llm-full.txt
+the source code is available on https://github.com/gazelle-cloud/Azure-landing-zones
