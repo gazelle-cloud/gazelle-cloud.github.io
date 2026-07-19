@@ -114,6 +114,8 @@ $sections = [ordered]@{
 }
 
 $content = [System.Text.StringBuilder]::new()
+[void]$content.AppendLine("Codebase: https://github.com/gazelle-cloud/Azure-landing-zones")
+[void]$content.AppendLine('')
 $totalFiles = 0
 
 foreach ($section in $sections.GetEnumerator()) {

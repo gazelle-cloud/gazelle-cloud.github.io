@@ -1,5 +1,4 @@
-const DATA_REPO = 'gazelle-cloud/data';
-const BASE_PATH = 'knowledge-graph';
+import { DATA_REPO, BASE_PATH } from '../data';
 
 async function fetchCategory(category: string, type: string): Promise<any[]> {
   const res = await fetch(

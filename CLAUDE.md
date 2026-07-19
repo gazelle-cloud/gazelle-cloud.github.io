@@ -62,7 +62,7 @@ runtime:
   *.page.js → engine.js → fetch /my-page.json → React force graph → humans
 ```
 
-Content lives in `github.com/gazelle-cloud/data`.
+Content lives in `github.com/gazelle-cloud/Azure-landing-zones`.
 All graph data is pre-built at deploy time — no GitHub API calls in the browser.
 `GITHUB_TOKEN` is available automatically in GitHub Actions; set it locally in `.env`.
 

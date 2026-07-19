@@ -2,8 +2,7 @@
 import Base from '../../layouts/Base.astro';
 
 export async function getStaticPaths() {
-  const DATA_REPO = 'gazelle-cloud/data';
-  const BASE_PATH = 'knowledge-graph';
+  const { DATA_REPO, BASE_PATH } = await import('../../data');
 
   const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/operations`);
   const listing: any[] = await res.json();
