@@ -23,7 +23,8 @@ export async function GET() {
   const blobs = tree.filter((e: any) =>
     e.type === 'blob' &&
     !isBinary(e.path) &&
-    !e.path.includes('ipmgmt'),
+    !e.path.includes('ipmgmt') &&
+    !e.path.startsWith('knowledge-graph/'),
   );
 
   const files = await Promise.all(
