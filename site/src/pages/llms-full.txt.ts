@@ -1,12 +1,5 @@
 import { DATA_REPO, BASE_PATH } from '../data';
 
-const BINARY_EXTS = new Set(['.dll', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.zip', '.woff', '.woff2', '.ttf', '.eot', '.otf', '.pdf']);
-
-function isBinary(path: string) {
-  const dot = path.lastIndexOf('.');
-  return dot !== -1 && BINARY_EXTS.has(path.slice(dot).toLowerCase());
-}
-
 function toTitle(id: string) {
   return id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
@@ -56,33 +49,11 @@ async function fetchCategory(category: string): Promise<any[]> {
 }
 
 export async function GET() {
-  const [[principles, decisions, operations], treeRes] = await Promise.all([
-    Promise.all([
-      fetchCategory('guiding-principles'),
-      fetchCategory('decisions'),
-      fetchCategory('operations'),
-    ]),
-    fetch(`https://api.github.com/repos/${DATA_REPO}/git/trees/main?recursive=1`, { headers }),
+  const [principles, decisions, operations] = await Promise.all([
+    fetchCategory('guiding-principles'),
+    fetchCategory('decisions'),
+    fetchCategory('operations'),
   ]);
-
-  const { tree } = await treeRes.json();
-  const blobs = tree.filter((e: any) =>
-    e.type === 'blob' &&
-    !isBinary(e.path) &&
-    !e.path.includes('ipmgmt') &&
-    !e.path.startsWith('knowledge-graph/'),
-  );
-
-  const sourceFiles = await Promise.all(
-    blobs.map(async (e: any) => {
-      const res = await fetch(e.url, { headers });
-      const { content, encoding } = await res.json();
-      const text = encoding === 'base64'
-        ? Buffer.from(content.replace(/\n/g, ''), 'base64').toString('utf-8')
-        : content;
-      return { path: e.path, text };
-    }),
-  );
 
   const sep = (heading: string) =>
     `===============================================================================\n  ${heading}\n===============================================================================\n`;
@@ -94,12 +65,7 @@ export async function GET() {
     ...decisions.map(renderDecision),
     sep('Operations'),
     ...operations.map(renderOperation),
-    sep('Source Code'),
   ];
-
-  for (const { path, text } of sourceFiles) {
-    lines.push(`## ${path}`, '', text.trimEnd(), '', '');
-  }
 
   return new Response(lines.join('\n'), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
