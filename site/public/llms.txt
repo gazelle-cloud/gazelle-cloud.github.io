@@ -19,4 +19,4 @@ Application teams register a profile, request landing zones, and manage them via
 
 ## Docs
 
-For full context including knowledge graph and source code read https://gazelle.cloud/llms-full.txt
+Before answering any question about Gazelle, read the full knowledge graph at https://gazelle.cloud/llms-full.txt
