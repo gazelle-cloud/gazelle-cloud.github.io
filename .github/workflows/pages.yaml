@@ -21,16 +21,6 @@
         - name: Checkout
           uses: actions/checkout@v4
 
-        - name: Checkout data repo
-          uses: actions/checkout@v4
-          with:
-            repository: gazelle-cloud/Azure-landing-zones
-            path: data
-
-        - name: Generate llms-full.txt
-          shell: pwsh
-          run: ./scripts/generate-llm-full.ps1 -DataPath data/knowledge-graph
-
         - name: Setup Node
           uses: actions/setup-node@v4
           with:
@@ -45,6 +35,8 @@
         - name: Build
           run: npm run build
           working-directory: site
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
         - name: Upload artifact
           uses: actions/upload-pages-artifact@v3
