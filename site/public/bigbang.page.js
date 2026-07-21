@@ -67,7 +67,7 @@ function IdlePanel({ theme }) {
       'BigBang'),
     React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-        'The architect defines the laws of physics. The graph fills the space — so you can see how the platform restores itself from nothing to working state.'),
+        'Workflows that bring the platform from nothing to life.'),
       React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' } }),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.ENTRY } }, 'Yellow'), ' = GitHub workflows'),
