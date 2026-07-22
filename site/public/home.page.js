@@ -2,69 +2,68 @@ import { mount } from '/engine.js';
 import { PALETTE, FONT_MONO, OpenSourceNote, linkEnds } from '/shell.js';
 import React from 'react';
 
-// ── animation data ────────────────────────────────────────────────────────────
+// ── animation data ─────────────────────────────────────────────────────────────
 // One shared canvas: yellow corners define the boundary, green+blue live inside.
-
-// Virtual box half-dimensions — just outside the interior cluster
 const CW = 52, CH = 40;
-
-// Principle dots — 4 corners of the virtual box, breathing in/out together
-const PRINCIPLE_ANIM = {
-  'no-human-touch':          { corner: [-1,-1], wx: 0.11, wy: 0.18, px: 0.00, py: 0.00 },
-  'no-fixed-cost':           { corner: [ 1,-1], wx: 0.15, wy: 0.10, px: 2.09, py: 1.05 },
-  'no-platform-ops':         { corner: [-1, 1], wx: 0.13, wy: 0.21, px: 4.19, py: 2.09 },
-  'no-unapproved-resources': { corner: [ 1, 1], wx: 0.10, wy: 0.14, px: 1.05, py: 3.14 },
-};
 const BREATHE_AMP  = 0.08;
 const BREATHE_FREQ = 0.12;
-const DRIFT_A = 6;           // wander within the corner zone, stay inside the box
-
-// Flow dots — Lissajous, upper interior (original frequencies kept)
-const FLOW_ANIM = {
-  join:    { cx: -28, cy: -12, wx: 0.19, wy: 0.33, px: 0.00, py: 0.00, ax: 4, ay: 4 },
-  request: { cx:   0, cy:  -8, wx: 0.27, wy: 0.18, px: 2.09, py: 1.05 },
-  deploy:  { cx:  28, cy: -12, wx: 0.23, wy: 0.38, px: 4.19, py: 2.09 },
-};
+const DRIFT_A = 6;          // wander within the corner zone, stay inside the box
 const FLOW_AX = 14, FLOW_AY = 10;
+const VIS_AX  = 10, VIS_AY  = 8;
+const REPULSE_DIST = 20;   // min centre-to-centre distance between non-principle dots
+const OUTBOUND_COLOR = '#fb923c';
 
-// Visual dots — gentle drift, lower interior
-const VISUAL_ANIM = {
-  'knowledge-graph': { cx: -30, cy: 16, wx: 0.07, wy: 0.05, px: 0.00, py: 1.20 },
-  'operations':      { cx:   0, cy: 22, wx: 0.05, wy: 0.08, px: 2.00, py: 0.60 },
-  'big-bang':        { cx:  30, cy: 16, wx: 0.09, wy: 0.06, px: 1.00, py: 2.40, ax: 4, ay: 4 },
+// Single descriptor table — every per-node property lives here.
+const HOME_NODES = {
+  // ── Principles (yellow, corners) ────────────────────────────────────────────
+  'no-human-touch':          { type:'principle', corner:[-1,-1], wx:0.11,wy:0.18,px:0.00,py:0.00 },
+  'no-fixed-cost':           { type:'principle', corner:[ 1,-1], wx:0.15,wy:0.10,px:2.09,py:1.05 },
+  'no-platform-ops':         { type:'principle', corner:[-1, 1], wx:0.13,wy:0.21,px:4.19,py:2.09 },
+  'no-unapproved-resources': { type:'principle', corner:[ 1, 1], wx:0.10,wy:0.14,px:1.05,py:3.14 },
+
+  // ── Flow (green) ─────────────────────────────────────────────────────────────
+  join:    { type:'flow', cx:-28, cy:-12, wx:0.19,wy:0.33,px:0.00,py:0.00, ax:4,ay:4, spring:0.06, kgNode:'landing-zone-join-the-platform' },
+  request: { type:'flow', cx:  0, cy: -8, wx:0.27,wy:0.18,px:2.09,py:1.05 },
+  deploy:  { type:'flow', cx: 28, cy:-12, wx:0.23,wy:0.38,px:4.19,py:2.09,                         kgNode:'landing-zone-getting-started'    },
+
+  // ── Visual (blue) ────────────────────────────────────────────────────────────
+  'knowledge-graph': { type:'visual', cx:-30,cy:16, wx:0.14,wy:0.11,px:0.00,py:1.20, ax:18,ay:14, href:'/knowledge-graph/', panelJson:'/knowledge-graph.json', panelType:'decision',        panelLabel:'Decisions',  panelColor:PALETTE.LEAF  },
+  'operations':      { type:'visual', cx:  0,cy:22, wx:0.05,wy:0.08,px:2.00,py:0.60, href:'/operations/',      panelJson:'/operations.json',      panelType:'operation',       panelLabel:'Operations', panelColor:PALETTE.ENTRY },
+  'big-bang':        { type:'visual', cx: 30,cy:16, wx:0.09,wy:0.06,px:1.00,py:2.40, href:'/bigbang/',         panelJson:'/bigbang.json',          panelType:'github-workflow', panelLabel:'Workflows',  panelColor:PALETTE.ENTRY, ax:4,ay:4, spring:0.06 },
 };
-const VIS_AX = 10, VIS_AY = 8;
+
+// Derive physics bounds from the table — changing a cy automatically updates gravity and clamps.
+function groupBounds(type, ax, ay) {
+  const nodes = Object.values(HOME_NODES).filter(n => n.type === type);
+  const cxs = nodes.map(n => n.cx), cys = nodes.map(n => n.cy);
+  return {
+    xMax: Math.max(...cxs) + ax,
+    yMin: Math.min(...cys) - ay,
+    yMax: Math.max(...cys) + ay,
+    midY: (Math.min(...cys) + Math.max(...cys)) / 2,
+  };
+}
+const FLOW_BOUNDS   = groupBounds('flow',   FLOW_AX, FLOW_AY);
+const VISUAL_BOUNDS = groupBounds('visual', VIS_AX,  VIS_AY);
 
 function nodePosition(n, t) {
-  if (n.type === 'principle') {
-    const a = PRINCIPLE_ANIM[n.id];
-    if (!a) return { x: 0, y: 0 };
+  const a = HOME_NODES[n.id];
+  if (!a) return { x: 0, y: 0 };
+  if (a.type === 'principle') {
     const breathe = 1 + BREATHE_AMP * Math.sin(t * BREATHE_FREQ);
     const [sx, sy] = a.corner;
-    // Subtract dot radius (5) so the dot edge, not center, stays inside the red box.
+    // Subtract dot radius (5) so the dot edge, not center, stays inside the box.
     // (1 + cos) / 2 is always 0..1 — drift is inward from corner, never outward
     return {
       x: sx * (CW * breathe - 5 - DRIFT_A * (1 + Math.cos(a.wx * t + a.px)) / 2),
       y: sy * (CH * breathe - 5 - DRIFT_A * (1 + Math.sin(a.wy * t + a.py)) / 2),
     };
   }
-  if (n.type === 'flow') {
-    const a = FLOW_ANIM[n.id];
-    if (!a) return { x: 0, y: 0 };
-    return {
-      x: a.cx + (a.ax ?? FLOW_AX) * Math.cos(a.wx * t + a.px),
-      y: a.cy + (a.ay ?? FLOW_AY) * Math.sin(a.wy * t + a.py),
-    };
-  }
-  if (n.type === 'visual') {
-    const a = VISUAL_ANIM[n.id];
-    if (!a) return { x: 0, y: 0 };
-    return {
-      x: a.cx + (a.ax ?? VIS_AX) * Math.cos(a.wx * t + a.px),
-      y: a.cy + (a.ay ?? VIS_AY) * Math.sin(a.wy * t + a.py),
-    };
-  }
-  return { x: 0, y: 0 };
+  const [defAx, defAy] = a.type === 'flow' ? [FLOW_AX, FLOW_AY] : [VIS_AX, VIS_AY];
+  return {
+    x: a.cx + (a.ax ?? defAx) * Math.cos(a.wx * t + a.px),
+    y: a.cy + (a.ay ?? defAy) * Math.sin(a.wy * t + a.py),
+  };
 }
 
 // ── idle panel ────────────────────────────────────────────────────────────────
@@ -87,11 +86,11 @@ function IdlePanel({ theme }) {
     }),
     React.createElement('p', { className: 'info-text', style: { margin: 0 } },
       React.createElement('span', { style: { color: PALETTE.ENTRY } }, '● '),
-      'Design principles',
+      'Platform rules',
     ),
     React.createElement('p', { className: 'info-text', style: { margin: 0 } },
       React.createElement('span', { style: { color: PALETTE.CONNECTOR } }, '● '),
-      'The flow',
+      'From nothing to hello-world',
     ),
     React.createElement('p', { className: 'info-text', style: { margin: 0 } },
       React.createElement('span', { style: { color: PALETTE.LEAF } }, '● '),
@@ -112,148 +111,91 @@ function fetchJson(url) {
   return _jsonCache[url];
 }
 
-const OUTBOUND_COLOR = '#fb923c';
+// Stable hook — null url → returns null immediately, no fetch
+function useJson(url) {
+  const entry = url ? fetchJson(url) : null;
+  const [data, setData] = React.useState(entry?.data ?? null);
+  React.useEffect(() => { if (url && !data) entry.promise.then(setData); }, [url]);
+  return data;
+}
 
-function PrinciplePanel({ node }) {
-  const entry       = fetchJson('/knowledge-graph.json');
-  const [kg, setKg] = React.useState(entry.data);
-  React.useEffect(() => { if (!kg) entry.promise.then(setKg); }, []);
-  if (!kg) return React.createElement('p', { className: 'info-text', style: { opacity: 0.5 } }, 'Loading…');
+// ── unified node panel ────────────────────────────────────────────────────────
+function NodePanel({ node }) {
+  const desc     = HOME_NODES[node.id] ?? {};
+  const kgUrl    = (node.type === 'principle' || desc.kgNode) ? '/knowledge-graph.json' : null;
+  const kg       = useJson(kgUrl);
+  const listData = useJson(desc.panelJson ?? null);
 
-  const kgNode = kg.nodes.find(n => n.id === node.id);
-  if (!kgNode) return null;
+  const children = [];
 
-  const outLinks = kg.links.filter(l => { const [s] = linkEnds(l); return s === node.id && l.relationship === 'related'; });
+  // Description (visual nodes only)
+  if (node.description && desc.panelJson)
+    children.push(React.createElement('p', { key: 'desc', className: 'info-text', style: { marginTop: 0 } }, node.description));
 
-  function LinkedNode({ id, arrow, color }) {
-    return React.createElement('div', { style: { paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
-      React.createElement('a', {
-        href:  `/knowledge-graph/${id}/`,
-        style: { color, fontFamily: FONT_MONO, fontSize: 13 },
-      }, arrow + ' ' + id.replaceAll('-', ' ')),
+  // KG content (principle + mapped flow nodes)
+  if (kgUrl && !kg)
+    return React.createElement('p', { className: 'info-text', style: { opacity: 0.5 } }, 'Loading\u2026');
+
+  if (kg) {
+    const kgId   = node.type === 'principle' ? node.id : desc.kgNode;
+    const kgNode = kg.nodes.find(n => n.id === kgId);
+    if (!kgNode) return null;
+
+    if (kgNode.intent) children.push(
+      React.createElement('div', { key: 'il', className: 'info-label' }, 'Intent'),
+      React.createElement('p',   { key: 'iv', className: 'info-text'  }, kgNode.intent),
+    );
+
+    if (kgNode.decision) children.push(
+      React.createElement('p', { key: 'dv', className: 'info-text' }, kgNode.decision),
+    );
+
+    const isRelated = l => l.relationship === 'related';
+    const links = [
+      ...kg.links.filter(l => { const [s] = linkEnds(l); return s === kgId && isRelated(l); })
+                 .map(l => { const [, t] = linkEnds(l); return { id: t, arrow: '\u2192' }; }),
+      ...(node.type === 'flow'
+        ? kg.links.filter(l => { const [, t] = linkEnds(l); return t === kgId && isRelated(l); })
+                  .map(l => { const [s] = linkEnds(l); return { id: s, arrow: '\u2190' }; })
+        : []),
+    ];
+
+    if (links.length > 0) children.push(
+      React.createElement('div', { key: 'dl', className: 'info-label', style: { color: OUTBOUND_COLOR } }, 'Decisions made'),
+      React.createElement('div', { key: 'dlist', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
+        ...links.map(({ id, arrow }, i) => React.createElement('div', { key: i, style: { paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
+          React.createElement('a', {
+            href:  `/knowledge-graph/${id}/`,
+            style: { color: OUTBOUND_COLOR, fontFamily: FONT_MONO, fontSize: 13 },
+          }, arrow + ' ' + id.replaceAll('-', ' ')),
+        )),
+      ),
     );
   }
 
-  const children = [];
-
-  if (kgNode.intent) children.push(
-    React.createElement('div', { key: 'il', className: 'info-label' }, 'Intent'),
-    React.createElement('p',   { key: 'iv', className: 'info-text'  }, kgNode.intent),
-  );
-
-  if (outLinks.length > 0) children.push(
-    React.createElement('div', { key: 'ol', className: 'info-label', style: { color: OUTBOUND_COLOR } }, 'Decisions made'),
-    React.createElement('div', { key: 'ov', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
-      ...outLinks.map((l, i) => { const [, t] = linkEnds(l); return React.createElement(LinkedNode, { key: i, id: t, arrow: '→', color: OUTBOUND_COLOR }); }),
-    ),
-  );
-
-  return React.createElement(React.Fragment, null, ...children);
-}
-
-// ── VisualPanel (blue dots) ───────────────────────────────────────────────────
-const VISUAL_SOURCES = {
-  'knowledge-graph': { url: '/knowledge-graph.json', type: 'decision',        label: 'Decisions',  color: PALETTE.LEAF,  base: '/knowledge-graph/' },
-  'operations':      { url: '/operations.json',      type: 'operation',       label: 'Operations', color: PALETTE.ENTRY, base: '/operations/'      },
-  'big-bang':        { url: '/bigbang.json',          type: 'github-workflow', label: 'Workflows',  color: PALETTE.ENTRY, base: '/bigbang/'         },
-};
-
-function VisualPanel({ node }) {
-  const src         = VISUAL_SOURCES[node.id];
-  const entry       = src ? fetchJson(src.url) : null;
-  const [data, setData] = React.useState(entry?.data ?? null);
-  React.useEffect(() => { if (src && !data) entry.promise.then(setData); }, []);
-  if (!src || !data) return React.createElement('p', { className: 'info-text', style: { opacity: 0.5 } }, src ? 'Loading…' : null);
-
-  const items = data.nodes.filter(n => n.type === src.type);
-
-  return React.createElement(React.Fragment, null,
-    node.description && React.createElement('p', { className: 'info-text', style: { marginTop: 0 } }, node.description),
-    React.createElement('div', { className: 'info-label', style: { color: src.color } }, src.label),
-    React.createElement('div', { className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
-      ...items.map((n, i) => React.createElement('div', { key: i, style: { paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
-        React.createElement('a', {
-          href:  src.base + n.id + '/',
-          style: { color: src.color, fontFamily: FONT_MONO, fontSize: 13 },
-        }, n.label ?? n.id.replaceAll('-', ' ')),
-      )),
-    ),
-  );
-}
-
-// ── FlowPanel (green dots with KG mapping) ────────────────────────────────────
-const FLOW_KG_MAP = {
-  'join':   'landing-zone-join-the-platform',
-  'deploy': 'landing-zone-getting-started',
-};
-
-function FlowPanel({ node }) {
-  const kgNodeId    = FLOW_KG_MAP[node.id];
-  const entry       = fetchJson('/knowledge-graph.json');
-  const [kg, setKg] = React.useState(entry.data);
-  React.useEffect(() => { if (!kg) entry.promise.then(setKg); }, []);
-  if (!kg) return React.createElement('p', { className: 'info-text', style: { opacity: 0.5 } }, 'Loading…');
-
-  const kgNode   = kg.nodes.find(n => n.id === kgNodeId);
-  if (!kgNode) return null;
-
-  const related = l => l.relationship === 'related';
-  const outLinks = kg.links.filter(l => { const [s]    = linkEnds(l); return s === kgNodeId && related(l); });
-  const inLinks  = kg.links.filter(l => { const [, t]  = linkEnds(l); return t === kgNodeId && related(l); });
-  const children = [];
-
-  if (kgNode.intent) children.push(
-    React.createElement('div', { key: 'il', className: 'info-label' }, 'Intent'),
-    React.createElement('p',   { key: 'iv', className: 'info-text'  }, kgNode.intent),
-  );
-
-  if (kgNode.decision) children.push(
-    React.createElement('p', { key: 'dv', className: 'info-text' }, kgNode.decision),
-  );
-
-  const allDecisions = [
-    ...outLinks.map(l => { const [, t] = linkEnds(l); return { id: t, arrow: '→' }; }),
-    ...inLinks.map( l => { const [s]   = linkEnds(l); return { id: s, arrow: '←' }; }),
-  ];
-
-  if (allDecisions.length > 0) children.push(
-    React.createElement('div', { key: 'dl', className: 'info-label', style: { color: OUTBOUND_COLOR } }, 'Decisions made'),
-    React.createElement('div', { key: 'dv', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
-      ...allDecisions.map(({ id, arrow }, i) => React.createElement('div', { key: i, style: { paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
-        React.createElement('a', {
-          href:  `/knowledge-graph/${id}/`,
-          style: { color: OUTBOUND_COLOR, fontFamily: FONT_MONO, fontSize: 13 },
-        }, arrow + ' ' + id.replaceAll('-', ' ')),
-      )),
-    ),
-  );
+  // Visual list (knowledge-graph / operations / big-bang)
+  if (desc.panelJson) {
+    if (!listData) return React.createElement('p', { className: 'info-text', style: { opacity: 0.5 } }, 'Loading\u2026');
+    const items = listData.nodes.filter(n => n.type === desc.panelType);
+    children.push(
+      React.createElement('div', { key: 'pl', className: 'info-label', style: { color: desc.panelColor } }, desc.panelLabel),
+      React.createElement('div', { key: 'plist', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
+        ...items.map((n, i) => React.createElement('div', { key: i, style: { paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
+          React.createElement('a', {
+            href:  desc.href + n.id + '/',
+            style: { color: desc.panelColor, fontFamily: FONT_MONO, fontSize: 13 },
+          }, n.label ?? n.id.replaceAll('-', ' ')),
+        )),
+      ),
+    );
+  }
 
   return React.createElement(React.Fragment, null, ...children);
 }
 
-// ── node panel ────────────────────────────────────────────────────────────────
-function panel(node, graph, { typeColors }) {
-  if (node.type === 'principle') return React.createElement(PrinciplePanel, { node });
-  if (node.type === 'flow' && FLOW_KG_MAP[node.id]) return React.createElement(FlowPanel, { node });
-  if (node.type === 'visual')   return React.createElement(VisualPanel,    { node });
-
-  const color    = typeColors?.[node.type] ?? PALETTE.ENTRY;
-  const children = [];
-
-  if (node.description) children.push(
-    React.createElement('div', { key: 'dl', className: 'info-label' }, 'About'),
-    React.createElement('p',   { key: 'dv', className: 'info-text'  }, node.description),
-  );
-
-  if (node.href) children.push(
-    React.createElement('a', {
-      key:   'lnk',
-      href:  node.href,
-      style: { display: 'inline-block', marginTop: 8, color, textDecoration: 'none', fontSize: 13 },
-    }, 'Open →'),
-  );
-
-  return React.createElement(React.Fragment, null, ...children);
+function panel(node) {
+  if (node.type === 'request') return null;
+  return React.createElement(NodePanel, { node });
 }
 
 // ── debug ─────────────────────────────────────────────────────────────────────
@@ -267,12 +209,13 @@ mount({
   localJson:  '/home.json',
 
   types: {
-    principle: { palette: 'ENTRY',     label: 'design principles' },
-    flow:      { palette: 'CONNECTOR', label: 'the flow'          },
+    principle: { palette: 'ENTRY',     label: 'platform rules' },
+    flow:      { palette: 'CONNECTOR', label: 'from nothing to hello-world' },
     visual:    { palette: 'LEAF',      label: 'visualisations'    },
   },
 
-  dotRadius: () => 5,
+  dotRadius: () => 7,
+  labelFontSize: () => 14,
 
   forces(fg, nodes) {
     _liveNodes = nodes;
@@ -289,10 +232,6 @@ mount({
       // Center gravity: always present, scales smoothly across the full breathe cycle.
       // 0.02 at breathe-out → 0.05 at neutral → 0.08 at breathe-in
       const pull = 0.05 + breatheIn * 0.03;
-      // Midpoint of each group's box — gravity pulls toward this, not world origin.
-      // Greens: y in [-22, 2] → mid -10.  Blues: y in [8, 30] → mid 19.
-      const flowMidY   = (-(12 + FLOW_AY) + (-8 + FLOW_AY)) / 2;   // -10
-      const visualMidY = ((16 - VIS_AY)   + (22 + VIS_AY))  / 2;   // 19
       nodes.forEach(n => {
         const p = nodePosition(n, t);
 
@@ -304,34 +243,44 @@ mount({
           // Friction — damps velocity each tick for organic deceleration
           n.vx *= 0.85;
           n.vy *= 0.85;
-          // Spring toward natural animated position (anchors use weaker spring)
-          const spring = (n.id === 'join' || n.id === 'big-bang') ? 0.06 : 0.12;
+          // Spring toward natural animated position (per-node spring, default 0.12)
+          const spring = HOME_NODES[n.id]?.spring ?? 0.12;
           n.vx += (p.x - n.x) * spring;
           n.vy += (p.y - n.y) * spring;
 
           // Gravity toward own box midpoint — identical pull strength for both types
           // so greens and blues react equally to the breathe cycle.
-          const midY = n.type === 'flow' ? flowMidY : visualMidY;
-          n.vx -= n.x       * pull;
+          const b    = n.type === 'flow' ? FLOW_BOUNDS : VISUAL_BOUNDS;
+          const midY = b.midY;
+          n.vx -= n.x          * pull;
           n.vy -= (n.y - midY) * pull;
 
           // Hard clamp — gravity now pulls away from both walls (toward box midpoint),
           // so a hard stop is stable: forces immediately carry the node back inward.
-          if (n.type === 'flow') {
-            const xMax = 28 + FLOW_AX, yMin = -(12 + FLOW_AY), yMax = -8 + FLOW_AY;
-            if (n.x < -xMax) { n.x = -xMax; if (n.vx < 0) n.vx = 0; }
-            if (n.x >  xMax) { n.x =  xMax; if (n.vx > 0) n.vx = 0; }
-            if (n.y <  yMin) { n.y =  yMin; if (n.vy < 0) n.vy = 0; }
-            if (n.y >  yMax) { n.y =  yMax; if (n.vy > 0) n.vy = 0; }
-          } else if (n.type === 'visual') {
-            const xMax = 30 + VIS_AX, yMin = 16 - VIS_AY, yMax = 22 + VIS_AY;
-            if (n.x < -xMax) { n.x = -xMax; if (n.vx < 0) n.vx = 0; }
-            if (n.x >  xMax) { n.x =  xMax; if (n.vx > 0) n.vx = 0; }
-            if (n.y <  yMin) { n.y =  yMin; if (n.vy < 0) n.vy = 0; }
-            if (n.y >  yMax) { n.y =  yMax; if (n.vy > 0) n.vy = 0; }
-          }
+          const { xMax, yMin, yMax } = b;
+          if (n.x < -xMax) { n.x = -xMax; if (n.vx < 0) n.vx = 0; }
+          if (n.x >  xMax) { n.x =  xMax; if (n.vx > 0) n.vx = 0; }
+          if (n.y <  yMin) { n.y =  yMin; if (n.vy < 0) n.vy = 0; }
+          if (n.y >  yMax) { n.y =  yMax; if (n.vy > 0) n.vy = 0; }
         }
       });
+      // Pairwise soft repulsion — pushes non-principle dots apart when closer than REPULSE_DIST
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].type === 'principle') continue;
+        for (let j = i + 1; j < nodes.length; j++) {
+          if (nodes[j].type === 'principle') continue;
+          const a = nodes[i], b = nodes[j];
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const d  = Math.sqrt(dx * dx + dy * dy) || 0.01;
+          if (d < REPULSE_DIST) {
+            const push = (REPULSE_DIST - d) / REPULSE_DIST * 0.4;
+            a.vx -= dx / d * push;
+            a.vy -= dy / d * push;
+            b.vx += dx / d * push;
+            b.vy += dy / d * push;
+          }
+        }
+      }
       if (alpha < 0.05) fg.d3ReheatSimulation();
     });
   },
@@ -354,15 +303,15 @@ mount({
   nodeLabel: node => node.label ?? node.id.replaceAll('-', ' '),
 
   panelLabel(node) {
-    if (node.type === 'flow' && FLOW_KG_MAP[node.id]) return FLOW_KG_MAP[node.id].replaceAll('-', ' ');
-    return node.label ?? node.id.replaceAll('-', ' ');
+    const desc = HOME_NODES[node.id];
+    return desc?.kgNode?.replaceAll('-', ' ') ?? node.label ?? node.id.replaceAll('-', ' ');
   },
 
   nodeHref(node) {
+    const desc = HOME_NODES[node.id];
     if (node.type === 'principle') return `/knowledge-graph/${node.id}/`;
-    if (node.type === 'visual')   return node.href ?? null;
-    if (node.type === 'flow')     return FLOW_KG_MAP[node.id] ? `/knowledge-graph/${FLOW_KG_MAP[node.id]}/` : null;
-    return null;
+    if (desc?.kgNode)              return `/knowledge-graph/${desc.kgNode}/`;
+    return desc?.href ?? null;
   },
 
   linkColor(l, { activeId, theme }) {
@@ -391,13 +340,13 @@ mount({
     ctx.strokeStyle = 'rgba(240,165,0,0.6)';
     ctx.strokeRect(-RW, -RH, RW * 2, RH * 2);
 
-    // Green: flow max reach → x: -42..+42, y: -22..+2
+    // Green: flow max reach (derived from FLOW_BOUNDS)
     ctx.strokeStyle = 'rgba(61,186,127,0.6)';
-    ctx.strokeRect(-(28 + FLOW_AX), -(12 + FLOW_AY), (28 + FLOW_AX) * 2, (12 + FLOW_AY) + (-8 + FLOW_AY));
+    ctx.strokeRect(-FLOW_BOUNDS.xMax, FLOW_BOUNDS.yMin, FLOW_BOUNDS.xMax * 2, FLOW_BOUNDS.yMax - FLOW_BOUNDS.yMin);
 
-    // Blue: visual max reach → x: -36..+36, y: 17..33
+    // Blue: visual max reach (derived from VISUAL_BOUNDS)
     ctx.strokeStyle = 'rgba(78,142,247,0.6)';
-    ctx.strokeRect(-(30 + VIS_AX), 22 - VIS_AY, (30 + VIS_AX) * 2, 6 + VIS_AY * 2);
+    ctx.strokeRect(-VISUAL_BOUNDS.xMax, VISUAL_BOUNDS.yMin, VISUAL_BOUNDS.xMax * 2, VISUAL_BOUNDS.yMax - VISUAL_BOUNDS.yMin);
 
     // Force lines: each yellow → each inner node, opacity pulses with breathe-in
     if (_liveNodes) {

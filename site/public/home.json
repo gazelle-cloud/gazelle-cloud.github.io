@@ -40,7 +40,7 @@
     {
       "id": "deploy",
       "type": "flow",
-      "label": "Deploy",
+      "label": "Hello world",
       "description": "A compliant landing zone is provisioned automatically from the approved profile."
     },
     {
