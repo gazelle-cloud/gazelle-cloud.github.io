@@ -3,6 +3,43 @@ import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
 import { PALETTE, RENDER, FONT_MONO, linkEnds, OpenSourceNote } from '/shell.js';
 import React from 'react';
 
+// ── live data from GitHub ─────────────────────────────────────────────────────
+const GH_BASE = 'https://api.github.com/repos/gazelle-cloud/Azure-landing-zones/contents/knowledge-graph';
+
+async function ghFetch(sub) {
+  const listing = await fetch(`${GH_BASE}/${sub}`).then(r => r.json());
+  return Promise.all(
+    listing.filter(f => f.type === 'file' && f.name.endsWith('.json'))
+           .map(f => fetch(f.download_url).then(r => r.json()))
+  );
+}
+
+async function getData() {
+  const KEY = 'kg-v1';
+  const hit = sessionStorage.getItem(KEY);
+  if (hit) return JSON.parse(hit);
+
+  const [principles, decisions] = await Promise.all([
+    ghFetch('guiding-principles'),
+    ghFetch('decisions'),
+  ]);
+  const nodes = [
+    ...principles.map(p => ({ ...p, type: 'guiding-principle' })),
+    ...decisions.map(d => ({ ...d, type: 'decision' })),
+  ];
+  const links = [];
+  principles.forEach(p =>
+    (p.decisions ?? []).forEach(id =>
+      links.push({ source: p.id, target: id, relationship: 'related' })));
+  decisions.forEach(d =>
+    (d.links ?? []).forEach(l =>
+      links.push({ source: d.id, target: l.id, relationship: 'related', note: l.note })));
+
+  const raw = { nodes, links };
+  sessionStorage.setItem(KEY, JSON.stringify(raw));
+  return raw;
+}
+
 // ── idle panel ────────────────────────────────────────────────────────────────
 function IdlePanel({ theme }) {
   return React.createElement('div', {
@@ -96,7 +133,7 @@ function panel(node, graph, { setFocusedId, theme }) {
 mount({
   activeHref: '/knowledge-graph/',
 
-  localJson: '/knowledge-graph.json',
+  getData,
 
   types: {
     'guiding-principle': { palette: 'ENTRY', label: 'guiding principle' },
