@@ -437,8 +437,11 @@ export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId, on
 //   - a bold node ID           (info-text, high-contrast)
 // Usage:
 //   <DetailHeader typeLabel={TYPE_LABELS[activeNode.type]} nodeId={activeNode.id} theme={theme} />
-export function DetailHeader({ nodeId }) {
-  return React.createElement('div', { className: 'info-label', style: { marginTop: 0 } }, nodeId);
+export function DetailHeader({ nodeId, href }) {
+  const inner = href
+    ? React.createElement('a', { href, style: { color: 'inherit', textDecoration: 'underline' } }, nodeId)
+    : nodeId;
+  return React.createElement('div', { className: 'info-label', style: { marginTop: 0 } }, inner);
 }
 
 // ── useMousePos ───────────────────────────────────────────────────────────────

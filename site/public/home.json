@@ -1,0 +1,72 @@
+{
+  "nodes": [
+    {
+      "id": "no-human-touch",
+      "type": "principle",
+      "label": "no human touch",
+      "description": "Every platform operation is fully automated. No manual steps, no human approvals in the critical path."
+    },
+    {
+      "id": "no-fixed-cost",
+      "type": "principle",
+      "label": "no fixed cost",
+      "description": "The platform has zero cost when idle. Compute, networking, and tooling scale to zero outside active use."
+    },
+    {
+      "id": "no-platform-ops",
+      "type": "principle",
+      "label": "no platform ops",
+      "description": "The platform operates itself. No dedicated ops team, no on-call rotations, no runbooks."
+    },
+    {
+      "id": "no-unapproved-resources",
+      "type": "principle",
+      "label": "no unapproved resources",
+      "description": "Only pre-approved resource types can be deployed. Policy enforcement is automated and unbypassable."
+    },
+    {
+      "id": "join",
+      "type": "flow",
+      "label": "Join",
+      "description": "An application team joins the platform by raising a pull request with their profile.",
+      "href": "/knowledge-graph/landing-zone-application-profile/"
+    },
+    {
+      "id": "request",
+      "type": "flow",
+      "label": "Request",
+      "description": "The platform reviews the application profile and validates it against the design decisions."
+    },
+    {
+      "id": "deploy",
+      "type": "flow",
+      "label": "Hello world",
+      "description": "A compliant landing zone is provisioned automatically from the approved profile."
+    },
+    {
+      "id": "knowledge-graph",
+      "type": "visual",
+      "label": "Knowledge Graph",
+      "description": "Captures the reasoning behind every platform decision.",
+      "href": "/knowledge-graph/"
+    },
+    {
+      "id": "operations",
+      "type": "visual",
+      "label": "Operations",
+      "description": "How AI operates the platform — decisions to respect, files to touch, sequence to follow.",
+      "href": "/operations/"
+    },
+    {
+      "id": "big-bang",
+      "type": "visual",
+      "label": "Big Bang",
+      "description": "Workflows that bring the platform from nothing to life.",
+      "href": "/bigbang/"
+    }
+  ],
+  "links": [
+    { "source": "join",    "target": "request" },
+    { "source": "request", "target": "deploy"  }
+  ]
+}
