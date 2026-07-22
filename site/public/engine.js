@@ -136,9 +136,12 @@ export async function mount(config) {
       !searchFocused && activeNode &&
         React.createElement(CornerPanel, { node: activeNode, theme },
           React.createElement(DetailHeader, {
-            nodeId: config.nodeLabel
-              ? config.nodeLabel(activeNode)
-              : activeNode.id.replaceAll('-', ' '),
+            nodeId: config.panelLabel
+              ? config.panelLabel(activeNode)
+              : config.nodeLabel
+                ? config.nodeLabel(activeNode)
+                : activeNode.id.replaceAll('-', ' '),
+            href: config.nodeHref ? config.nodeHref(activeNode) : undefined,
           }),
           panelContent,
         ),
@@ -158,6 +161,7 @@ export async function mount(config) {
         onBackgroundClick: handleBackgroundClick,
         nodeCanvasObject:  paintNode,
         nodePointerAreaPaint,
+        ...(config.onRenderFramePost ? { onRenderFramePost: config.onRenderFramePost } : {}),
       }),
     );
   }
