@@ -22,7 +22,7 @@ const HOME_NODES = {
   'no-unapproved-resources': { type:'principle', corner:[ 1, 1], wx:0.10,wy:0.14,px:1.05,py:3.14 },
 
   // ── Flow (green) ─────────────────────────────────────────────────────────────
-  join:    { type:'flow', cx:-28, cy:-12, wx:0.19,wy:0.33,px:0.00,py:0.00, ax:4,ay:4, spring:0.06, kgNode:'landing-zone-join-the-platform' },
+  join:    { type:'flow', cx:-28, cy:-12, wx:0.19,wy:0.33,px:0.00,py:0.00, ax:4,ay:4, spring:0.06, kgNode:'landing-zone-platform-members' },
   request: { type:'flow', cx:  0, cy: -8, wx:0.27,wy:0.18,px:2.09,py:1.05 },
   deploy:  { type:'flow', cx: 28, cy:-12, wx:0.23,wy:0.38,px:4.19,py:2.09,                         kgNode:'landing-zone-getting-started'    },
 
@@ -101,15 +101,84 @@ function IdlePanel({ theme }) {
 }
 
 // ── shared JSON cache ─────────────────────────────────────────────────────────
+// _fetchFns lets page-level code register custom fetchers for URLs that are no
+// longer static files (knowledge-graph.json, operations.json). Falls back to a
+// plain fetch for everything else (bigbang.json, etc.).
 const _jsonCache = {};
+const _fetchFns  = {};
+
 function fetchJson(url) {
   if (!_jsonCache[url]) {
     const entry = { data: null };
-    entry.promise = fetch(url).then(r => r.json()).then(d => { entry.data = d; return d; });
+    const fn    = _fetchFns[url] ?? (() => fetch(url).then(r => r.json()));
+    entry.promise = fn().then(d => { entry.data = d; return d; });
     _jsonCache[url] = entry;
   }
   return _jsonCache[url];
 }
+
+// ── GitHub fetch helpers ───────────────────────────────────────────────────────
+const GH_BASE = 'https://api.github.com/repos/gazelle-cloud/Azure-landing-zones/contents/knowledge-graph';
+
+async function ghFetch(sub) {
+  const listing = await fetch(`${GH_BASE}/${sub}`).then(r => r.json());
+  return Promise.all(
+    listing.filter(f => f.type === 'file' && f.name.endsWith('.json'))
+           .map(f => fetch(f.download_url).then(r => r.json()))
+  );
+}
+
+// knowledge-graph.json — derive from raw GH entities, cache in sessionStorage
+_fetchFns['/knowledge-graph.json'] = async () => {
+  const KEY = 'kg-v1';
+  const hit = sessionStorage.getItem(KEY);
+  if (hit) return JSON.parse(hit);
+  const [principles, decisions] = await Promise.all([
+    ghFetch('guiding-principles'),
+    ghFetch('decisions'),
+  ]);
+  const nodes = [
+    ...principles.map(p => ({ ...p, type: 'guiding-principle' })),
+    ...decisions.map(d => ({ ...d, type: 'decision' })),
+  ];
+  const links = [];
+  principles.forEach(p =>
+    (p.decisions ?? []).forEach(id =>
+      links.push({ source: p.id, target: id, relationship: 'related' })));
+  decisions.forEach(d =>
+    (d.links ?? []).forEach(l =>
+      links.push({ source: d.id, target: l.id, relationship: 'related', note: l.note })));
+  const data = { nodes, links };
+  sessionStorage.setItem(KEY, JSON.stringify(data));
+  return data;
+};
+
+// operations.json — derive from raw GH entities, cache in sessionStorage
+_fetchFns['/operations.json'] = async () => {
+  const KEY = 'ops-v1';
+  const hit = sessionStorage.getItem(KEY);
+  if (hit) return JSON.parse(hit);
+  const [operations, allDecisions] = await Promise.all([
+    ghFetch('operations'),
+    ghFetch('decisions'),
+  ]);
+  const decMap    = new Map(allDecisions.map(d => [d.id, d]));
+  const refDecIds = new Set(operations.flatMap(op => op.decisions ?? []));
+  const refFiles  = new Set(operations.flatMap(op => op.files ?? []));
+  const nodes = [
+    ...operations.map(op => ({ ...op, type: 'operation' })),
+    ...[...refDecIds].map(id => ({ ...(decMap.get(id) ?? { id }), type: 'decision' })),
+    ...[...refFiles].map(id => ({ id, type: 'file' })),
+  ];
+  const links = [];
+  operations.forEach(op => {
+    (op.decisions ?? []).forEach(id => links.push({ source: op.id, target: id, type: 'reasoning' }));
+    (op.files ?? []).forEach(id  => links.push({ source: op.id, target: id, type: 'file' }));
+  });
+  const data = { nodes, links };
+  sessionStorage.setItem(KEY, JSON.stringify(data));
+  return data;
+};
 
 // Stable hook — null url → returns null immediately, no fetch
 function useJson(url) {

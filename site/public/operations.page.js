@@ -6,6 +6,46 @@ import React from 'react';
 const INNER_R = 70;
 const OUTER_R = 160;
 
+// ── live data from GitHub ─────────────────────────────────────────────────────
+const GH_BASE = 'https://api.github.com/repos/gazelle-cloud/Azure-landing-zones/contents/knowledge-graph';
+
+async function ghFetch(sub) {
+  const listing = await fetch(`${GH_BASE}/${sub}`).then(r => r.json());
+  return Promise.all(
+    listing.filter(f => f.type === 'file' && f.name.endsWith('.json'))
+           .map(f => fetch(f.download_url).then(r => r.json()))
+  );
+}
+
+async function getData() {
+  const KEY = 'ops-v1';
+  const hit = sessionStorage.getItem(KEY);
+  if (hit) return JSON.parse(hit);
+
+  const [operations, allDecisions] = await Promise.all([
+    ghFetch('operations'),
+    ghFetch('decisions'),
+  ]);
+  const decMap     = new Map(allDecisions.map(d => [d.id, d]));
+  const refDecIds  = new Set(operations.flatMap(op => op.decisions ?? []));
+  const refFiles   = new Set(operations.flatMap(op => op.files ?? []));
+
+  const nodes = [
+    ...operations.map(op => ({ ...op, type: 'operation' })),
+    ...[...refDecIds].map(id => ({ ...(decMap.get(id) ?? { id }), type: 'decision' })),
+    ...[...refFiles].map(id => ({ id, type: 'file' })),
+  ];
+  const links = [];
+  operations.forEach(op => {
+    (op.decisions ?? []).forEach(id => links.push({ source: op.id, target: id, type: 'reasoning' }));
+    (op.files ?? []).forEach(id  => links.push({ source: op.id, target: id, type: 'file' }));
+  });
+
+  const raw = { nodes, links };
+  sessionStorage.setItem(KEY, JSON.stringify(raw));
+  return raw;
+}
+
 // ── idle panel ────────────────────────────────────────────────────────────────
 function IdlePanel({ theme }) {
   return React.createElement('div', {
@@ -131,7 +171,7 @@ function nodeLabel(node) {
 mount({
   activeHref: '/operations/',
 
-  localJson: '/operations.json',
+  getData,
 
   types: {
     'operation': { palette: 'ENTRY',     label: 'operation'      },

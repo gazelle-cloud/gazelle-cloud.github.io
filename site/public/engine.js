@@ -14,7 +14,9 @@ export async function mount(config) {
   setupLayout();
 
   // ── fetch data ──────────────────────────────────────────────────────────────
-  const raw = await fetch(config.localJson).then(r => r.json());
+  const raw = config.getData
+    ? await config.getData()
+    : await fetch(config.localJson).then(r => r.json());
 
   normalizeNodeWeights(raw);
   if (config.prepare) config.prepare(raw);
