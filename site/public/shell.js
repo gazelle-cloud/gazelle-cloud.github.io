@@ -383,7 +383,7 @@ export function OpenSourceNote() {
       target: '_blank',
       rel: 'noopener noreferrer',
       style: { color: 'inherit', textDecoration: 'underline' },
-    }, 'Open source — view on GitHub'),
+    }, 'Source on GitHub'),
     ),
   );
 }
