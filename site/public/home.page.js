@@ -80,7 +80,7 @@ function IdlePanel({ theme }) {
     React.createElement('p', {
       className: 'info-text',
       style: { margin: '0 0 4px', opacity: 0.7 },
-    }, 'Azure landing zones at the speed of code'),
+    }, 'A complete, reasoned implementation of Azure landing zones designed so the platform team isn\'t needed to operate them.'),
     React.createElement('hr', {
       style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '12px 0' },
     }),
