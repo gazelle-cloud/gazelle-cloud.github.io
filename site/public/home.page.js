@@ -1,5 +1,5 @@
 import { mount } from '/engine.js';
-import { PALETTE, FONT_MONO, OpenSourceNote, linkEnds } from '/shell.js';
+import { PALETTE, FONT_MONO, OpenSourceNote, DetailHeader, linkEnds } from '/shell.js';
 import React from 'react';
 
 // ── animation data ─────────────────────────────────────────────────────────────
@@ -67,35 +67,53 @@ function nodePosition(n, t) {
 }
 
 // ── idle panel ────────────────────────────────────────────────────────────────
-function IdlePanel({ theme }) {
+const BLOCK_STYLE = { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' };
+const ROW_STYLE   = { paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' };
+
+function linkRow(label, href, color, nodeId, setHoveredId) {
+  const inner = href
+    ? React.createElement('a', { href, style: { color, fontFamily: FONT_MONO, fontSize: 13 } }, '\u2192 ' + label)
+    : React.createElement('span', { style: { color, fontFamily: FONT_MONO, fontSize: 13, opacity: 0.5 } }, '\u2192 ' + label);
+  return React.createElement('div', {
+    style: ROW_STYLE,
+    onMouseEnter: () => setHoveredId(nodeId),
+    onMouseLeave: () => setHoveredId(null),
+  }, inner);
+}
+
+function IdlePanel({ theme, setHoveredId }) {
+  const h = setHoveredId ?? (() => {});
   return React.createElement('div', {
     className: 'corner-panel' + (theme === 'light' ? ' light' : ''),
   },
-    React.createElement('h1', {
-      style: { margin: '0 0 4px', padding: 0, fontSize: 20, fontWeight: 500, lineHeight: 1.2 },
-    },
-      'Gazelle ',
-      React.createElement('span', { style: { color: PALETTE.ENTRY } }, 'Cloud'),
-    ),
+    React.createElement(DetailHeader, { nodeId: 'Gazelle Cloud' }),
     React.createElement('p', {
       className: 'info-text',
-      style: { margin: '0 0 4px', opacity: 0.7 },
-    }, 'Azure landing zones at the speed of code'),
-    React.createElement('hr', {
-      style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '12px 0' },
-    }),
-    React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-      React.createElement('span', { style: { color: PALETTE.ENTRY } }, '● '),
-      'Platform rules',
+      style: { margin: '0 0 4px' },
+    }, 'A complete, reasoned implementation of Azure landing zones designed so the platform team isn\'t needed to operate them.'),
+
+    React.createElement('div', { className: 'info-label', style: { color: PALETTE.ENTRY } }, 'Platform rules'),
+    React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
+      linkRow('no human touch',          '/knowledge-graph/no-human-touch/',          PALETTE.ENTRY, 'no-human-touch',          h),
+      linkRow('no fixed cost',           '/knowledge-graph/no-fixed-cost/',           PALETTE.ENTRY, 'no-fixed-cost',           h),
+      linkRow('no platform ops',         '/knowledge-graph/no-platform-ops/',         PALETTE.ENTRY, 'no-platform-ops',         h),
+      linkRow('no unapproved resources', '/knowledge-graph/no-unapproved-resources/', PALETTE.ENTRY, 'no-unapproved-resources', h),
     ),
-    React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-      React.createElement('span', { style: { color: PALETTE.CONNECTOR } }, '● '),
-      'From nothing to hello-world',
+
+    React.createElement('div', { className: 'info-label', style: { color: PALETTE.CONNECTOR } }, 'Getting Started'),
+    React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
+      linkRow('join the platform', '/knowledge-graph/landing-zone-platform-members/', PALETTE.CONNECTOR, 'join',    h),
+      linkRow('own landing zones', null,                                               PALETTE.CONNECTOR, 'request', h),
+      linkRow('deploy hello world', '/knowledge-graph/landing-zone-getting-started/', PALETTE.CONNECTOR, 'deploy',  h),
     ),
-    React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-      React.createElement('span', { style: { color: PALETTE.LEAF } }, '● '),
-      'Visualisations',
+
+    React.createElement('div', { className: 'info-label', style: { color: PALETTE.LEAF } }, 'visuals:'),
+    React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
+      linkRow('Knowledge Graph', '/knowledge-graph/', PALETTE.LEAF, 'knowledge-graph', h),
+      linkRow('Operations',      '/operations/',      PALETTE.LEAF, 'operations',      h),
+      linkRow('Big Bang',        '/bigbang/',         PALETTE.LEAF, 'big-bang',        h),
     ),
+
     React.createElement(OpenSourceNote),
   );
 }
@@ -369,7 +387,11 @@ mount({
     return { lx: node.x + gap, ly: node.y, align: 'left' };
   },
 
-  nodeLabel: node => node.label ?? node.id.replaceAll('-', ' '),
+  nodeLabel(node) {
+    if (node.id === 'request') return 'Own';
+    if (node.id === 'deploy')  return 'Hello World';
+    return node.label ?? node.id.replaceAll('-', ' ');
+  },
 
   panelLabel(node) {
     const desc = HOME_NODES[node.id];

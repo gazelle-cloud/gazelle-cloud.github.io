@@ -48,6 +48,7 @@ export async function mount(config) {
     );
 
     const [searchFocused, setSearchFocused] = React.useState(false);
+    const [panelHoverId, setPanelHoverId]   = React.useState(null);
 
     React.useEffect(() => {
       const hash = window.location.hash.slice(1);
@@ -82,7 +83,7 @@ export async function mount(config) {
       ctx.globalAlpha = dimmed ? RENDER.dimmedAlpha : 1;
       ctx.beginPath();
       ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
-      ctx.fillStyle = isActive ? activeColor : (typeColors[node.type] ?? '#ccc');
+      ctx.fillStyle = isActive || node.id === panelHoverId ? activeColor : (typeColors[node.type] ?? '#ccc');
       ctx.fill();
 
       const showLabel = config.showLabel
@@ -105,7 +106,7 @@ export async function mount(config) {
 
       ctx.globalAlpha = 1;
       node.__r = r;
-    }, [activeId, neighbours, searchMatchIds, theme]);
+    }, [activeId, neighbours, searchMatchIds, theme, panelHoverId]);
 
     const panelContent = activeNode
       ? config.panel(activeNode, graph, { setFocusedId, theme, typeColors })
@@ -133,7 +134,7 @@ export async function mount(config) {
       ),
 
       !activeNode && !searchFocused && config.idlePanel &&
-        React.createElement(config.idlePanel, { theme }),
+        React.createElement(config.idlePanel, { theme, setHoveredId: setPanelHoverId }),
 
       !searchFocused && activeNode &&
         React.createElement(CornerPanel, { node: activeNode, theme },
