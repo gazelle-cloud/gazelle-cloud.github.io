@@ -23,7 +23,7 @@ const HOME_NODES = {
 
   // ── Flow (green) ─────────────────────────────────────────────────────────────
   join:    { type:'flow', cx:-28, cy:-12, wx:0.19,wy:0.33,px:0.00,py:0.00, ax:4,ay:4, spring:0.06, kgNode:'landing-zone-platform-members' },
-  request: { type:'flow', cx:  0, cy: -8, wx:0.27,wy:0.18,px:2.09,py:1.05 },
+  request: { type:'flow', cx:  0, cy: -8, wx:0.27,wy:0.18,px:2.09,py:1.05, kgNode:'landing-zone-ownership' },
   deploy:  { type:'flow', cx: 28, cy:-12, wx:0.23,wy:0.38,px:4.19,py:2.09,                         kgNode:'landing-zone-getting-started'    },
 
   // ── Visual (blue) ────────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ function IdlePanel({ theme, setHoveredId }) {
     React.createElement('div', { className: 'info-label', style: { color: PALETTE.CONNECTOR } }, 'Getting Started'),
     React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
       linkRow('join the platform', '/knowledge-graph/landing-zone-platform-members/', PALETTE.CONNECTOR, 'join',    h),
-      linkRow('own landing zones', null,                                               PALETTE.CONNECTOR, 'request', h),
+      linkRow('own landing zones', '/knowledge-graph/landing-zone-ownership/',         PALETTE.CONNECTOR, 'request', h),
       linkRow('deploy hello world', '/knowledge-graph/landing-zone-getting-started/', PALETTE.CONNECTOR, 'deploy',  h),
     ),
 
@@ -281,7 +281,6 @@ function NodePanel({ node }) {
 }
 
 function panel(node) {
-  if (node.type === 'request') return null;
   return React.createElement(NodePanel, { node });
 }
 
