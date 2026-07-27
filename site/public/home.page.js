@@ -90,7 +90,7 @@ function IdlePanel({ theme, setHoveredId }) {
     React.createElement('p', {
       className: 'info-text',
       style: { margin: '0 0 4px' },
-    }, 'A complete, reasoned implementation of Azure landing zones designed so the platform team isn\'t needed to operate them.'),
+    }, 'A complete Azure landing zones implementation designed so the platform team isn\'t needed to operate them.'),
 
     React.createElement('div', { className: 'info-label', style: { color: PALETTE.ENTRY } }, 'Platform rules'),
     React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
