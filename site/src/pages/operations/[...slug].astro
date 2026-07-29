@@ -25,7 +25,7 @@ const name  = node.id;
 const label = node.label || name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
 const desc  = (node.intent || '').slice(0, 155);
 ---
-<Base title={label} description={desc || undefined}>
+<Base title={label} description={desc || undefined} redirectTo="/operations/">
   <script is:inline define:vars={{ name }}>
     window.location.replace('/operations/#' + name);
   </script>
