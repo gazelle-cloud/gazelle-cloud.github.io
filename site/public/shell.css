@@ -6,7 +6,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
   --bg-color:    #1f2430;
   --viz-padding: 20px;
   --topbar-h:    48px;
-  --footer-h:    32px;
+  --footer-h:    48px;
   --panel-w:     360px;
   --panel-gap:   14px;
   --font-mono:   'Fira Code', 'Cascadia Code', 'Consolas', monospace;
@@ -55,14 +55,14 @@ body { background: var(--bg-color); display: flex; flex-direction: column; }
   z-index: 20;
 }
 .footer-item {
-  font: 12px/1 var(--font-mono);
+  font: 14px/1 'IBM Plex Sans', system-ui, sans-serif;
   color: rgba(155,175,215,0.45);
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.15s;
 }
 a.footer-item:hover { color: rgba(235,242,255,0.75); }
-.footer-sep { color: rgba(155,175,215,0.20); font-size: 12px; user-select: none; }
+.footer-sep { color: rgba(155,175,215,0.20); font-size: 14px; user-select: none; }
 #viz-pane {
   flex: 1 1 100%;
   position: relative;
