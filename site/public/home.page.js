@@ -92,7 +92,7 @@ function IdlePanel({ theme, setHoveredId }) {
       style: { margin: '0 0 4px' },
     }, 'A complete Azure landing zones implementation designed so the platform team isn\'t needed to operate them.'),
 
-    React.createElement('div', { className: 'info-label', style: { color: PALETTE.ENTRY } }, 'Platform rules'),
+    React.createElement('div', { className: 'info-label', style: { color: PALETTE.ENTRY } }, 'Gazelle nature'),
     React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
       linkRow('no human touch',          '/knowledge-graph/no-human-touch/',          PALETTE.ENTRY, 'no-human-touch',          h),
       linkRow('no fixed cost',           '/knowledge-graph/no-fixed-cost/',           PALETTE.ENTRY, 'no-fixed-cost',           h),
@@ -107,7 +107,7 @@ function IdlePanel({ theme, setHoveredId }) {
       linkRow('deploy hello world', '/knowledge-graph/landing-zone-getting-started/', PALETTE.CONNECTOR, 'deploy',  h),
     ),
 
-    React.createElement('div', { className: 'info-label', style: { color: PALETTE.LEAF } }, 'visuals:'),
+    React.createElement('div', { className: 'info-label', style: { color: PALETTE.LEAF } }, 'visuals'),
     React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
       linkRow('Knowledge Graph', '/knowledge-graph/', PALETTE.LEAF, 'knowledge-graph', h),
       linkRow('Operations',      '/operations/',      PALETTE.LEAF, 'operations',      h),
@@ -295,7 +295,7 @@ mount({
   localJson:  '/home.json',
 
   types: {
-    principle: { palette: 'ENTRY',     label: 'platform rules' },
+    principle: { palette: 'ENTRY',     label: 'gazelle nature' },
     flow:      { palette: 'CONNECTOR', label: 'from nothing to hello-world' },
     visual:    { palette: 'LEAF',      label: 'visualisations'    },
   },
