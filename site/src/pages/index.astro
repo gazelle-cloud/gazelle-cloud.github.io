@@ -6,4 +6,22 @@ import GraphPage from '../layouts/GraphPage.astro';
   fullTitle
   description="An interactive map of Azure landing zone — design decisions, platform operations, and deployment workflows visualised."
   page="/home.page.js"
-/>
+>
+  <div class="sr-only">
+    <h1>Gazelle Cloud — Azure Landing Zone</h1>
+    <p>
+      An interactive map of a lightweight Azure landing zone. Design decisions, platform operations,
+      and deployment workflows visualised as force-directed graphs.
+    </p>
+    <p>
+      Full machine-readable content is available at <a href="/llms.txt">llms.txt</a> and
+      <a href="/llms-full.txt">llms-full.txt</a>.
+    </p>
+    <h2>Sections</h2>
+    <ul>
+      <li><a href="/knowledge-graph/">Knowledge Graph</a> — guiding principles and design decisions that shape the platform</li>
+      <li><a href="/operations/">Operations</a> — standardised operations that manage the platform and the files they touch</li>
+      <li><a href="/bigbang/">Big Bang</a> — GitHub workflows and Bicep modules that deploy the landing zone</li>
+    </ul>
+  </div>
+</GraphPage>
