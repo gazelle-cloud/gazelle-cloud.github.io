@@ -151,8 +151,8 @@ export async function mount(config) {
 
       React.createElement(ForceGraph2D, {
         ref: fgRef,
-        width:  size.width,
-        height: size.height,
+        width:  config.maxCanvasWidth  ? Math.min(size.width,  config.maxCanvasWidth)  : size.width,
+        height: config.maxCanvasHeight ? Math.min(size.height, config.maxCanvasHeight) : size.height,
         graphData: graph,
         linkColor,
         linkDirectionalArrowLength: 0,

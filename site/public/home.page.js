@@ -300,6 +300,9 @@ mount({
     visual:    { palette: 'LEAF',      label: 'visualisations'    },
   },
 
+  maxCanvasWidth:  1080,
+  maxCanvasHeight: 680,
+
   dotRadius: () => 7,
   labelFontSize: () => 14,
 
