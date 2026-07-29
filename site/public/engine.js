@@ -27,6 +27,8 @@ export async function mount(config) {
     Object.entries(config.types).map(([t, cfg]) => [t, PALETTE[cfg.palette]])
   );
 
+  const nodeLabelFn = config.nodeLabel ?? (n => n.id.replaceAll('-', ' '));
+
   const dotRadius = node =>
     config.dotRadius ? config.dotRadius(node) : 4;
 
@@ -41,7 +43,7 @@ export async function mount(config) {
       setHoveredId, setFocusedId,
       onNodeClick, onBackgroundClick,
       searchQuery, setSearchQuery, searchMatchIds,
-    } = useGraphState(raw, typeKeys);
+    } = useGraphState(raw, typeKeys, nodeLabelFn);
 
     const handleBackgroundClick = useBraveClickFix(
       fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick
@@ -133,6 +135,7 @@ export async function mount(config) {
       React.createElement(NavBar, { activeHref: config.activeHref },
         React.createElement(SearchBox, {
           nodes: graph.nodes, searchQuery, setSearchQuery, setFocusedId,
+          nodeLabel: nodeLabelFn,
           onFocus: () => setSearchFocused(true),
           onBlur:  () => setSearchFocused(false),
         }),

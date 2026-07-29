@@ -185,7 +185,7 @@ export function useVizPaneSize(fgRef, padding = _cssPx('--viz-padding')) {
 // and ready-to-use onNodeClick / onBackgroundClick props.
 // Returns { activeId, graph, activeNode, neighbours,
 //           setHoveredId, setFocusedId, onNodeClick, onBackgroundClick }.
-export function useGraphState(raw, nodeTypes) {
+export function useGraphState(raw, nodeTypes, nodeLabel) {
   const [hoveredId, setHoveredId] = React.useState(null);
   const [focusedId, setFocusedId] = React.useState(null);
 
@@ -201,8 +201,11 @@ export function useGraphState(raw, nodeTypes) {
   const searchMatchIds = React.useMemo(() => {
     if (!searchQuery) return new Set();
     const q = searchQuery.toLowerCase();
-    return new Set(graph.nodes.filter(n => n.id.toLowerCase().includes(q)).map(n => n.id));
-  }, [searchQuery, graph.nodes]);
+    const labelOf = nodeLabel ?? (n => n.id.replaceAll('-', ' '));
+    return new Set(graph.nodes.filter(n =>
+      n.id.toLowerCase().includes(q) || labelOf(n).toLowerCase().includes(q)
+    ).map(n => n.id));
+  }, [searchQuery, graph.nodes, nodeLabel]);
 
   const activeNode = React.useMemo(() =>
     activeId ? graph.nodes.find(n => n.id === activeId) : null,
@@ -422,11 +425,12 @@ export function FooterBar() {
 // Usage:
 //   <SearchBox nodes={graph.nodes} searchQuery={searchQuery}
 //              setSearchQuery={setSearchQuery} setFocusedId={setFocusedId} />
-export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId, onFocus, onBlur }) {
+export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId, onFocus, onBlur, nodeLabel }) {
   const [open, setOpen] = React.useState(false);
   const inputRef = React.useRef(null);
+  const labelOf = nodeLabel ?? (n => n.id.replaceAll('-', ' '));
   const q       = searchQuery.toLowerCase();
-  const matches = q.length > 0 ? nodes.filter(n => n.id.toLowerCase().includes(q)) : nodes;
+  const matches = q.length > 0 ? nodes.filter(n => labelOf(n).toLowerCase().includes(q)) : nodes;
 
   return React.createElement('div', { className: 'search-box' },
     React.createElement('input', {
@@ -453,7 +457,7 @@ export function SearchBox({ nodes, searchQuery, setSearchQuery, setFocusedId, on
             setOpen(false);
             inputRef.current?.blur();
           },
-        }, n.id)
+        }, labelOf(n))
       )
     ),
   );
