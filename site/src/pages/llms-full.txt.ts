@@ -50,7 +50,7 @@ async function fetchCategory(category: string): Promise<any[]> {
 
 export async function GET() {
   const [principles, decisions, operations] = await Promise.all([
-    fetchCategory('guiding-principles'),
+    fetchCategory('nature'),
     fetchCategory('decisions'),
     fetchCategory('operations'),
   ]);
@@ -59,7 +59,7 @@ export async function GET() {
     `===============================================================================\n  ${heading}\n===============================================================================\n`;
 
   const lines: string[] = [
-    sep('Guiding Principles'),
+    sep('Nature'),
     ...principles.map(renderGuidingPrinciple),
     sep('Decisions'),
     ...decisions.map(renderDecision),

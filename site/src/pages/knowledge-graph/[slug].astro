@@ -16,7 +16,7 @@ export async function getStaticPaths() {
   }
 
   const [principles, decisions] = await Promise.all([
-    fetchCategory('guiding-principles', 'guiding-principle'),
+    fetchCategory('nature', 'nature'),
     fetchCategory('decisions', 'decision'),
   ]);
   const nodes = [...principles, ...decisions];

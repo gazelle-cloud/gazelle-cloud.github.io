@@ -152,11 +152,11 @@ _fetchFns['/knowledge-graph.json'] = async () => {
   const hit = sessionStorage.getItem(KEY);
   if (hit) return JSON.parse(hit);
   const [principles, decisions] = await Promise.all([
-    ghFetch('guiding-principles'),
+    ghFetch('nature'),
     ghFetch('decisions'),
   ]);
   const nodes = [
-    ...principles.map(p => ({ ...p, type: 'guiding-principle' })),
+    ...principles.map(p => ({ ...p, type: 'nature' })),
     ...decisions.map(d => ({ ...d, type: 'decision' })),
   ];
   const links = [];

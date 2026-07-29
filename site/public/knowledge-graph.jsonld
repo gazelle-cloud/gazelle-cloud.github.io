@@ -1272,7 +1272,7 @@
       ],
       "steps": [
         "Identify whether this is a new entry or an update to an existing one. For an update, read the existing file first.",
-        "Determine the type: guiding-principles, decisions, or operations.",
+        "Determine the type: nature, decisions, or operations.",
         "Draft the entry. For decisions: id matches filename; decision is a single clear statement; why explains the consequence of not following it; links are organic and unidirectional — each note answers 'how does this linked decision specifically affect or constrain this decision?'; violations are specific enough to detect in a code review; files list only files where a reviewer would look to verify the decision is respected.",
         "For links: only add one if the note would change how someone implements or reviews this decision. Drop it if the relationship is obvious from context alone.",
         "Present the complete draft to the user before writing any file.",
@@ -1281,7 +1281,7 @@
         "Open a PR."
       ],
       "files": [
-        "knowledge-graph/guiding-principles/",
+        "knowledge-graph/nature/",
         "knowledge-graph/decisions/",
         "knowledge-graph/operations/"
       ],

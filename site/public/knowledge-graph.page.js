@@ -20,11 +20,11 @@ async function getData() {
   if (hit) return JSON.parse(hit);
 
   const [principles, decisions] = await Promise.all([
-    ghFetch('guiding-principles'),
+    ghFetch('nature'),
     ghFetch('decisions'),
   ]);
   const nodes = [
-    ...principles.map(p => ({ ...p, type: 'guiding-principle' })),
+    ...principles.map(p => ({ ...p, type: 'nature' })),
     ...decisions.map(d => ({ ...d, type: 'decision' })),
   ];
   const links = [];
@@ -52,7 +52,7 @@ function IdlePanel({ theme }) {
         "Captures the reasoning behind every platform decision."),
       React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' } }),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-        React.createElement('span', { style: { color: PALETTE.ENTRY } }, 'Yellow'), ' = guiding principles'),
+        React.createElement('span', { style: { color: PALETTE.ENTRY } }, 'Yellow'), ' = nature'),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.LEAF } }, 'Blue'), ' = design decisions'),
     ),
@@ -94,7 +94,7 @@ function panel(node, graph, { setFocusedId, theme }) {
 
   function LinkedNode({ id, note, arrow, color }) {
     const linked = nodeById[id];
-    const isYellowInvolved = node.type === 'guiding-principle' || linked?.type === 'guiding-principle';
+    const isYellowInvolved = node.type === 'nature' || linked?.type === 'nature';
     const summary = linked?.decision || linked?.intent;
     return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 4, paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
       React.createElement('span', {
@@ -136,15 +136,15 @@ mount({
   getData,
 
   types: {
-    'guiding-principle': { palette: 'ENTRY', label: 'guiding principle' },
+    'nature': { palette: 'ENTRY', label: 'nature' },
     'decision':          { palette: 'LEAF',  label: 'design decision'   },
   },
 
   dotRadius: node => node.type === 'decision' ? 2 + node.__weight * 7 : 5,
 
   prepare(raw) {
-    // Pin guiding-principles on a rim
-    const rim = raw.nodes.filter(n => n.type === 'guiding-principle');
+    // Pin nature on a rim
+    const rim = raw.nodes.filter(n => n.type === 'nature');
     rim.forEach((n, i) => {
       const angle = (2 * Math.PI * i) / rim.length - Math.PI / 4;
       n.x = Math.cos(angle) * 105;
@@ -152,7 +152,7 @@ mount({
     });
     // Pin the highest-weight decision at the centre
     raw.nodes
-      .filter(n => n.type !== 'guiding-principle')
+      .filter(n => n.type !== 'nature')
       .sort((a, b) => b.__weight - a.__weight)
       .slice(0, 1)
       .forEach(n => { n.fx = 0; n.fy = 0; });
@@ -161,18 +161,18 @@ mount({
   forces(fg) {
     fg.d3Force('link').distance(60).strength(0.05);
     fg.d3Force('collision', forceCollide(n => (n.type === 'decision' ? 2 + n.__weight * 7 : 5) + 3));
-    fg.d3Force('charge').strength(n => n.type === 'guiding-principle' ? 0 : -5);
+    fg.d3Force('charge').strength(n => n.type === 'nature' ? 0 : -5);
     fg.d3Force('radial', forceRadial(
-      n => n.type === 'guiding-principle' ? 105 : (1 - n.__weight) * 110, 0, 0)
-      .strength(n => n.type === 'guiding-principle' ? 0.8 : 1.0));
+      n => n.type === 'nature' ? 105 : (1 - n.__weight) * 110, 0, 0)
+      .strength(n => n.type === 'nature' ? 0.8 : 1.0));
   },
 
   showLabel(node, { activeId, isNeighbour, isMatch }) {
-    return node.type === 'guiding-principle' || node.id === activeId || isNeighbour || isMatch;
+    return node.type === 'nature' || node.id === activeId || isNeighbour || isMatch;
   },
 
   labelPosition(node, r, gap) {
-    if (node.type === 'guiding-principle') {
+    if (node.type === 'nature') {
       const angle = Math.atan2(node.y, node.x);
       return {
         lx: node.x + Math.cos(angle) * gap,
@@ -184,7 +184,7 @@ mount({
   },
 
   labelFontSize(node) {
-    return node.type === 'guiding-principle' ? RENDER.labelFontSize + 1 : RENDER.labelFontSize;
+    return node.type === 'nature' ? RENDER.labelFontSize + 1 : RENDER.labelFontSize;
   },
 
   linkColor(l, { activeId, theme }) {
