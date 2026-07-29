@@ -55,6 +55,22 @@ export async function mount(config) {
       if (hash && graph.nodes.some(n => n.id === hash)) setFocusedId(hash);
     }, []);
 
+    React.useEffect(() => {
+      const handleClick = e => {
+        const canvas  = document.querySelector('#graph canvas');
+        const inCanvas = canvas && (e.target === canvas || canvas.contains(e.target));
+        const inPanel  = e.target.closest?.('.corner-panel');
+        if (!inCanvas && !inPanel) setFocusedId(null);
+      };
+      const handleKey = e => { if (e.key === 'Escape') setFocusedId(null); };
+      document.addEventListener('click', handleClick);
+      document.addEventListener('keydown', handleKey);
+      return () => {
+        document.removeEventListener('click', handleClick);
+        document.removeEventListener('keydown', handleKey);
+      };
+    }, [setFocusedId]);
+
     const physicsProps = useGraphPhysics(fgRef, graph, fg => {
       config.forces(fg, graph.nodes, raw);
     });
