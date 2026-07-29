@@ -111,6 +111,10 @@ export function setupLayout() {
   layout.id = 'layout';
   layout.innerHTML = '<div id="viz-pane"><div id="graph"></div></div>';
   document.body.appendChild(layout);
+
+  const footer = document.createElement('footer');
+  footer.id = 'footer-bar';
+  document.body.appendChild(footer);
 }
 
 // ── useGraphPhysics ───────────────────────────────────────────────────────────
@@ -385,6 +389,37 @@ export function OpenSourceNote() {
       style: { color: 'inherit', textDecoration: 'underline' },
     }, 'Source on GitHub'),
     ),
+  );
+}
+
+// ── FooterBar ─────────────────────────────────────────────────────────────────
+// Portals into #footer-bar (created by setupLayout).
+// Renders a centred, muted one-line strip: open source · no cookies · LLMS.txt · MIT
+export function FooterBar() {
+  const container = document.getElementById('footer-bar');
+  if (!container) return null;
+  const sep = (key) => React.createElement('span', { key, className: 'footer-sep' }, '·');
+  return createPortal(
+    React.createElement(React.Fragment, null,
+      React.createElement('a', {
+        className: 'footer-item',
+        href: 'https://github.com/gazelle-cloud/gazelle-cloud.github.io',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }, 'Built on open source'),
+      sep('s1'),
+      React.createElement('span', { className: 'footer-item' }, 'No cookies'),
+      sep('s2'),
+      React.createElement('a', {
+        className: 'footer-item',
+        href: '/llms-full.txt',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }, 'LLMS.txt'),
+      sep('s3'),
+      React.createElement('span', { className: 'footer-item' }, 'MIT'),
+    ),
+    container,
   );
 }
 

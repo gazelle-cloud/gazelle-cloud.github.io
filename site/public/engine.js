@@ -6,7 +6,7 @@ import {
   useTheme, setupLayout, useVizPaneSize, useGraphPhysics,
   RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds,
   useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint,
-  paintNodeColors,
+  paintNodeColors, FooterBar,
 } from '/shell.js';
 
 // ── mount ─────────────────────────────────────────────────────────────────────
@@ -166,6 +166,8 @@ export async function mount(config) {
         nodePointerAreaPaint,
         ...(config.onRenderFramePost ? { onRenderFramePost: config.onRenderFramePost } : {}),
       }),
+
+      React.createElement(FooterBar),
     );
   }
 
