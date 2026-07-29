@@ -394,7 +394,7 @@ export function OpenSourceNote() {
 
 // ── FooterBar ─────────────────────────────────────────────────────────────────
 // Portals into #footer-bar (created by setupLayout).
-// Renders a centred, muted one-line strip: open source · no cookies · LLMS.txt · MIT
+// Renders a centred, muted one-line strip: open source · no cookies · MIT
 export function FooterBar() {
   const container = document.getElementById('footer-bar');
   if (!container) return null;
@@ -410,13 +410,6 @@ export function FooterBar() {
       sep('s1'),
       React.createElement('span', { className: 'footer-item' }, 'No cookies'),
       sep('s2'),
-      React.createElement('a', {
-        className: 'footer-item',
-        href: '/llms-full.txt',
-        target: '_blank',
-        rel: 'noopener noreferrer',
-      }, 'LLMS.txt'),
-      sep('s3'),
       React.createElement('span', { className: 'footer-item' }, 'MIT'),
     ),
     container,
