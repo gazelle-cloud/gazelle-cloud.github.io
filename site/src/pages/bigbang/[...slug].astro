@@ -1,5 +1,5 @@
 ---
-import Base from '../../layouts/Base.astro';
+import GraphPage from '../../layouts/GraphPage.astro';
 import data from '../../../public/bigbang.json';
 
 export function getStaticPaths() {
@@ -14,9 +14,9 @@ const name = node.id;
 const label = node.label || name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
 const desc = (node.intent || node.decision || node.jobs || '').slice(0, 155);
 ---
-<Base title={label} description={desc || undefined}>
+<GraphPage title={label} description={desc || undefined} page="/bigbang.page.js">
   <script is:inline define:vars={{ name }}>
-    window.location.replace('/bigbang/#' + name);
+    history.replaceState(null, '', '#' + name);
   </script>
 
   <div class="sr-only">
@@ -53,4 +53,4 @@ const desc = (node.intent || node.decision || node.jobs || '').slice(0, 155);
 
     <p><a href="/bigbang/">← Back to bigbang</a></p>
   </div>
-</Base>
+</GraphPage>

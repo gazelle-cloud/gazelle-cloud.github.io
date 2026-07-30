@@ -97,9 +97,9 @@ function panel(node, graph, { setFocusedId, theme }) {
     const isYellowInvolved = node.type === 'nature' || linked?.type === 'nature';
     const summary = linked?.decision || linked?.intent;
     return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 4, paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
-      React.createElement('span', {
-        style: { color, fontFamily: FONT_MONO, fontSize: 13, cursor: 'pointer' },
-        onClick: () => setFocusedId(id),
+      React.createElement('a', {
+        href: `/knowledge-graph/${id}/`,
+        style: { color, fontFamily: FONT_MONO, fontSize: 13, textDecoration: 'none' },
       }, arrow + ' ' + id.replaceAll('-', ' ')),
       note && React.createElement('div', { style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12 } }, note),
       isYellowInvolved && summary && React.createElement('div', { style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12 } }, summary),

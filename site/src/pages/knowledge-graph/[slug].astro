@@ -1,5 +1,5 @@
 ---
-import Base from '../../layouts/Base.astro';
+import GraphPage from '../../layouts/GraphPage.astro';
 
 export async function getStaticPaths() {
   const { DATA_REPO, BASE_PATH } = await import('../../data');
@@ -31,9 +31,9 @@ const name  = node.id;
 const label = node.label || name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
 const desc  = (node.intent || node.decision || node.why || '').slice(0, 155);
 ---
-<Base title={label} description={desc || undefined}>
+<GraphPage title={label} description={desc || undefined} page="/knowledge-graph.page.js">
   <script is:inline define:vars={{ name }}>
-    window.location.replace('/knowledge-graph/#' + name);
+    history.replaceState(null, '', '#' + name);
   </script>
 
   <div class="sr-only">
@@ -99,4 +99,4 @@ const desc  = (node.intent || node.decision || node.why || '').slice(0, 155);
 
     <p><a href="/knowledge-graph/">← Back to knowledge graph</a></p>
   </div>
-</Base>
+</GraphPage>
