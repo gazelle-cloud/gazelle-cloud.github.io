@@ -1,5 +1,5 @@
 import { mount } from '/engine.js';
-import { forceCollide, forceRadial } from 'https://esm.sh/d3-force';
+import { forceCollide } from 'https://esm.sh/d3-force';
 import { PALETTE, RENDER, FONT_MONO, linkEnds, OpenSourceNote } from '/shell.js';
 import React from 'react';
 
@@ -129,6 +129,27 @@ function panel(node, graph, { setFocusedId, theme }) {
   return React.createElement(React.Fragment, null, ...children);
 }
 
+// ── box constraint ────────────────────────────────────────────────────────────
+const BOX_W = 250, BOX_H = 170;
+
+// Hard-wall force: clamps every unpinned node inside the nature rectangle
+function forceWalls(W, H) {
+  let nodes;
+  function force() {
+    for (const n of nodes) {
+      if (n.fx != null) continue;                          // skip pinned nature nodes
+      const r = 2 + (n.__weight ?? 0) * 7 + 12;           // node radius + gap
+      const mx = W / 2 - r, my = H / 2 - r;
+      if (n.x >  mx) { n.x =  mx; if (n.vx > 0) n.vx = 0; }
+      if (n.x < -mx) { n.x = -mx; if (n.vx < 0) n.vx = 0; }
+      if (n.y >  my) { n.y =  my; if (n.vy > 0) n.vy = 0; }
+      if (n.y < -my) { n.y = -my; if (n.vy < 0) n.vy = 0; }
+    }
+  }
+  force.initialize = ns => { nodes = ns; };
+  return force;
+}
+
 // ── page config ───────────────────────────────────────────────────────────────
 mount({
   activeHref: '/knowledge-graph/',
@@ -143,29 +164,28 @@ mount({
   dotRadius: node => node.type === 'decision' ? 2 + node.__weight * 7 : 5,
 
   prepare(raw) {
-    // Pin nature on a rim
-    const rim = raw.nodes.filter(n => n.type === 'nature');
-    rim.forEach((n, i) => {
-      const angle = (2 * Math.PI * i) / rim.length - Math.PI / 4;
-      n.x = Math.cos(angle) * 105;
-      n.y = Math.sin(angle) * 105;
+    // Pin nature nodes evenly along the rectangle perimeter
+    const nature = raw.nodes.filter(n => n.type === 'nature');
+    const W = BOX_W, H = BOX_H;
+    const perimeter = 2 * (W + H);
+    nature.forEach((n, i) => {
+      const d = (i / nature.length) * perimeter;
+      if (d < W)            { n.fx = -W / 2 + d;        n.fy = -H / 2; }
+      else if (d < W + H)   { n.fx =  W / 2;            n.fy = -H / 2 + (d - W); }
+      else if (d < 2*W + H) { n.fx =  W / 2 - (d-W-H); n.fy =  H / 2; }
+      else                  { n.fx = -W / 2;            n.fy =  H / 2 - (d - 2*W - H); }
     });
-    // Pin the highest-weight decision at the centre
-    raw.nodes
-      .filter(n => n.type !== 'nature')
-      .sort((a, b) => b.__weight - a.__weight)
-      .slice(0, 1)
-      .forEach(n => { n.fx = 0; n.fy = 0; });
   },
 
   forces(fg) {
-    fg.d3Force('link').distance(60).strength(0.05);
-    fg.d3Force('collision', forceCollide(n => (n.type === 'decision' ? 2 + n.__weight * 7 : 5) + 3));
-    fg.d3Force('charge').strength(n => n.type === 'nature' ? 0 : -5);
-    fg.d3Force('radial', forceRadial(
-      n => n.type === 'nature' ? 105 : (1 - n.__weight) * 110, 0, 0)
-      .strength(n => n.type === 'nature' ? 0.8 : 1.0));
+    fg.d3Force('link').distance(65).strength(0.25);
+    fg.d3Force('collision', forceCollide(n => (n.type === 'decision' ? 2 + n.__weight * 7 : 5) + 14));
+    fg.d3Force('charge').strength(n => n.type === 'nature' ? 0 : -55);
+    fg.d3Force('walls', forceWalls(BOX_W, BOX_H));  // hard wall — no escapes
   },
+
+  warmupTicks: 400,
+  cooldownTime: 0,
 
   showLabel(node, { activeId, isNeighbour, isMatch }) {
     return node.type === 'nature' || node.id === activeId || isNeighbour || isMatch;
