@@ -31,7 +31,7 @@ const name  = node.id;
 const label = node.label || name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
 const desc  = (node.intent || node.decision || node.why || '').slice(0, 155);
 ---
-<Base title={label} description={desc || undefined} redirectTo="/knowledge-graph/">
+<Base title={label} description={desc || undefined}>
   <script is:inline define:vars={{ name }}>
     window.location.replace('/knowledge-graph/#' + name);
   </script>

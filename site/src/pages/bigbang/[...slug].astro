@@ -14,7 +14,7 @@ const name = node.id;
 const label = node.label || name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
 const desc = (node.intent || node.decision || node.jobs || '').slice(0, 155);
 ---
-<Base title={label} description={desc || undefined} redirectTo="/bigbang/">
+<Base title={label} description={desc || undefined}>
   <script is:inline define:vars={{ name }}>
     window.location.replace('/bigbang/#' + name);
   </script>
