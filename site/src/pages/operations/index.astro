@@ -3,14 +3,20 @@ import GraphPage from '../../layouts/GraphPage.astro';
 
 import { DATA_REPO, BASE_PATH } from '../../data';
 
+const token = import.meta.env.GITHUB_TOKEN;
+const headers: Record<string, string> = {
+  Accept: 'application/vnd.github+json',
+  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+};
+
 async function fetchCategory(category: string, type: string): Promise<any[]> {
-  const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/${category}`);
+  const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/${category}`, { headers });
   const listing: any[] = await res.json();
   if (!Array.isArray(listing)) return [];
   return Promise.all(
     listing
       .filter((f: any) => f.type === 'file' && f.name.endsWith('.json'))
-      .map((f: any) => fetch(f.download_url).then(r => r.json()).then((obj: any) => ({ ...obj, type })))
+      .map((f: any) => fetch(f.download_url, { headers }).then(r => r.json()).then((obj: any) => ({ ...obj, type })))
   );
 }
 

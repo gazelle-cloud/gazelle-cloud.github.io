@@ -4,7 +4,7 @@ import data from '../../../public/bigbang.json';
 
 export function getStaticPaths() {
   return data.nodes.map((n: any) => ({
-    params: { slug: n.id.replace(/\/+$/, '') },
+    params: { slug: n.id },
     props: { node: n },
   }));
 }

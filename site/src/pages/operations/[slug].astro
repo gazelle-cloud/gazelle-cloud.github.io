@@ -4,18 +4,24 @@ import GraphPage from '../../layouts/GraphPage.astro';
 export async function getStaticPaths() {
   const { DATA_REPO, BASE_PATH } = await import('../../data');
 
-  const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/operations`);
+  const token = import.meta.env.GITHUB_TOKEN;
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/operations`, { headers });
   const listing: any[] = await res.json();
   if (!Array.isArray(listing)) return [];
 
   const operations: any[] = await Promise.all(
     listing
       .filter((f: any) => f.type === 'file' && f.name.endsWith('.json'))
-      .map((f: any) => fetch(f.download_url).then(r => r.json()).then((obj: any) => ({ ...obj, type: 'operation' })))
+      .map((f: any) => fetch(f.download_url, { headers }).then(r => r.json()).then((obj: any) => ({ ...obj, type: 'operation' })))
   );
 
   return operations.map((n: any) => ({
-    params: { slug: n.id.replace(/\/+$/, '') },
+    params: { slug: n.id },
     props:  { node: n },
   }));
 }
