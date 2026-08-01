@@ -538,6 +538,26 @@ export function nodePointerAreaPaint(node, color, ctx) {
   ctx.fill();
 }
 
+// ── MobileNameplate ───────────────────────────────────────────────────────────
+// Thin 44px strip shown at the bottom on mobile when a node is active.
+// Hidden on desktop via CSS. Replaces the full CornerPanel on small screens.
+// If `href` is provided the whole strip is a link (navigates to slug page).
+//
+// Usage (engine.js):
+//   <MobileNameplate node={activeNode} typeLabel="design decision"
+//                    label="use azure policy" href="/knowledge-graph/id/" theme={theme} />
+export function MobileNameplate({ node, typeLabel, label, href, theme }) {
+  if (!node) return null;
+  const cls = `mobile-nameplate${theme === 'light' ? ' light' : ''}`;
+  const children = [
+    React.createElement('span', { key: 'l', className: 'mobile-nameplate-label' }, label),
+    href && React.createElement('span', { key: 'a', className: 'mobile-nameplate-arrow' }, '→'),
+  ].filter(Boolean);
+  return href
+    ? React.createElement('a', { className: cls, href }, ...children)
+    : React.createElement('div', { className: cls }, ...children);
+}
+
 // ── CornerPanel ───────────────────────────────────────────────────────────────
 // Fixed overlay panel anchored to the top-right corner of the viewport.
 // Invisible when `node` is null; scrollable when content is tall.

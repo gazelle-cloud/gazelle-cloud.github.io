@@ -5,7 +5,7 @@ import {
   NavBar, SearchBox, ThemeToggle, DetailHeader,
   useTheme, setupLayout, useVizPaneSize, useGraphPhysics,
   RENDER, PALETTE, normalizeNodeWeights, drawLabel, linkEnds,
-  useGraphState, useBraveClickFix, CornerPanel, nodePointerAreaPaint,
+  useGraphState, useBraveClickFix, CornerPanel, MobileNameplate, nodePointerAreaPaint,
   paintNodeColors, FooterBar,
 } from '/shell.js';
 
@@ -167,6 +167,21 @@ export async function mount(config) {
           }),
           panelContent,
         ),
+
+      !searchFocused && activeNode &&
+        React.createElement(MobileNameplate, {
+          node:      activeNode,
+          typeLabel: config.types[activeNode.type]?.label,
+          label:     config.nameplateLabel
+            ? config.nameplateLabel(activeNode)
+            : config.panelLabel
+              ? config.panelLabel(activeNode)
+              : config.nodeLabel
+                ? config.nodeLabel(activeNode)
+                : activeNode.id.replaceAll('-', ' '),
+          href:  config.nodeHref ? config.nodeHref(activeNode) : undefined,
+          theme,
+        }),
 
       React.createElement(ForceGraph2D, {
         ref: fgRef,

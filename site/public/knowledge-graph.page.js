@@ -220,6 +220,8 @@ mount({
     return (s === activeId || t === activeId) ? active : faded;
   },
 
+  nameplateLabel: node => node.decision ?? node.intent ?? node.id.replaceAll('-', ' '),
+
   idlePanel: IdlePanel,
   panel,
 });
