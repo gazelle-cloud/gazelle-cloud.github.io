@@ -314,6 +314,9 @@ a.footer-item:hover { color: rgba(235,242,255,0.75); }
 .node-tooltip.light .info-label { color: rgba(26,27,38,0.45); }
 .node-tooltip.light .info-text  { color: #1a1b26; }
 
+/* ── mobile nameplate (desktop: hidden) ─────────────────────────────────── */
+.mobile-nameplate { display: none; }
+
 /* ── mobile ─────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   #viz-pane { padding-right: 0; }
@@ -368,13 +371,37 @@ a.footer-item:hover { color: rgba(235,242,255,0.75); }
     box-shadow: 0 8px 32px rgba(0,0,0,0.1);
   }
 
-  /* ── corner panel reflows to a bottom sheet on mobile ───────────────── */
-  .corner-panel {
-    top: auto;
-    right: 0; left: 0; bottom: 0;
-    width: 100%;
-    max-height: 60vh;
-    border-radius: 16px 16px 0 0;
-    border-bottom: none;
+  /* ── footer + search hidden on mobile ───────────────────────────────── */
+  #footer-bar { display: none; }
+  .search-box  { display: none; }
+
+  /* ── corner panel hidden on mobile (nameplate takes over) ───────────── */
+  .corner-panel { display: none; }
+
+  /* ── mobile nameplate ────────────────────────────────────────────────── */
+  .mobile-nameplate {
+    display: flex;
+    align-items: flex-end;
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    padding: 12px 16px;
+    background: rgba(22, 26, 36, 0.97);
+    border-top: 1px solid rgba(155,175,215,0.15);
+    gap: 10px;
+    z-index: 10;
+    font: 14px/1.55 'IBM Plex Sans', system-ui, sans-serif;
+    color: #d4daf0;
+    text-decoration: none;
   }
+  .mobile-nameplate-label { flex: 1; }
+  .mobile-nameplate-arrow { flex-shrink: 0; color: rgba(155,175,215,0.55); }
+
+  [data-theme="light"] .mobile-nameplate {
+    background: rgba(245,245,240,0.97);
+    border-top-color: rgba(0,0,0,0.08);
+    color: #1a1b26;
+  }
+  [data-theme="light"] .mobile-nameplate-type  { color: rgba(26,27,38,0.45); }
+  [data-theme="light"] .mobile-nameplate-arrow { color: rgba(26,27,38,0.35); }
 }
