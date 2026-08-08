@@ -10,16 +10,16 @@ const BREATHE_FREQ = 0.12;
 const DRIFT_A = 6;          // wander within the corner zone, stay inside the box
 const FLOW_AX = 14, FLOW_AY = 10;
 const VIS_AX  = 10, VIS_AY  = 8;
-const REPULSE_DIST = 20;   // min centre-to-centre distance between non-principle dots
+const REPULSE_DIST = 20;   // min centre-to-centre distance between non-foundation dots
 const OUTBOUND_COLOR = '#fb923c';
 
 // Single descriptor table — every per-node property lives here.
 const HOME_NODES = {
-  // ── Principles (yellow, corners) ────────────────────────────────────────────
-  'no-human-touch':          { type:'principle', corner:[-1,-1], wx:0.11,wy:0.18,px:0.00,py:0.00 },
-  'no-fixed-cost':           { type:'principle', corner:[ 1,-1], wx:0.15,wy:0.10,px:2.09,py:1.05 },
-  'no-platform-ops':         { type:'principle', corner:[-1, 1], wx:0.13,wy:0.21,px:4.19,py:2.09 },
-  'no-unapproved-resources': { type:'principle', corner:[ 1, 1], wx:0.10,wy:0.14,px:1.05,py:3.14 },
+  // ── Foundations (yellow, corners) ───────────────────────────────────────────
+  'no-human-touch':          { type:'foundation', corner:[-1,-1], wx:0.11,wy:0.18,px:0.00,py:0.00 },
+  'no-fixed-cost':           { type:'foundation', corner:[ 1,-1], wx:0.15,wy:0.10,px:2.09,py:1.05 },
+  'no-platform-ops':         { type:'foundation', corner:[-1, 1], wx:0.13,wy:0.21,px:4.19,py:2.09 },
+  'no-unapproved-resources': { type:'foundation', corner:[ 1, 1], wx:0.10,wy:0.14,px:1.05,py:3.14 },
 
   // ── Flow (green) ─────────────────────────────────────────────────────────────
   join:    { type:'flow', cx:-28, cy:-12, wx:0.19,wy:0.33,px:0.00,py:0.00, ax:4,ay:4, spring:0.06, kgNode:'landing-zone-platform-members' },
@@ -49,7 +49,7 @@ const VISUAL_BOUNDS = groupBounds('visual', VIS_AX,  VIS_AY);
 function nodePosition(n, t) {
   const a = HOME_NODES[n.id];
   if (!a) return { x: 0, y: 0 };
-  if (a.type === 'principle') {
+  if (a.type === 'foundation') {
     const breathe = 1 + BREATHE_AMP * Math.sin(t * BREATHE_FREQ);
     const [sx, sy] = a.corner;
     // Subtract dot radius (5) so the dot edge, not center, stays inside the box.
@@ -92,7 +92,7 @@ function IdlePanel({ theme, setHoveredId }) {
       style: { margin: '0 0 4px' },
     }, 'A complete Azure landing zones implementation designed so the platform team isn\'t needed to operate them.'),
 
-    React.createElement('div', { className: 'info-label', style: { color: PALETTE.ENTRY } }, 'Gazelle nature'),
+    React.createElement('div', { className: 'info-label', style: { color: PALETTE.ENTRY } }, 'Gazelle foundations'),
     React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
       linkRow('no human touch',          '/knowledge-graph/no-human-touch/',          PALETTE.ENTRY, 'no-human-touch',          h),
       linkRow('no fixed cost',           '/knowledge-graph/no-fixed-cost/',           PALETTE.ENTRY, 'no-fixed-cost',           h),
@@ -148,21 +148,21 @@ async function ghFetch(sub) {
 
 // knowledge-graph.json — derive from raw GH entities, cache in sessionStorage
 _fetchFns['/knowledge-graph.json'] = async () => {
-  const KEY = 'kg-v1';
+  const KEY = 'kg-v2';
   const hit = sessionStorage.getItem(KEY);
   if (hit) return JSON.parse(hit);
-  const [principles, decisions] = await Promise.all([
-    ghFetch('nature'),
+  const [foundations, decisions] = await Promise.all([
+    ghFetch('foundations'),
     ghFetch('decisions'),
   ]);
   const nodes = [
-    ...principles.map(p => ({ ...p, type: 'nature' })),
+    ...foundations.map(f => ({ ...f, type: 'foundation' })),
     ...decisions.map(d => ({ ...d, type: 'decision' })),
   ];
   const links = [];
-  principles.forEach(p =>
-    (p.decisions ?? []).forEach(id =>
-      links.push({ source: p.id, target: id, relationship: 'related' })));
+  foundations.forEach(f =>
+    (f.decisions ?? []).forEach(id =>
+      links.push({ source: f.id, target: id, relationship: 'related' })));
   decisions.forEach(d =>
     (d.links ?? []).forEach(l =>
       links.push({ source: d.id, target: l.id, relationship: 'related', note: l.note })));
@@ -209,7 +209,7 @@ function useJson(url) {
 // ── unified node panel ────────────────────────────────────────────────────────
 function NodePanel({ node }) {
   const desc     = HOME_NODES[node.id] ?? {};
-  const kgUrl    = (node.type === 'principle' || desc.kgNode) ? '/knowledge-graph.json' : null;
+  const kgUrl    = (node.type === 'foundation' || desc.kgNode) ? '/knowledge-graph.json' : null;
   const kg       = useJson(kgUrl);
   const listData = useJson(desc.panelJson ?? null);
 
@@ -219,12 +219,12 @@ function NodePanel({ node }) {
   if (node.description && desc.panelJson)
     children.push(React.createElement('p', { key: 'desc', className: 'info-text', style: { marginTop: 0 } }, node.description));
 
-  // KG content (principle + mapped flow nodes)
+  // KG content (foundation + mapped flow nodes)
   if (kgUrl && !kg)
     return React.createElement('p', { className: 'info-text', style: { opacity: 0.5 } }, 'Loading\u2026');
 
   if (kg) {
-    const kgId   = node.type === 'principle' ? node.id : desc.kgNode;
+    const kgId   = node.type === 'foundation' ? node.id : desc.kgNode;
     const kgNode = kg.nodes.find(n => n.id === kgId);
     if (!kgNode) return null;
 
@@ -295,7 +295,7 @@ mount({
   localJson:  '/home.json',
 
   types: {
-    principle: { palette: 'ENTRY',     label: 'gazelle nature' },
+    foundation: { palette: 'ENTRY',     label: 'gazelle foundations' },
     flow:      { palette: 'CONNECTOR', label: 'from nothing to hello-world' },
     visual:    { palette: 'LEAF',      label: 'visualisations'    },
   },
@@ -324,7 +324,7 @@ mount({
       nodes.forEach(n => {
         const p = nodePosition(n, t);
 
-        if (n.type === 'principle') {
+        if (n.type === 'foundation') {
           // Yellows are hard-pinned to their breathing paths — immune to each other
           n.x = p.x; n.y = p.y;
           n.vx = 0;  n.vy = 0;
@@ -353,11 +353,11 @@ mount({
           if (n.y >  yMax) { n.y =  yMax; if (n.vy > 0) n.vy = 0; }
         }
       });
-      // Pairwise soft repulsion — pushes non-principle dots apart when closer than REPULSE_DIST
+      // Pairwise soft repulsion — pushes non-foundation dots apart when closer than REPULSE_DIST
       for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].type === 'principle') continue;
+        if (nodes[i].type === 'foundation') continue;
         for (let j = i + 1; j < nodes.length; j++) {
-          if (nodes[j].type === 'principle') continue;
+          if (nodes[j].type === 'foundation') continue;
           const a = nodes[i], b = nodes[j];
           const dx = b.x - a.x, dy = b.y - a.y;
           const d  = Math.sqrt(dx * dx + dy * dy) || 0.01;
@@ -378,7 +378,7 @@ mount({
   showLabel: () => true,
 
   labelPosition(node, r, gap) {
-    if (node.type === 'principle') {
+    if (node.type === 'foundation') {
       const inward = Math.cos(Math.atan2(node.y, node.x)) >= 0 ? -1 : 1;
       return {
         lx:    node.x + inward * gap,
@@ -402,7 +402,7 @@ mount({
 
   nodeHref(node) {
     const desc = HOME_NODES[node.id];
-    if (node.type === 'principle') return `/knowledge-graph/${node.id}/`;
+    if (node.type === 'foundation') return `/knowledge-graph/${node.id}/`;
     if (desc?.kgNode)              return `/knowledge-graph/${desc.kgNode}/`;
     return desc?.href ?? null;
   },
@@ -414,7 +414,7 @@ mount({
       const [s, t] = linkEnds(l);
       return (s === activeId || t === activeId) ? 'rgba(235,242,255,0.85)' : faded;
     }
-    if (src?.type === 'principle') return 'rgba(240,165,0,0.20)';
+    if (src?.type === 'foundation') return 'rgba(240,165,0,0.20)';
     if (src?.type === 'flow')      return 'rgba(61,186,127,0.28)';
     return 'rgba(78,142,247,0.20)';
   },
@@ -427,7 +427,7 @@ mount({
     ctx.lineWidth = 0.4;
     ctx.setLineDash([1.5, 1.5]);
 
-    // Yellow: principle absolute max reach
+    // Yellow: foundation absolute max reach
     const RW = CW * (1 + BREATHE_AMP);
     const RH = CH * (1 + BREATHE_AMP);
     ctx.strokeStyle = 'rgba(240,165,0,0.6)';
@@ -443,13 +443,13 @@ mount({
 
     // Force lines: each yellow → each inner node, opacity pulses with breathe-in
     if (_liveNodes) {
-      const principles = _liveNodes.filter(n => n.type === 'principle');
-      const inners     = _liveNodes.filter(n => n.type !== 'principle');
+      const foundations = _liveNodes.filter(n => n.type === 'foundation');
+      const inners      = _liveNodes.filter(n => n.type !== 'foundation');
       // opacity: 0.08 at rest/breathe-out, peaks at 0.55 when fully breathed in
       const lineAlpha  = 0.08 + Math.max(0, (_repulse - 0.2) / 2.8) * 0.47;
       ctx.lineWidth    = 0.3;
       ctx.setLineDash([0.8, 2]);
-      principles.forEach(pn => {
+      foundations.forEach(pn => {
         inners.forEach(n => {
           ctx.strokeStyle = `rgba(240,165,0,${lineAlpha.toFixed(2)})`;
           ctx.beginPath();

@@ -13,7 +13,7 @@ async function fetchCategory(category: string): Promise<any[]> {
   const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/${category}`, { headers });
   const listing: any[] = await res.json();
   if (!Array.isArray(listing)) return [];
-  const type = category === 'nature' ? 'nature' : category.replace(/s$/, '');
+  const type = category.replace(/s$/, '');
   return Promise.all(
     listing
       .filter((f: any) => f.type === 'file' && f.name.endsWith('.json'))
@@ -21,8 +21,8 @@ async function fetchCategory(category: string): Promise<any[]> {
   );
 }
 
-const [principles, decisions] = await Promise.all([
-  fetchCategory('nature'),
+const [foundations, decisions] = await Promise.all([
+  fetchCategory('foundations'),
   fetchCategory('decisions'),
 ]);
 ---
@@ -30,9 +30,9 @@ const [principles, decisions] = await Promise.all([
   <div class="sr-only">
     <h1>Platform Design Knowledge Graph</h1>
 
-    <h2>Nature</h2>
+    <h2>Foundations</h2>
     <ul>
-      {principles.map((r: any) => (
+      {foundations.map((r: any) => (
         <li>
           <a href={`/knowledge-graph/${r.id}/`}>{r.id}</a>
           {r.intent && <span> — {r.intent}</span>}

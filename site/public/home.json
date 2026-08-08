@@ -2,25 +2,25 @@
   "nodes": [
     {
       "id": "no-human-touch",
-      "type": "principle",
+      "type": "foundation",
       "label": "no human touch",
       "description": "Every platform operation is fully automated. No manual steps, no human approvals in the critical path."
     },
     {
       "id": "no-fixed-cost",
-      "type": "principle",
+      "type": "foundation",
       "label": "no fixed cost",
       "description": "The platform has zero cost when idle. Compute, networking, and tooling scale to zero outside active use."
     },
     {
       "id": "no-platform-ops",
-      "type": "principle",
+      "type": "foundation",
       "label": "no platform ops",
       "description": "The platform operates itself. No dedicated ops team, no on-call rotations, no runbooks."
     },
     {
       "id": "no-unapproved-resources",
-      "type": "principle",
+      "type": "foundation",
       "label": "no unapproved resources",
       "description": "Only pre-approved resource types can be deployed. Policy enforcement is automated and unbypassable."
     },
