@@ -4,7 +4,7 @@ function toTitle(id: string) {
   return id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function renderGuidingPrinciple(obj: any): string {
+function renderFoundation(obj: any): string {
   const lines = [`# ${toTitle(obj.id)}`, '', `Intent: ${obj.intent}`];
   if (obj.decisions?.length) { lines.push('', 'Decisions:', ...obj.decisions.map((d: string) => `- ${d}`)); }
   if (obj.violations?.length) { lines.push('', 'Violations:', ...obj.violations.map((v: string) => `- ${v}`)); }
@@ -49,8 +49,8 @@ async function fetchCategory(category: string): Promise<any[]> {
 }
 
 export async function GET() {
-  const [principles, decisions, operations] = await Promise.all([
-    fetchCategory('nature'),
+  const [foundations, decisions, operations] = await Promise.all([
+    fetchCategory('foundations'),
     fetchCategory('decisions'),
     fetchCategory('operations'),
   ]);
@@ -59,8 +59,8 @@ export async function GET() {
     `===============================================================================\n  ${heading}\n===============================================================================\n`;
 
   const lines: string[] = [
-    sep('Nature'),
-    ...principles.map(renderGuidingPrinciple),
+    sep('Foundations'),
+    ...foundations.map(renderFoundation),
     sep('Decisions'),
     ...decisions.map(renderDecision),
     sep('Operations'),

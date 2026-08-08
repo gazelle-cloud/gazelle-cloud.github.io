@@ -23,7 +23,7 @@ site/
     engine.js                  # centralised engine: load JSON → mount → render
     shell.js                   # hooks, components, palette (used by engine + page configs)
     shell.css                  # all styles
-    knowledge-graph.page.js    # page config: guiding-principles + decisions, rim layout
+    knowledge-graph.page.js    # page config: foundations + decisions, rim layout
     operations.page.js         # page config: operations + decisions + file nodes, concentric layout
     bigbang.page.js            # page config: github-workflows + bicep, tiered layout
     bigbang.json               # pre-built graph data (bigbang not in data repo)
@@ -124,7 +124,7 @@ The engine uses these directly. Page configs can import them for panel content o
 
 | `PALETTE` key | Colour | Typical use |
 |---------------|--------|-------------|
-| `ENTRY` | gold | Entry points (guiding principles, workflows) |
+| `ENTRY` | gold | Entry points (foundations, workflows) |
 | `CONNECTOR` | green | Orchestrators (file nodes, main-bicep) |
 | `LEAF` | blue | Most nodes (decisions, modules) |
 

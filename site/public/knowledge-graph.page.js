@@ -15,22 +15,22 @@ async function ghFetch(sub) {
 }
 
 async function getData() {
-  const KEY = 'kg-v1';
+  const KEY = 'kg-v2';
   const hit = sessionStorage.getItem(KEY);
   if (hit) return JSON.parse(hit);
 
-  const [principles, decisions] = await Promise.all([
-    ghFetch('nature'),
+  const [foundations, decisions] = await Promise.all([
+    ghFetch('foundations'),
     ghFetch('decisions'),
   ]);
   const nodes = [
-    ...principles.map(p => ({ ...p, type: 'nature' })),
+    ...foundations.map(f => ({ ...f, type: 'foundation' })),
     ...decisions.map(d => ({ ...d, type: 'decision' })),
   ];
   const links = [];
-  principles.forEach(p =>
-    (p.decisions ?? []).forEach(id =>
-      links.push({ source: p.id, target: id, relationship: 'related' })));
+  foundations.forEach(f =>
+    (f.decisions ?? []).forEach(id =>
+      links.push({ source: f.id, target: id, relationship: 'related' })));
   decisions.forEach(d =>
     (d.links ?? []).forEach(l =>
       links.push({ source: d.id, target: l.id, relationship: 'related', note: l.note })));
@@ -52,7 +52,7 @@ function IdlePanel({ theme }) {
         "Captures the reasoning behind every platform decision."),
       React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' } }),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-        React.createElement('span', { style: { color: PALETTE.ENTRY } }, 'Yellow'), ' = nature'),
+        React.createElement('span', { style: { color: PALETTE.ENTRY } }, 'Yellow'), ' = foundations'),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.LEAF } }, 'Blue'), ' = design decisions'),
     ),
@@ -94,7 +94,7 @@ function panel(node, graph, { setFocusedId, theme }) {
 
   function LinkedNode({ id, note, arrow, color }) {
     const linked = nodeById[id];
-    const isYellowInvolved = node.type === 'nature' || linked?.type === 'nature';
+    const isYellowInvolved = node.type === 'foundation' || linked?.type === 'foundation';
     const summary = linked?.decision || linked?.intent;
     return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 4, paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
       React.createElement('a', {
@@ -132,12 +132,12 @@ function panel(node, graph, { setFocusedId, theme }) {
 // ── box constraint ────────────────────────────────────────────────────────────
 const BOX_W = 250, BOX_H = 170;
 
-// Hard-wall force: clamps every unpinned node inside the nature rectangle
+// Hard-wall force: clamps every unpinned node inside the foundations rectangle
 function forceWalls(W, H) {
   let nodes;
   function force() {
     for (const n of nodes) {
-      if (n.fx != null) continue;                          // skip pinned nature nodes
+      if (n.fx != null) continue;                          // skip pinned foundation nodes
       const r = 2 + (n.__weight ?? 0) * 7 + 12;           // node radius + gap
       const mx = W / 2 - r, my = H / 2 - r;
       if (n.x >  mx) { n.x =  mx; if (n.vx > 0) n.vx = 0; }
@@ -157,19 +157,19 @@ mount({
   getData,
 
   types: {
-    'nature': { palette: 'ENTRY', label: 'nature' },
+    'foundation': { palette: 'ENTRY', label: 'foundation' },
     'decision':          { palette: 'LEAF',  label: 'design decision'   },
   },
 
   dotRadius: node => node.type === 'decision' ? 2 + node.__weight * 7 : 5,
 
   prepare(raw) {
-    // Pin nature nodes evenly along the rectangle perimeter
-    const nature = raw.nodes.filter(n => n.type === 'nature');
+    // Pin foundation nodes evenly along the rectangle perimeter
+    const foundations = raw.nodes.filter(n => n.type === 'foundation');
     const W = BOX_W, H = BOX_H;
     const perimeter = 2 * (W + H);
-    nature.forEach((n, i) => {
-      const d = (i / nature.length) * perimeter;
+    foundations.forEach((n, i) => {
+      const d = (i / foundations.length) * perimeter;
       if (d < W)            { n.fx = -W / 2 + d;        n.fy = -H / 2; }
       else if (d < W + H)   { n.fx =  W / 2;            n.fy = -H / 2 + (d - W); }
       else if (d < 2*W + H) { n.fx =  W / 2 - (d-W-H); n.fy =  H / 2; }
@@ -180,7 +180,7 @@ mount({
   forces(fg) {
     fg.d3Force('link').distance(65).strength(0.25);
     fg.d3Force('collision', forceCollide(n => (n.type === 'decision' ? 2 + n.__weight * 7 : 5) + 14));
-    fg.d3Force('charge').strength(n => n.type === 'nature' ? 0 : -55);
+    fg.d3Force('charge').strength(n => n.type === 'foundation' ? 0 : -55);
     fg.d3Force('walls', forceWalls(BOX_W, BOX_H));  // hard wall — no escapes
   },
 
@@ -188,11 +188,11 @@ mount({
   cooldownTime: 0,
 
   showLabel(node, { activeId, isNeighbour, isMatch }) {
-    return node.type === 'nature' || node.id === activeId || isNeighbour || isMatch;
+    return node.type === 'foundation' || node.id === activeId || isNeighbour || isMatch;
   },
 
   labelPosition(node, r, gap) {
-    if (node.type === 'nature') {
+    if (node.type === 'foundation') {
       const angle = Math.atan2(node.y, node.x);
       return {
         lx: node.x + Math.cos(angle) * gap,
@@ -204,7 +204,7 @@ mount({
   },
 
   labelFontSize(node) {
-    return node.type === 'nature' ? RENDER.labelFontSize + 1 : RENDER.labelFontSize;
+    return node.type === 'foundation' ? RENDER.labelFontSize + 1 : RENDER.labelFontSize;
   },
 
   linkColor(l, { activeId, theme }) {

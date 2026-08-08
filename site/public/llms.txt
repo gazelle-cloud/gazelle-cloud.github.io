@@ -10,7 +10,7 @@ Gazelle automates the full lifecycle of Azure landing zones: provisioning isolat
 
 Application teams register a profile, request landing zones, and manage them via PRs. The platform enforces guardrails (policy, RBAC, networking, telemetry) automatically. No human touch is needed after initial bootstrap.
 
-## Principles
+## Foundations
 
 - Everything is consumption-based — no flat costs
 - Code is the only path to production

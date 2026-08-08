@@ -21,11 +21,11 @@ export async function getStaticPaths() {
     );
   }
 
-  const [principles, decisions] = await Promise.all([
-    fetchCategory('nature', 'nature'),
+  const [foundations, decisions] = await Promise.all([
+    fetchCategory('foundations', 'foundation'),
     fetchCategory('decisions', 'decision'),
   ]);
-  const nodes = [...principles, ...decisions];
+  const nodes = [...foundations, ...decisions];
   return nodes.map((n: any) => ({
     params: { slug: n.id },
     props:  { node: n },
