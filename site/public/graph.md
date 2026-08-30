@@ -4,29 +4,26 @@
 
 ## Vocabulary
 
-### governed-by
+### Terms
 
-Points at a rule the process respects while it runs.
+| term |
+| --- |
+| product-team |
+| azure-resource |
+| azure-subscription |
+| landing-zone |
+| whitelisted |
+| infrastructure-as-code |
+| platform-membership |
+| product-team-owned |
 
-### depends-on
+### Relations
 
-The source is incomplete without the target, and the note names which target constraint the source relies on.
-
-### product-team
-
-### azure-resource
-
-### azure-subscription
-
-### landing-zone
-
-### whitelisted
-
-### infrastructure-as-code
-
-### platform-membership
-
-### product-team-owned
+| relation | definition |
+| --- | --- |
+| governed-by | Points at a rule the process respects while it runs. |
+| depends-on | The source is incomplete without the target, and the note names which target constraint the source relies on. |
+| constrains | The source narrows where the target applies, and the note names what falls outside it. |
 
 ## Foundations
 
@@ -82,7 +79,7 @@ An Azure resource counts as infrastructure-as-code when removing it from the cod
 
 **Subject:** landing-zone (entity)
 
-An Azure subscription counts as a landing zone when the landing zone template declares its resources and a product team owns it.
+An Azure subscription counts as a landing zone when a platform-owned deployment pipelines declares its resources.
 
 **Anchor:** no-human-touch
 
