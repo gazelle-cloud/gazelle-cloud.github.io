@@ -9,13 +9,11 @@
 | term |
 | --- |
 | product-team |
-| azure-resource |
 | azure-subscription |
+| oasis |
 | landing-zone |
-| whitelisted |
-| infrastructure-as-code |
 | platform-membership |
-| product-team-owned |
+| ownership |
 
 ### Relations
 
@@ -79,52 +77,72 @@ An Azure resource counts as infrastructure-as-code when removing it from the cod
 
 **Subject:** landing-zone (entity)
 
-An Azure subscription counts as a landing zone when a platform-owned deployment pipelines declares its resources.
+An Azure subscription counts as a landing zone once a pipeline run has deployed its resources.
 
 **Anchor:** no-human-touch
 
 **Links:**
 
-- depends-on → platform-membership — The template declares a landing zone for a named platform member, so there is no team for the declaration to name until membership exists.
+- depends-on → platform-membership — The run deploys the landing zone in a named member's name, so there is no one to deploy it for until membership exists.
 
 **Violations:**
 
 - Subscription hand-built to resemble a landing zone.
+- Landing zone counted as existing on the strength of a merged parameter file, with no pipeline run behind it.
+
+### oasis
+
+**Subject:** oasis (entity)
+
+A landing zone counts as an oasis when every platform capability it relies on runs inside it.
+
+**Anchor:** no-platform-ops
+
+**Links:**
+
+- depends-on → landing-zone — There is nothing to make self-contained until a pipeline run has turned the subscription into a landing zone.
+
+**Violations:**
+
+- Log Analytics Workspace, runner pool, or automation runtime serving more than one landing zone.
+- Landing zone that cannot be destroyed and rebuilt without affecting another.
+
+### ownership
+
+**Subject:** ownership (entity)
+
+A platform member counts as the owner of a landing zone once a pipeline run has provisioned it in the member's name.
+
+**Anchor:** no-platform-ops
+
+**Links:**
+
+- depends-on → platform-membership — The run has no party to transfer ownership to until the member's group, invoice section, and repository exist.
+- depends-on → oasis — A landing zone can only be handed over whole, so there is nothing transferable until every capability it relies on runs inside it.
+
+**Violations:**
+
+- Team treated as owner of a landing zone that was never provisioned in its name.
+- Landing zone operated by the platform team and called product-team-owned.
 
 ### platform-membership
 
 **Subject:** platform-membership (entity)
 
-A product team counts as a platform member when it has an Entra ID group, an invoice section, and a repository.
+A product team counts as a platform member when it holds an Entra ID group, an invoice section, and a repository.
 
 **Anchor:** no-platform-ops
 
 **Violations:**
 
 - Product team sharing another team's Entra ID group, invoice section, or repository.
-
-### product-team-owned
-
-**Subject:** product-team-owned (entity)
-
-An Azure resource counts as product-team-owned when the landing zone template does not declare it.
-
-**Anchor:** no-platform-ops
-
-**Links:**
-
-- depends-on → landing-zone — Ownership hands the product team everything the template stops declaring.
-- depends-on → infrastructure-as-code — The product team only gains what the template stops declaring because removing a resource from the code removes it from Azure.
-
-**Violations:**
-
-- Platform team operating a resource the template does not declare.
+- Team treated as a member with no group, invoice section, or repository provisioned.
 
 ### whitelisted
 
 **Subject:** whitelisted (entity)
 
-An Azure resource counts as whitelisted when its type appears on the platform allowed list.
+A resource type counts as platform-ready when it appears on the allowed list.
 
 **Anchor:** no-unapproved-resources
 
@@ -473,6 +491,10 @@ Automation jobs must run inside the landing zone's own subscription.
 
 **Anchor:** no-fixed-cost
 
+**Implements:**
+
+- oasis
+
 **Links:**
 
 - depends-on → platform-identity-graph — Jobs query Entra ID, so the Graph read permissions are what make that call possible.
@@ -545,7 +567,7 @@ Every landing zone must have its own private GitHub runners provisioned inside i
 
 **Implements:**
 
-- whitelisted
+- oasis
 
 **Links:**
 
@@ -569,6 +591,10 @@ A landing zone must have a single managed identity, shared across all its workfl
 **Why:** Without a single identity, every new capability multiplies the permission surface through RBAC and OIDC sprawl.
 
 **Anchor:** no-platform-ops
+
+**Implements:**
+
+- oasis
 
 **Links:**
 
@@ -640,7 +666,7 @@ A landing zone must not share a Log Analytics Workspace with another landing zon
 
 **Implements:**
 
-- platform-membership
+- oasis
 
 **Links:**
 
@@ -687,7 +713,7 @@ Resources the landing zone template declares must live in a single dedicated res
 
 **Implements:**
 
-- product-team-owned
+- ownership
 
 **Violations:**
 
@@ -733,7 +759,7 @@ Each landing zone must have its own parameter file and its own trigger workflow.
 
 **Implements:**
 
-- platform-membership
+- oasis
 
 **Links:**
 
