@@ -8,12 +8,18 @@
 
 | term |
 | --- |
+| gazelle |
+| constitution |
+| codebase |
+| source-of-truth |
+| platform |
+| oasis |
+| guardrail |
+| approved |
 | product-team |
 | azure-subscription |
-| oasis |
 | landing-zone |
-| platform-membership |
-| ownership |
+| platform-member |
 
 ### Relations
 
@@ -61,94 +67,142 @@ The allowed list starts empty. A resource type joins the platform only after its
 
 ## Constitutive
 
-### infrastructure-as-code
+### allowed-resources
 
-**Subject:** infrastructure-as-code (entity)
+**Subject:** approved (entity)
 
-An Azure resource counts as infrastructure-as-code when removing it from the code removes it from Azure.
+An Azure resource counts as approved in Gazelle when the allowed-resources list names it.
+
+**Anchor:** no-unapproved-resources
+
+**Links:**
+
+- depends-on → guardrail — The list confers approval only as the roll of the Allowed Resources guardrail, so it names nothing until the platform assigns that guardrail.
+
+**Violations:**
+
+- Resource deployed because nothing denied it rather than because the allowed-resources list names it.
+- Resource treated as approved because it already exists in the estate.
+
+### codebase
+
+**Subject:** source-of-truth (entity)
+
+A codebase counts as the source of truth for Gazelle when BigBang establishes it.
+
+**Anchor:** no-human-touch
+
+**Links:**
+
+- depends-on → gazelle — There is nothing for a codebase to be the source of truth for until BigBang builds a tenant Gazelle says is one.
+
+**Violations:**
+
+- Resource kept because it exists in Azure after the codebase stopped declaring it.
+- Azure state treated as source of truth because no one has rebuilt the tenant to check.
+
+### constitution
+
+**Subject:** constitution (entity)
+
+A JSON file counts as Gazelle's constitution when the knowledge graph holds it.
+
+**Anchor:** no-human-touch
+
+**Links:**
+
+- depends-on → codebase — The graph holds a rule as files the codebase carries, so a rule held outside it would confer status that no rebuild reproduces.
+
+**Violations:**
+
+- Rule followed that no JSON file in the knowledge graph carries.
+- Foundation or regulative rule treated as advisory because it is not a constitutive one.
+- graph.md edited directly rather than the node it is generated from.
+- Constitution read as documentation of what the code already does.
+
+### gazelle
+
+**Subject:** gazelle (entity)
+
+An Azure tenant counts as Gazelle when BigBang builds it and Gazelle says what it is.
 
 **Anchor:** no-human-touch
 
 **Violations:**
 
-- Resource whose deletion requires a manual step after the code change merges.
+- Azure tenant presented as Gazelle that BigBang did not build.
+- Status held by a platform, landing zone, or platform member that Gazelle never conferred.
+- Gazelle read as a description of the tenant rather than what makes it one.
+
+### guardrail
+
+**Subject:** guardrail (entity)
+
+A policy name counts as a guardrail in Gazelle when the platform assigns it.
+
+**Anchor:** no-unapproved-resources
+
+**Links:**
+
+- depends-on → platform — The platform is what assigns a guardrail, so there is nothing to assign it until Gazelle names a management group as the platform.
+
+**Violations:**
+
+- Policy name treated as a guardrail that the platform never assigned.
+- Exemption granted against something that is not an assigned guardrail.
 
 ### landing-zone
 
 **Subject:** landing-zone (entity)
 
-An Azure subscription counts as a landing zone once a pipeline run has deployed its resources.
+An Azure subscription counts as a landing zone when the platform's register names it.
 
 **Anchor:** no-human-touch
 
 **Links:**
 
-- depends-on → platform-membership — The run deploys the landing zone in a named member's name, so there is no one to deploy it for until membership exists.
+- depends-on → platform-member — The run deploys the landing zone in a named member's name, so there is no one to deploy it for until membership exists.
+- depends-on → platform — A landing zone holds its status in the platform's register, so there is nowhere for it to hold until Gazelle names a management group as the platform.
 
 **Violations:**
 
 - Subscription hand-built to resemble a landing zone.
-- Landing zone counted as existing on the strength of a merged parameter file, with no pipeline run behind it.
 
-### oasis
+### platform-member
 
-**Subject:** oasis (entity)
+**Subject:** platform-member (entity)
 
-A landing zone counts as an oasis when every platform capability it relies on runs inside it.
-
-**Anchor:** no-platform-ops
-
-**Links:**
-
-- depends-on → landing-zone — There is nothing to make self-contained until a pipeline run has turned the subscription into a landing zone.
-
-**Violations:**
-
-- Log Analytics Workspace, runner pool, or automation runtime serving more than one landing zone.
-- Landing zone that cannot be destroyed and rebuilt without affecting another.
-
-### ownership
-
-**Subject:** ownership (entity)
-
-A platform member counts as the owner of a landing zone once a pipeline run has provisioned it in the member's name.
+A product team counts as a platform member in Gazelle when the member register names it.
 
 **Anchor:** no-platform-ops
 
 **Links:**
 
-- depends-on → platform-membership — The run has no party to transfer ownership to until the member's group, invoice section, and repository exist.
-- depends-on → oasis — A landing zone can only be handed over whole, so there is nothing transferable until every capability it relies on runs inside it.
+- depends-on → gazelle — Membership is a status held in Gazelle, so there is nowhere for it to hold until the graph binds a tenant.
 
 **Violations:**
 
-- Team treated as owner of a landing zone that was never provisioned in its name.
-- Landing zone operated by the platform team and called product-team-owned.
+- Product team provisioning a landing zone with no entry in the member register.
+- Membership treated as held because a repo, Entra group, or invoice section exists for the team.
 
-### platform-membership
+### platform
 
-**Subject:** platform-membership (entity)
+**Subject:** platform (entity)
 
-A product team counts as a platform member when it holds an Entra ID group, an invoice section, and a repository.
+A management group counts as the platform when Gazelle names it.
 
-**Anchor:** no-platform-ops
+**Anchor:** no-human-touch
 
-**Violations:**
+**Links:**
 
-- Product team sharing another team's Entra ID group, invoice section, or repository.
-- Team treated as a member with no group, invoice section, or repository provisioned.
-
-### whitelisted
-
-**Subject:** whitelisted (entity)
-
-A resource type counts as platform-ready when it appears on the allowed list.
-
-**Anchor:** no-unapproved-resources
+- depends-on → gazelle — The authority the platform holds is Gazelle's, so there is nothing for a name to carry until BigBang builds a tenant Gazelle says is one.
 
 **Violations:**
 
-- whitelisting resource before the policy constraints applied.
+- Platform capability hosted in a subscription rather than assigned at a management group.
+- Dedicated platform hierarchy or connectivity subscription introduced to hold a capability enterprise-scale would put there.
+- Management group presented as the platform that BigBang cannot rebuild from the repository.
+- Platform deciding on behalf of the landing zones its register names.
 
 ## Regulative - entity
 
@@ -162,7 +216,7 @@ A subscription must bill to the owning application's invoice section.
 
 **Implements:**
 
-- platform-membership
+- platform-member
 
 **Violations:**
 
@@ -185,7 +239,7 @@ Only a service reachable through Azure Resource Manager may be adopted.
 
 **Implements:**
 
-- whitelisted
+- allowed-resources
 
 **Violations:**
 
@@ -205,7 +259,7 @@ A resource type must appear on the allowed list before it deploys; the absence o
 
 **Implements:**
 
-- whitelisted
+- allowed-resources
 
 **Links:**
 
@@ -232,7 +286,7 @@ Every Deny or DeployIfNotExists gap with no built-in policy must be closed by a 
 
 **Implements:**
 
-- whitelisted
+- guardrail
 
 **Links:**
 
@@ -258,7 +312,7 @@ A security control must be carried by a policy assignment that denies the violat
 
 **Implements:**
 
-- whitelisted
+- guardrail
 
 **Violations:**
 
@@ -280,7 +334,7 @@ A policy assignment name must begin with its effect prefix, deny, config, or all
 
 **Implements:**
 
-- whitelisted
+- guardrail
 
 **Violations:**
 
@@ -302,7 +356,7 @@ An exemption must resolve its assignment ID through the platform-generated refer
 
 **Implements:**
 
-- whitelisted
+- guardrail
 
 **Links:**
 
@@ -329,7 +383,7 @@ BigBang must be able to rebuild the platform from the repository alone.
 
 **Implements:**
 
-- infrastructure-as-code
+- codebase
 
 **Links:**
 
@@ -354,7 +408,7 @@ Platform configuration must be defined in the repository, never set outside it.
 
 **Implements:**
 
-- infrastructure-as-code
+- codebase
 
 **Violations:**
 
@@ -375,7 +429,7 @@ A deployment stack must be configured with deleteAll, so what its code stops dec
 
 **Implements:**
 
-- infrastructure-as-code
+- codebase
 
 **Violations:**
 
@@ -399,7 +453,7 @@ Deployment logic must live in a reusable workflow; an environment workflow suppl
 
 **Implements:**
 
-- infrastructure-as-code
+- codebase
 
 **Violations:**
 
@@ -423,7 +477,7 @@ A role must be scoped to a job function and assigned to the application's Entra 
 
 **Implements:**
 
-- platform-membership
+- platform-member
 
 **Violations:**
 
@@ -445,7 +499,7 @@ Alerts must route through the landing zone's action group, addressed from the pl
 
 **Implements:**
 
-- platform-membership
+- landing-zone
 
 **Violations:**
 
@@ -468,7 +522,7 @@ Data-plane access from outside Azure must originate from the platform-trusted pu
 
 **Implements:**
 
-- infrastructure-as-code
+- landing-zone
 
 **Links:**
 
@@ -493,7 +547,7 @@ Automation jobs must run inside the landing zone's own subscription.
 
 **Implements:**
 
-- oasis
+- landing-zone
 
 **Links:**
 
@@ -519,7 +573,7 @@ Diagnostic settings must be defined by the platform; a landing zone declares non
 
 **Implements:**
 
-- whitelisted
+- guardrail
 
 **Links:**
 
@@ -546,7 +600,7 @@ An application repo must be seeded with deployable pipelines and modules from th
 
 **Implements:**
 
-- platform-membership
+- platform-member
 
 **Violations:**
 
@@ -567,7 +621,7 @@ Every landing zone must have its own private GitHub runners provisioned inside i
 
 **Implements:**
 
-- oasis
+- landing-zone
 
 **Links:**
 
@@ -594,7 +648,7 @@ A landing zone must have a single managed identity, shared across all its workfl
 
 **Implements:**
 
-- oasis
+- landing-zone
 
 **Links:**
 
@@ -617,6 +671,10 @@ VNet address spaces must be allocated by querying live Azure, not by reading an 
 **Why:** Without querying live state, address allocations drift and VNets cannot peer.
 
 **Anchor:** no-platform-ops
+
+**Implements:**
+
+- landing-zone
 
 **Violations:**
 
@@ -666,7 +724,7 @@ A landing zone must not share a Log Analytics Workspace with another landing zon
 
 **Implements:**
 
-- oasis
+- landing-zone
 
 **Links:**
 
@@ -692,7 +750,7 @@ Every landing zone must be deployed and configured from its application's reposi
 
 **Implements:**
 
-- platform-membership
+- platform-member
 
 **Violations:**
 
@@ -713,7 +771,7 @@ Resources the landing zone template declares must live in a single dedicated res
 
 **Implements:**
 
-- ownership
+- landing-zone
 
 **Violations:**
 
@@ -733,7 +791,7 @@ Tag values on a landing zone must be sourced from the platform member profile.
 
 **Implements:**
 
-- platform-membership
+- landing-zone
 
 **Links:**
 
@@ -759,7 +817,7 @@ Each landing zone must have its own parameter file and its own trigger workflow.
 
 **Implements:**
 
-- oasis
+- landing-zone
 
 **Links:**
 
@@ -785,6 +843,10 @@ Break-glass must be used only where automation cannot execute the change.
 
 **Anchor:** no-human-touch
 
+**Implements:**
+
+- platform
+
 **Links:**
 
 - depends-on → deployment-declarative-lifecycle — Stack deny assignments override role actions, so break-glass reaches platform resources by being excluded from them.
@@ -808,6 +870,10 @@ Platform automation Docker images must be hosted outside the landing zones.
 
 **Anchor:** no-fixed-cost
 
+**Implements:**
+
+- platform
+
 **Links:**
 
 - constrains → azure-native-services-only — GitHub Container Registry sits outside ARM, so it is a dependency the platform consumes rather than a service it adopts.
@@ -830,6 +896,10 @@ The platform must authenticate through an app registration rather than a managed
 
 **Anchor:** no-human-touch
 
+**Implements:**
+
+- platform
+
 **Links:**
 
 - depends-on → deployment-config-in-repo — The registration has a distinct client ID per environment, and each appears as a committed variable.
@@ -851,13 +921,13 @@ Agentic workflows must authenticate with the Claude Pro OAuth token.
 
 **Anchor:** no-human-touch
 
+**Implements:**
+
+- constitution
+
 **Violations:**
 
 - Agentic workflow step using ANTHROPIC_API_KEY instead of CLAUDE_CODE_OAUTH_TOKEN.
-
-**Files:**
-
-- `.github/workflows/validate-knowledge-graph.yml`
 
 ### platform-identity-github
 
@@ -866,6 +936,10 @@ Platform and landing zone workflows must authenticate to GitHub through the shar
 **Why:** Without a shared GitHub App, the platform has no mechanism to provision and configure application repos and environments.
 
 **Anchor:** no-human-touch
+
+**Implements:**
+
+- platform
 
 **Violations:**
 
@@ -883,6 +957,10 @@ A landing zone identity must hold granular Microsoft Graph read permissions and 
 **Why:** Without them, applications cannot resolve tenant identities, so user lookup and group-based authorization fail.
 
 **Anchor:** no-platform-ops
+
+**Implements:**
+
+- platform
 
 **Links:**
 
@@ -908,7 +986,7 @@ Every platform capability must exist in the test environment exactly as it exist
 
 **Implements:**
 
-- infrastructure-as-code
+- platform
 
 **Violations:**
 
@@ -933,8 +1011,7 @@ Defender for Cloud recommendations with no free remediation path must be pre-exe
 
 **Implements:**
 
-- whitelisted
-- platform-membership
+- guardrail
 
 **Violations:**
 
@@ -955,7 +1032,7 @@ An exemption must be granted through a merged pull request against the landing z
 
 **Implements:**
 
-- whitelisted
+- guardrail
 
 **Violations:**
 
@@ -977,6 +1054,10 @@ A new automation job must run as the landing zone identity, against the ARM API,
 **Why:** A job needing its own identity, a data-plane path, or an authenticated base image cannot run unattended in every landing zone.
 
 **Anchor:** no-platform-ops
+
+**Implements:**
+
+- landing-zone
 
 **Trigger:**
 
@@ -1021,7 +1102,7 @@ A resource type must clear deny coverage, diagnostic settings, and job-function 
 
 **Implements:**
 
-- whitelisted
+- allowed-resources
 
 **Trigger:**
 
@@ -1118,7 +1199,7 @@ A platform change must pass the test environment before it reaches production.
 
 **Implements:**
 
-- infrastructure-as-code
+- platform
 
 **Links:**
 
@@ -1187,13 +1268,15 @@ An observation that does not fit as a rule, a link, or a violation must be recor
 
 **Anchor:** no-human-touch
 
+**Implements:**
+
+- constitution
+
 **Trigger:**
 
 - knowledge that doesn't fit the graph
 - pattern across decisions
 - explanatory context without a dependency
-
-**Workflow:** validate-knowledge-graph
 
 **Steps:**
 
@@ -1221,7 +1304,7 @@ An application must be registered through requestNew-Platform-Members before any
 
 **Implements:**
 
-- platform-membership
+- platform-member
 
 **Trigger:**
 
@@ -1258,6 +1341,10 @@ A knowledge graph entry must be drafted and presented before any file is written
 
 **Anchor:** no-human-touch
 
+**Implements:**
+
+- constitution
+
 **Trigger:**
 
 - add a decision
@@ -1268,8 +1355,6 @@ A knowledge graph entry must be drafted and presented before any file is written
 - add a link
 - update knowledge graph
 
-**Workflow:** validate-knowledge-graph
-
 **Steps:**
 
 1. Identify whether this is a new entry or an update to an existing one. For an update, read the existing file first.
@@ -1279,7 +1364,7 @@ A knowledge graph entry must be drafted and presented before any file is written
 5. For a regulative rule, name the constitutive rules it upholds in implements[]. An empty array is legal where the rule serves its foundation directly.
 6. Present the complete draft before writing any file.
 7. Write the file.
-8. Open a pull request. Validation runs on changed entries, and the pull request cannot merge until it passes.
+8. Open a pull request.
 
 **Violations:**
 
@@ -1292,7 +1377,6 @@ A knowledge graph entry must be drafted and presented before any file is written
 - `knowledge-graph/vocabulary/`
 - `knowledge-graph/constitutive/`
 - `knowledge-graph/regulative/`
-- `knowledge-graph/schema/`
 
 ### update-landing-zone
 
@@ -1304,7 +1388,7 @@ A landing zone must be reshaped by editing its parameter file and merging a pull
 
 **Implements:**
 
-- whitelisted
+- landing-zone
 
 **Trigger:**
 
