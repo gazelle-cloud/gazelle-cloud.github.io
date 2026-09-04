@@ -22,13 +22,12 @@ const HOME_NODES = {
   'no-unapproved-resources': { type:'foundation', corner:[ 1, 1], wx:0.10,wy:0.14,px:1.05,py:3.14 },
 
   // ── Flow (green) ─────────────────────────────────────────────────────────────
-  join:    { type:'flow', cx:-28, cy:-12, wx:0.19,wy:0.33,px:0.00,py:0.00, ax:4,ay:4, spring:0.06, kgNode:'landing-zone-platform-members' },
-  request: { type:'flow', cx:  0, cy: -8, wx:0.27,wy:0.18,px:2.09,py:1.05, kgNode:'landing-zone-ownership' },
+  join:    { type:'flow', cx:-28, cy:-12, wx:0.19,wy:0.33,px:0.00,py:0.00, ax:4,ay:4, spring:0.06, kgNode:'register-platform-member' },
+  request: { type:'flow', cx:  0, cy: -8, wx:0.27,wy:0.18,px:2.09,py:1.05, kgNode:'create-landing-zone' },
   deploy:  { type:'flow', cx: 28, cy:-12, wx:0.23,wy:0.38,px:4.19,py:2.09,                         kgNode:'landing-zone-getting-started'    },
 
   // ── Visual (blue) ────────────────────────────────────────────────────────────
-  'knowledge-graph': { type:'visual', cx:-30,cy:16, wx:0.14,wy:0.11,px:0.00,py:1.20, ax:18,ay:14, href:'/knowledge-graph/', panelJson:'/knowledge-graph.json', panelType:'decision',        panelLabel:'Decisions',  panelColor:PALETTE.LEAF  },
-  'operations':      { type:'visual', cx:  0,cy:22, wx:0.05,wy:0.08,px:2.00,py:0.60, href:'/operations/',      panelJson:'/operations.json',      panelType:'operation',       panelLabel:'Operations', panelColor:PALETTE.ENTRY },
+  'knowledge-graph': { type:'visual', cx:-30,cy:16, wx:0.14,wy:0.11,px:0.00,py:1.20, ax:18,ay:14, href:'/knowledge-graph/', panelJson:'/knowledge-graph.json', panelType:'regulative',      panelLabel:'Regulative rules', panelColor:PALETTE.LEAF  },
   'big-bang':        { type:'visual', cx: 30,cy:16, wx:0.09,wy:0.06,px:1.00,py:2.40, href:'/bigbang/',         panelJson:'/bigbang.json',          panelType:'github-workflow', panelLabel:'Workflows',  panelColor:PALETTE.ENTRY, ax:4,ay:4, spring:0.06 },
 };
 
@@ -102,15 +101,14 @@ function IdlePanel({ theme, setHoveredId }) {
 
     React.createElement('div', { className: 'info-label', style: { color: PALETTE.CONNECTOR } }, 'Getting Started'),
     React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
-      linkRow('join the platform', '/knowledge-graph/landing-zone-platform-members/', PALETTE.CONNECTOR, 'join',    h),
-      linkRow('own landing zones', '/knowledge-graph/landing-zone-ownership/',         PALETTE.CONNECTOR, 'request', h),
+      linkRow('join the platform',  '/knowledge-graph/register-platform-member/',    PALETTE.CONNECTOR, 'join',    h),
+      linkRow('own landing zones',  '/knowledge-graph/create-landing-zone/',         PALETTE.CONNECTOR, 'request', h),
       linkRow('deploy hello world', '/knowledge-graph/landing-zone-getting-started/', PALETTE.CONNECTOR, 'deploy',  h),
     ),
 
     React.createElement('div', { className: 'info-label', style: { color: PALETTE.LEAF } }, 'visuals'),
     React.createElement('div', { className: 'code-block', style: BLOCK_STYLE },
       linkRow('Knowledge Graph', '/knowledge-graph/', PALETTE.LEAF, 'knowledge-graph', h),
-      linkRow('Operations',      '/operations/',      PALETTE.LEAF, 'operations',      h),
       linkRow('Big Bang',        '/bigbang/',         PALETTE.LEAF, 'big-bang',        h),
     ),
 
@@ -120,8 +118,8 @@ function IdlePanel({ theme, setHoveredId }) {
 
 // ── shared JSON cache ─────────────────────────────────────────────────────────
 // _fetchFns lets page-level code register custom fetchers for URLs that are no
-// longer static files (knowledge-graph.json, operations.json). Falls back to a
-// plain fetch for everything else (bigbang.json, etc.).
+// longer static files (knowledge-graph.json). Falls back to a plain fetch for
+// everything else (bigbang.json, etc.).
 const _jsonCache = {};
 const _fetchFns  = {};
 
@@ -146,52 +144,34 @@ async function ghFetch(sub) {
   );
 }
 
-// knowledge-graph.json — derive from raw GH entities, cache in sessionStorage
+// knowledge-graph.json — derive from raw GH entities, cache in sessionStorage.
+// Same key and shape as knowledge-graph.page.js, so the two share one cache entry.
 _fetchFns['/knowledge-graph.json'] = async () => {
-  const KEY = 'kg-v2';
+  const KEY = 'kg-v3';
   const hit = sessionStorage.getItem(KEY);
   if (hit) return JSON.parse(hit);
-  const [foundations, decisions] = await Promise.all([
+  const [foundations, constitutive, regEntity, regProcess] = await Promise.all([
     ghFetch('foundations'),
-    ghFetch('decisions'),
+    ghFetch('constitutive'),
+    ghFetch('regulative-entity'),
+    ghFetch('regulative-process'),
   ]);
   const nodes = [
     ...foundations.map(f => ({ ...f, type: 'foundation' })),
-    ...decisions.map(d => ({ ...d, type: 'decision' })),
+    ...constitutive.map(c => ({ ...c, type: 'constitutive' })),
+    ...regEntity.map(r  => ({ ...r, type: 'regulative', subjectType: 'entity'  })),
+    ...regProcess.map(r => ({ ...r, type: 'regulative', subjectType: 'process' })),
   ];
+  const ids   = new Set(nodes.map(n => n.id));
   const links = [];
-  foundations.forEach(f =>
-    (f.decisions ?? []).forEach(id =>
-      links.push({ source: f.id, target: id, relationship: 'related' })));
-  decisions.forEach(d =>
-    (d.links ?? []).forEach(l =>
-      links.push({ source: d.id, target: l.id, relationship: 'related', note: l.note })));
-  const data = { nodes, links };
-  sessionStorage.setItem(KEY, JSON.stringify(data));
-  return data;
-};
-
-// operations.json — derive from raw GH entities, cache in sessionStorage
-_fetchFns['/operations.json'] = async () => {
-  const KEY = 'ops-v1';
-  const hit = sessionStorage.getItem(KEY);
-  if (hit) return JSON.parse(hit);
-  const [operations, allDecisions] = await Promise.all([
-    ghFetch('operations'),
-    ghFetch('decisions'),
-  ]);
-  const decMap    = new Map(allDecisions.map(d => [d.id, d]));
-  const refDecIds = new Set(operations.flatMap(op => op.decisions ?? []));
-  const refFiles  = new Set(operations.flatMap(op => op.files ?? []));
-  const nodes = [
-    ...operations.map(op => ({ ...op, type: 'operation' })),
-    ...[...refDecIds].map(id => ({ ...(decMap.get(id) ?? { id }), type: 'decision' })),
-    ...[...refFiles].map(id => ({ id, type: 'file' })),
-  ];
-  const links = [];
-  operations.forEach(op => {
-    (op.decisions ?? []).forEach(id => links.push({ source: op.id, target: id, type: 'reasoning' }));
-    (op.files ?? []).forEach(id  => links.push({ source: op.id, target: id, type: 'file' }));
+  const add = (source, target, relationship, note) => {
+    if (source !== target && ids.has(source) && ids.has(target))
+      links.push({ source, target, relationship, note });
+  };
+  nodes.forEach(n => {
+    if (n.anchor) add(n.id, n.anchor, 'anchored-by');
+    (n.implements ?? []).forEach(t => add(n.id, t, 'implements'));
+    (n.links ?? []).forEach(l => add(n.id, l.target, l.relation ?? 'related', l.note));
   });
   const data = { nodes, links };
   sessionStorage.setItem(KEY, JSON.stringify(data));
@@ -233,22 +213,28 @@ function NodePanel({ node }) {
       React.createElement('p',   { key: 'iv', className: 'info-text'  }, kgNode.intent),
     );
 
+    if (kgNode.rule) children.push(
+      React.createElement('p', { key: 'rv', className: 'info-text' }, kgNode.rule),
+    );
+
     if (kgNode.decision) children.push(
       React.createElement('p', { key: 'dv', className: 'info-text' }, kgNode.decision),
     );
 
-    const isRelated = l => l.relationship === 'related';
-    const links = [
-      ...kg.links.filter(l => { const [s] = linkEnds(l); return s === kgId && isRelated(l); })
-                 .map(l => { const [, t] = linkEnds(l); return { id: t, arrow: '\u2192' }; }),
-      ...(node.type === 'flow'
-        ? kg.links.filter(l => { const [, t] = linkEnds(l); return t === kgId && isRelated(l); })
-                  .map(l => { const [s] = linkEnds(l); return { id: s, arrow: '\u2190' }; })
-        : []),
+    // Foundations are pure targets in the new schema \u2014 rules anchor to them, so
+    // list the inbound side. Flow nodes are rules themselves: show both directions.
+    const isFoundation = node.type === 'foundation';
+    const inbound = kg.links.filter(l => linkEnds(l)[1] === kgId)
+                            .map(l => ({ id: linkEnds(l)[0], arrow: '\u2190' }));
+    const links = isFoundation ? inbound : [
+      ...kg.links.filter(l => linkEnds(l)[0] === kgId)
+                 .map(l => ({ id: linkEnds(l)[1], arrow: '\u2192' })),
+      ...inbound,
     ];
 
     if (links.length > 0) children.push(
-      React.createElement('div', { key: 'dl', className: 'info-label', style: { color: OUTBOUND_COLOR } }, 'Decisions made'),
+      React.createElement('div', { key: 'dl', className: 'info-label', style: { color: OUTBOUND_COLOR } },
+        isFoundation ? 'Rules anchored here' : 'Related rules'),
       React.createElement('div', { key: 'dlist', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
         ...links.map(({ id, arrow }, i) => React.createElement('div', { key: i, style: { paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
           React.createElement('a', {
@@ -260,7 +246,7 @@ function NodePanel({ node }) {
     );
   }
 
-  // Visual list (knowledge-graph / operations / big-bang)
+  // Visual list (knowledge-graph / big-bang)
   if (desc.panelJson) {
     if (!listData) return React.createElement('p', { className: 'info-text', style: { opacity: 0.5 } }, 'Loading\u2026');
     const items = listData.nodes.filter(n => n.type === desc.panelType);

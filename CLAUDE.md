@@ -1,6 +1,6 @@
 # Gazelle Cloud — Site
 
-An interactive map of a lightweight Azure landing zone. Force-directed graphs visualise design decisions, platform operations, and deployment workflows. Nodes are dots; edges are relationships.
+An interactive map of a lightweight Azure landing zone. Force-directed graphs visualise design decisions and deployment workflows. Nodes are dots; edges are relationships.
 
 ## Design Principles
 
@@ -23,8 +23,7 @@ site/
     engine.js                  # centralised engine: load JSON → mount → render
     shell.js                   # hooks, components, palette (used by engine + page configs)
     shell.css                  # all styles
-    knowledge-graph.page.js    # page config: foundations + decisions, rim layout
-    operations.page.js         # page config: operations + decisions + file nodes, concentric layout
+    knowledge-graph.page.js    # page config: foundations + constitutive + regulative rules, rim layout
     bigbang.page.js            # page config: github-workflows + bicep, tiered layout
     bigbang.json               # pre-built graph data (bigbang not in data repo)
   src/
@@ -37,10 +36,6 @@ site/
       knowledge-graph/
         index.astro            # graph page + sr-only links
         [slug].astro           # detail page: sr-only SEO content + JS redirect to /#id
-      operations.json.ts       # build-time endpoint: fetches + derives → /operations.json
-      operations/
-        index.astro
-        [...slug].astro
       bigbang/
         index.astro
         [...slug].astro
@@ -54,7 +49,7 @@ build time:
   *.json.ts → GitHub API (GITHUB_TOKEN env var)
              → raw entity files (parallel fetch per category)
              → deriveGraph() → { nodes, links }
-             → /knowledge-graph.json, /operations.json
+             → /knowledge-graph.json
 
   index.astro → same GitHub API fetch → sr-only HTML → crawlers / LLMs
 

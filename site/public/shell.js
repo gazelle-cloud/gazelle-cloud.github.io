@@ -6,7 +6,6 @@ import { createPortal } from 'react-dom';
 export const NAV = [
   { label: 'Home',         href: '/' },
   { label: 'Knowledge Graph', href: '/knowledge-graph/' },
-  { label: 'Operations',   href: '/operations/' },
   { label: 'BigBang',      href: '/bigbang/' },
 ];
 
@@ -60,7 +59,7 @@ export const FONT_MONO = "'Fira Code', 'Cascadia Code', 'Consolas', monospace";
 // Pages assign their node types to these roles — never to raw hex values.
 export const PALETTE = {
   ENTRY:     '#f0a500',  // yellow — entry points (top-level triggers / anchors)
-  CONNECTOR: '#3dba7f',  // green  — links between (orchestrators / operations)
+  CONNECTOR: '#3dba7f',  // green  — links between (orchestrators / constitutive rules)
   LEAF:      '#4e8ef7',  // blue   — most nodes   (decisions / modules)
 };
 

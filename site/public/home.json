@@ -29,7 +29,7 @@
       "type": "flow",
       "label": "Join",
       "description": "An application team joins the platform by raising a pull request with their profile.",
-      "href": "/knowledge-graph/landing-zone-application-profile/"
+      "href": "/knowledge-graph/register-platform-member/"
     },
     {
       "id": "request",
@@ -49,13 +49,6 @@
       "label": "Knowledge Graph",
       "description": "Captures the reasoning behind every platform decision.",
       "href": "/knowledge-graph/"
-    },
-    {
-      "id": "operations",
-      "type": "visual",
-      "label": "Operations",
-      "description": "How AI operates the platform — decisions to respect, files to touch, sequence to follow.",
-      "href": "/operations/"
     },
     {
       "id": "big-bang",

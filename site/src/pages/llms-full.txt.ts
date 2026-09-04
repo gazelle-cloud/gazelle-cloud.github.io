@@ -4,30 +4,35 @@ function toTitle(id: string) {
   return id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
+// Shared tail — every entity carries some subset of these.
+function renderTail(obj: any, lines: string[]) {
+  if (obj.anchor)             { lines.push('', `Anchor: ${obj.anchor}`); }
+  if (obj.implements?.length) { lines.push('', 'Implements:', ...obj.implements.map((i: string) => `- ${i}`)); }
+  if (obj.links?.length)      { lines.push('', 'Links:', ...obj.links.map((l: any) =>
+                                  `- ${l.target} (${l.relation})${l.note ? `: ${l.note}` : ''}`)); }
+  if (obj.violations?.length) { lines.push('', 'Violations:', ...obj.violations.map((v: string) => `- ${v}`)); }
+  if (obj.files?.length)      { lines.push('', 'Files:', ...obj.files.map((f: string) => `- ${f}`)); }
+}
+
 function renderFoundation(obj: any): string {
   const lines = [`# ${toTitle(obj.id)}`, '', `Intent: ${obj.intent}`];
-  if (obj.decisions?.length) { lines.push('', 'Decisions:', ...obj.decisions.map((d: string) => `- ${d}`)); }
-  if (obj.violations?.length) { lines.push('', 'Violations:', ...obj.violations.map((v: string) => `- ${v}`)); }
+  renderTail(obj, lines);
   return lines.join('\n');
 }
 
-function renderDecision(obj: any): string {
+function renderConstitutive(obj: any): string {
+  const lines = [`# ${toTitle(obj.id)}`, '', `Rule: ${obj.rule}`];
+  if (obj.subject?.term) { lines.push('', `Subject: ${obj.subject.term} (${obj.subject.type})`); }
+  renderTail(obj, lines);
+  return lines.join('\n');
+}
+
+function renderRegulative(obj: any): string {
   const lines = [`# ${toTitle(obj.id)}`, '', `Decision: ${obj.decision}`, '', `Why: ${obj.why}`];
-  if (obj.links?.length)      { lines.push('', 'Related:', ...obj.links.map((l: any) => `- ${l.id}: ${l.note}`)); }
-  if (obj.violations?.length) { lines.push('', 'Violations:', ...obj.violations.map((v: string) => `- ${v}`)); }
-  if (obj.files?.length)      { lines.push('', 'Files:', ...obj.files.map((f: string) => `- ${f}`)); }
-  return lines.join('\n');
-}
-
-function renderOperation(obj: any): string {
-  const lines = [`# ${toTitle(obj.id)}`, '', `Intent: ${obj.intent}`];
-  if (obj.triggers?.length)   { lines.push('', `Triggers: ${obj.triggers.join(', ')}`); }
-  if (obj.prerequisite)       { lines.push('', `Prerequisite: ${obj.prerequisite}`); }
-  if (obj.workflow)           { lines.push('', `Workflow: ${obj.workflow}`); }
-  if (obj.decisions?.length)  { lines.push('', 'Decisions:', ...obj.decisions.map((d: string) => `- ${d}`)); }
-  if (obj.steps?.length)      { lines.push('', 'Steps:', ...obj.steps.map((s: string, i: number) => `${i + 1}. ${s}`)); }
-  if (obj.violations?.length) { lines.push('', 'Violations:', ...obj.violations.map((v: string) => `- ${v}`)); }
-  if (obj.files?.length)      { lines.push('', 'Files:', ...obj.files.map((f: string) => `- ${f}`)); }
+  if (obj.trigger?.length) { lines.push('', `Triggers: ${obj.trigger.join(', ')}`); }
+  if (obj.workflow)        { lines.push('', `Workflow: ${obj.workflow}`); }
+  if (obj.steps?.length)   { lines.push('', 'Steps:', ...obj.steps.map((s: string, i: number) => `${i + 1}. ${s}`)); }
+  renderTail(obj, lines);
   return lines.join('\n');
 }
 
@@ -49,10 +54,11 @@ async function fetchCategory(category: string): Promise<any[]> {
 }
 
 export async function GET() {
-  const [foundations, decisions, operations] = await Promise.all([
+  const [foundations, constitutive, regEntity, regProcess] = await Promise.all([
     fetchCategory('foundations'),
-    fetchCategory('decisions'),
-    fetchCategory('operations'),
+    fetchCategory('constitutive'),
+    fetchCategory('regulative-entity'),
+    fetchCategory('regulative-process'),
   ]);
 
   const sep = (heading: string) =>
@@ -61,13 +67,16 @@ export async function GET() {
   const lines: string[] = [
     sep('Foundations'),
     ...foundations.map(renderFoundation),
-    sep('Decisions'),
-    ...decisions.map(renderDecision),
-    sep('Operations'),
-    ...operations.map(renderOperation),
+    sep('Constitutive Rules'),
+    ...constitutive.map(renderConstitutive),
+    sep('Regulative Rules — Entities'),
+    ...regEntity.map(renderRegulative),
+    sep('Regulative Rules — Processes'),
+    ...regProcess.map(renderRegulative),
   ];
 
-  return new Response(lines.join('\n'), {
+  // Blank line between blocks — entries otherwise run straight into each other.
+  return new Response(lines.join('\n\n'), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
 }

@@ -9,11 +9,10 @@ const headers: Record<string, string> = {
   ...(token ? { Authorization: `Bearer ${token}` } : {}),
 };
 
-async function fetchCategory(category: string): Promise<any[]> {
+async function fetchCategory(category: string, type: string): Promise<any[]> {
   const res = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/${BASE_PATH}/${category}`, { headers });
   const listing: any[] = await res.json();
   if (!Array.isArray(listing)) return [];
-  const type = category.replace(/s$/, '');
   return Promise.all(
     listing
       .filter((f: any) => f.type === 'file' && f.name.endsWith('.json'))
@@ -21,9 +20,11 @@ async function fetchCategory(category: string): Promise<any[]> {
   );
 }
 
-const [foundations, decisions] = await Promise.all([
-  fetchCategory('foundations'),
-  fetchCategory('decisions'),
+const [foundations, constitutive, regEntity, regProcess] = await Promise.all([
+  fetchCategory('foundations', 'foundation'),
+  fetchCategory('constitutive', 'constitutive'),
+  fetchCategory('regulative-entity', 'regulative'),
+  fetchCategory('regulative-process', 'regulative'),
 ]);
 ---
 <GraphPage title="Gazelle — Captures the reasoning behind every platform decision." fullTitle description="Platform design rules and decisions that shape the Azure landing zone — how deny-by-default, self-service, and zero-cost-on-idle connect." page="/knowledge-graph.page.js">
@@ -40,9 +41,29 @@ const [foundations, decisions] = await Promise.all([
       ))}
     </ul>
 
-    <h2>Decisions</h2>
+    <h2>Constitutive rules</h2>
     <ul>
-      {decisions.map((d: any) => (
+      {constitutive.map((c: any) => (
+        <li>
+          <a href={`/knowledge-graph/${c.id}/`}>{c.id}</a>
+          {c.rule && <span> — {c.rule}</span>}
+        </li>
+      ))}
+    </ul>
+
+    <h2>Regulative rules — entities</h2>
+    <ul>
+      {regEntity.map((d: any) => (
+        <li>
+          <a href={`/knowledge-graph/${d.id}/`}>{d.id}</a>
+          {d.decision && <span> — {d.decision}</span>}
+        </li>
+      ))}
+    </ul>
+
+    <h2>Regulative rules — processes</h2>
+    <ul>
+      {regProcess.map((d: any) => (
         <li>
           <a href={`/knowledge-graph/${d.id}/`}>{d.id}</a>
           {d.decision && <span> — {d.decision}</span>}

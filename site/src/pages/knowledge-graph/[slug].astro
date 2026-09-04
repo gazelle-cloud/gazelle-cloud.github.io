@@ -21,11 +21,13 @@ export async function getStaticPaths() {
     );
   }
 
-  const [foundations, decisions] = await Promise.all([
+  const [foundations, constitutive, regEntity, regProcess] = await Promise.all([
     fetchCategory('foundations', 'foundation'),
-    fetchCategory('decisions', 'decision'),
+    fetchCategory('constitutive', 'constitutive'),
+    fetchCategory('regulative-entity', 'regulative'),
+    fetchCategory('regulative-process', 'regulative'),
   ]);
-  const nodes = [...foundations, ...decisions];
+  const nodes = [...foundations, ...constitutive, ...regEntity, ...regProcess];
   return nodes.map((n: any) => ({
     params: { slug: n.id },
     props:  { node: n },
@@ -35,7 +37,7 @@ export async function getStaticPaths() {
 const { node } = Astro.props as { node: any };
 const name  = node.id;
 const label = node.label || name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
-const desc  = (node.intent || node.decision || node.why || '').slice(0, 155);
+const desc  = (node.intent || node.rule || node.decision || node.why || '').slice(0, 155);
 ---
 <GraphPage title={label} description={desc || undefined} page="/knowledge-graph.page.js">
   <script is:inline define:vars={{ name }}>
@@ -50,6 +52,13 @@ const desc  = (node.intent || node.decision || node.why || '').slice(0, 155);
       <>
         <h2>Intent</h2>
         <p>{node.intent}</p>
+      </>
+    )}
+
+    {node.rule && (
+      <>
+        <h2>Rule</h2>
+        <p>{node.rule}</p>
       </>
     )}
 
@@ -78,12 +87,41 @@ const desc  = (node.intent || node.decision || node.why || '').slice(0, 155);
       </>
     )}
 
-    {node.decisions?.length > 0 && (
+    {node.anchor && (
       <>
-        <h2>Decisions</h2>
+        <h2>Anchor</h2>
+        <p><a href={`/knowledge-graph/${node.anchor}/`}>{node.anchor}</a></p>
+      </>
+    )}
+
+    {node.implements?.length > 0 && (
+      <>
+        <h2>Implements</h2>
         <ul>
-          {node.decisions.map((id: string) => (
+          {node.implements.map((id: string) => (
             <li><a href={`/knowledge-graph/${id}/`}>{id}</a></li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {node.steps?.length > 0 && (
+      <>
+        <h2>Steps</h2>
+        <ol>
+          {node.steps.map((s: string) => (
+            <li>{s}</li>
+          ))}
+        </ol>
+      </>
+    )}
+
+    {node.files?.length > 0 && (
+      <>
+        <h2>Files</h2>
+        <ul>
+          {node.files.map((f: string) => (
+            <li>{f}</li>
           ))}
         </ul>
       </>
@@ -95,7 +133,8 @@ const desc  = (node.intent || node.decision || node.why || '').slice(0, 155);
         <ul>
           {node.links.map((l: any) => (
             <li>
-              <a href={`/knowledge-graph/${l.id}/`}>{l.id}</a>
+              <a href={`/knowledge-graph/${l.target}/`}>{l.target}</a>
+              {l.relation && <span> ({l.relation})</span>}
               {l.note && <span> — {l.note}</span>}
             </li>
           ))}

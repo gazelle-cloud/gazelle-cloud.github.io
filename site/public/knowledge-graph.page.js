@@ -15,25 +15,36 @@ async function ghFetch(sub) {
 }
 
 async function getData() {
-  const KEY = 'kg-v2';
+  const KEY = 'kg-v3';
   const hit = sessionStorage.getItem(KEY);
   if (hit) return JSON.parse(hit);
 
-  const [foundations, decisions] = await Promise.all([
+  const [foundations, constitutive, regEntity, regProcess] = await Promise.all([
     ghFetch('foundations'),
-    ghFetch('decisions'),
+    ghFetch('constitutive'),
+    ghFetch('regulative-entity'),
+    ghFetch('regulative-process'),
   ]);
   const nodes = [
     ...foundations.map(f => ({ ...f, type: 'foundation' })),
-    ...decisions.map(d => ({ ...d, type: 'decision' })),
+    ...constitutive.map(c => ({ ...c, type: 'constitutive' })),
+    ...regEntity.map(r  => ({ ...r, type: 'regulative', subjectType: 'entity'  })),
+    ...regProcess.map(r => ({ ...r, type: 'regulative', subjectType: 'process' })),
   ];
+
+  // Only link ids that actually resolve to a node — a dangling id kills the sim.
+  const ids   = new Set(nodes.map(n => n.id));
   const links = [];
-  foundations.forEach(f =>
-    (f.decisions ?? []).forEach(id =>
-      links.push({ source: f.id, target: id, relationship: 'related' })));
-  decisions.forEach(d =>
-    (d.links ?? []).forEach(l =>
-      links.push({ source: d.id, target: l.id, relationship: 'related', note: l.note })));
+  const add = (source, target, relationship, note) => {
+    if (source !== target && ids.has(source) && ids.has(target))
+      links.push({ source, target, relationship, note });
+  };
+
+  nodes.forEach(n => {
+    if (n.anchor) add(n.id, n.anchor, 'anchored-by');
+    (n.implements ?? []).forEach(t => add(n.id, t, 'implements'));
+    (n.links ?? []).forEach(l => add(n.id, l.target, l.relation ?? 'related', l.note));
+  });
 
   const raw = { nodes, links };
   sessionStorage.setItem(KEY, JSON.stringify(raw));
@@ -54,7 +65,9 @@ function IdlePanel({ theme }) {
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
         React.createElement('span', { style: { color: PALETTE.ENTRY } }, 'Yellow'), ' = foundations'),
       React.createElement('p', { className: 'info-text', style: { margin: 0 } },
-        React.createElement('span', { style: { color: PALETTE.LEAF } }, 'Blue'), ' = design decisions'),
+        React.createElement('span', { style: { color: PALETTE.CONNECTOR } }, 'Green'), ' = constitutive rules'),
+      React.createElement('p', { className: 'info-text', style: { margin: 0 } },
+        React.createElement('span', { style: { color: PALETTE.LEAF } }, 'Blue'), ' = regulative rules'),
     ),
     React.createElement(OpenSourceNote),
   );
@@ -65,20 +78,18 @@ const OUTBOUND_COLOR = '#fb923c';
 const INBOUND_COLOR  = '#7dd3fc';
 
 function panel(node, graph, { setFocusedId, theme }) {
-  const outLinks = graph.links.filter(l => {
-    const [s] = linkEnds(l);
-    return s === node.id && l.relationship === 'related';
-  });
-  const inLinks = graph.links.filter(l => {
-    const [, t] = linkEnds(l);
-    return t === node.id && l.relationship === 'related';
-  });
+  const outLinks = graph.links.filter(l => linkEnds(l)[0] === node.id);
+  const inLinks  = graph.links.filter(l => linkEnds(l)[1] === node.id);
 
   const children = [];
 
   if (node.intent) children.push(
     React.createElement('div', { key: 'il', className: 'info-label' }, 'Intent'),
     React.createElement('p',   { key: 'iv', className: 'info-text' }, node.intent),
+  );
+
+  if (node.rule) children.push(
+    React.createElement('p', { key: 'rv', className: 'info-text' }, node.rule),
   );
 
   if (node.decision) children.push(
@@ -90,19 +101,29 @@ function panel(node, graph, { setFocusedId, theme }) {
     React.createElement('p',   { key: 'wv', className: 'info-text' }, node.why),
   );
 
+  if (node.violations?.length) children.push(
+    React.createElement('div', { key: 'vl', className: 'info-label' }, 'Violations'),
+    React.createElement('div', { key: 'vv', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 6, overflowX: 'hidden', whiteSpace: 'normal' } },
+      ...node.violations.map((v, i) =>
+        React.createElement('div', { key: i, style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12 } }, v)),
+    ),
+  );
+
   const nodeById = Object.fromEntries(graph.nodes.map(n => [n.id, n]));
 
-  function LinkedNode({ id, note, arrow, color }) {
+  function LinkedNode({ id, relation, note, arrow, color }) {
     const linked = nodeById[id];
     const isYellowInvolved = node.type === 'foundation' || linked?.type === 'foundation';
-    const summary = linked?.decision || linked?.intent;
+    const summary = linked?.decision || linked?.rule || linked?.intent;
+    const meta = { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12 };
     return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 4, paddingBottom: 8, borderBottom: '1px solid rgba(155,175,215,0.1)' } },
       React.createElement('a', {
         href: `/knowledge-graph/${id}/`,
         style: { color, fontFamily: FONT_MONO, fontSize: 13, textDecoration: 'none' },
       }, arrow + ' ' + id.replaceAll('-', ' ')),
-      note && React.createElement('div', { style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12 } }, note),
-      isYellowInvolved && summary && React.createElement('div', { style: { color: '#94a3b8', fontFamily: FONT_MONO, fontSize: 12 } }, summary),
+      relation && React.createElement('div', { style: { ...meta, opacity: 0.75 } }, relation.replaceAll('-', ' ')),
+      note && React.createElement('div', { style: meta }, note),
+      isYellowInvolved && summary && React.createElement('div', { style: meta }, summary),
     );
   }
 
@@ -111,7 +132,7 @@ function panel(node, graph, { setFocusedId, theme }) {
     React.createElement('div', { key: 'ov', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
       ...outLinks.map((l, i) => {
         const [, targetId] = linkEnds(l);
-        return React.createElement(LinkedNode, { key: i, id: targetId, note: l.note, arrow: '→', color: OUTBOUND_COLOR });
+        return React.createElement(LinkedNode, { key: i, id: targetId, relation: l.relationship, note: l.note, arrow: '→', color: OUTBOUND_COLOR });
       }),
     ),
   );
@@ -121,7 +142,7 @@ function panel(node, graph, { setFocusedId, theme }) {
     React.createElement('div', { key: 'inv', className: 'code-block', style: { display: 'flex', flexDirection: 'column', gap: 0, overflowX: 'hidden', whiteSpace: 'normal' } },
       ...inLinks.map((l, i) => {
         const [sourceId] = linkEnds(l);
-        return React.createElement(LinkedNode, { key: i, id: sourceId, note: l.note, arrow: '←', color: INBOUND_COLOR });
+        return React.createElement(LinkedNode, { key: i, id: sourceId, relation: l.relationship, note: l.note, arrow: '←', color: INBOUND_COLOR });
       }),
     ),
   );
@@ -157,11 +178,13 @@ mount({
   getData,
 
   types: {
-    'foundation': { palette: 'ENTRY', label: 'foundation' },
-    'decision':          { palette: 'LEAF',  label: 'design decision'   },
+    'foundation':   { palette: 'ENTRY',     label: 'foundation'        },
+    'constitutive': { palette: 'CONNECTOR', label: 'constitutive rule' },
+    'regulative':   { palette: 'LEAF',      label: 'regulative rule'   },
   },
 
-  dotRadius: node => node.type === 'decision' ? 2 + node.__weight * 7 : 5,
+  // Green and blue share one sizing rule; foundations are fixed.
+  dotRadius: node => node.type === 'foundation' ? 5 : 2 + node.__weight * 7,
 
   prepare(raw) {
     // Pin foundation nodes evenly along the rectangle perimeter
@@ -179,7 +202,7 @@ mount({
 
   forces(fg) {
     fg.d3Force('link').distance(65).strength(0.25);
-    fg.d3Force('collision', forceCollide(n => (n.type === 'decision' ? 2 + n.__weight * 7 : 5) + 14));
+    fg.d3Force('collision', forceCollide(n => (n.type === 'foundation' ? 5 : 2 + n.__weight * 7) + 14));
     fg.d3Force('charge').strength(n => n.type === 'foundation' ? 0 : -55);
     fg.d3Force('walls', forceWalls(BOX_W, BOX_H));  // hard wall — no escapes
   },
@@ -212,15 +235,12 @@ mount({
     const faded  = theme === 'dark' ? 'rgba(180,180,180,0.04)' : 'rgba(80,80,100,0.04)';
     if (!activeId) return dim;
     const [s, t] = linkEnds(l);
-    if (l.relationship === 'related') {
-      if (s === activeId) return OUTBOUND_COLOR;
-      if (t === activeId) return INBOUND_COLOR;
-    }
-    const active = theme === 'dark' ? 'rgba(235,242,255,0.95)' : 'rgba(30,30,50,0.75)';
-    return (s === activeId || t === activeId) ? active : faded;
+    if (s === activeId) return OUTBOUND_COLOR;
+    if (t === activeId) return INBOUND_COLOR;
+    return faded;
   },
 
-  nameplateLabel: node => node.decision ?? node.intent ?? node.id.replaceAll('-', ' '),
+  nameplateLabel: node => node.decision ?? node.rule ?? node.intent ?? node.id.replaceAll('-', ' '),
 
   idlePanel: IdlePanel,
   panel,
