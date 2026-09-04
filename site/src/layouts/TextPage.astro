@@ -1,0 +1,176 @@
+---
+// TextPage — prose pages. No graph, no info panel, no React.
+//
+// Ships the same chrome as GraphPage (top bar, nav, theme toggle, footer) but
+// renders it as static HTML at build time, so the page loads with zero
+// framework JavaScript. The only script is ~20 lines inline: theme persistence
+// and the mobile menu.
+//
+// Usage from Markdown (src/pages/*.md):
+//   ---
+//   layout: ../layouts/TextPage.astro
+//   title: Why landing zones rot
+//   description: One-line summary, shown as the standfirst and the meta description.
+//   ---
+//
+// Usage from Astro:
+//   <TextPage title="…" description="…"> …markup… </TextPage>
+import Base from './Base.astro';
+import { NAV, GITHUB_URL, GITHUB_ICON_PATH } from '../../public/nav.js';
+
+interface Heading { depth: number; slug: string; text: string }
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+  toc?: boolean;
+  frontmatter?: { title?: string; description?: string; noindex?: boolean; toc?: boolean };
+  // Supplied automatically by Astro for Markdown pages.
+  headings?: Heading[];
+}
+
+// Markdown pages arrive as `frontmatter`; .astro pages pass props directly.
+const fm = Astro.props.frontmatter ?? {};
+const title = fm.title ?? Astro.props.title ?? '';
+const description = fm.description ?? Astro.props.description;
+const noindex = fm.noindex ?? Astro.props.noindex ?? false;
+
+// Table of contents — opt in with `toc: true` in frontmatter. Built from the
+// headings Astro extracts at build time, so it can never drift from the body.
+// The slugs are the same ids Astro stamps onto the rendered <h2>/<h3>.
+// h1 is the page title (rendered here, not in the body) and h4+ is too fine
+// grained for a sidebar, so only h2/h3 are listed.
+const wantsToc = fm.toc ?? Astro.props.toc ?? false;
+const headings = (Astro.props.headings ?? []).filter((h) => h.depth === 2 || h.depth === 3);
+const showToc = wantsToc && headings.length > 0;
+
+// Normalise to a trailing slash so `/about` and `/about/` both match NAV.
+const withSlash = (p: string) => (p.endsWith('/') ? p : `${p}/`);
+const here = withSlash(Astro.url.pathname);
+---
+<Base title={title} description={description} noindex={noindex}>
+  <link rel="stylesheet" href="/shell.css" />
+  <link rel="stylesheet" href="/text.css" />
+
+  <!-- Applied before first paint so the page never flashes the wrong theme.
+       Mirrors useTheme() in shell.js — same key, same data-theme contract. -->
+  <script is:inline>
+    (() => {
+      const saved = localStorage.getItem('theme');
+      const light = saved
+        ? saved === 'light'
+        : window.matchMedia('(prefers-color-scheme: light)').matches;
+      document.documentElement.dataset.theme = light ? 'light' : '';
+    })();
+  </script>
+
+  <header id="top-bar">
+    <div class="top-bar-panel">
+      <nav class="top-bar-nav">
+        {NAV.map(({ label, href, external }, i) => (
+          <>
+            {i > 0 && <span class="nav-sep" aria-hidden="true">|</span>}
+            {withSlash(href) === here
+              ? <span class="nav-link nav-active">{label}</span>
+              : <a
+                  class="nav-link"
+                  href={href}
+                  {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                >{label}</a>}
+          </>
+        ))}
+      </nav>
+      <!-- Same order as the graph pages (engine.js): toggle, then GitHub.
+           Text pages have no search box, so that slot is simply absent. -->
+      <div class="top-bar-right">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle colour theme"></button>
+        <a
+          class="gh-link"
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub repository"
+          title="GitHub repository"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+            <path d={GITHUB_ICON_PATH} />
+          </svg>
+        </a>
+      </div>
+    </div>
+    <button id="menu-btn" aria-label="Open menu" aria-expanded="false">☰</button>
+  </header>
+
+  <main id="text-pane">
+    <!-- .text-wrap is the measure-width, centred box. The article sits in normal
+         flow inside it; the TOC is lifted into the left margin (right: 100%) so
+         adding one never shifts the reading column. -->
+    <div class="text-wrap">
+      {showToc && (
+        <aside class="toc" aria-label="On this page">
+          <nav class="toc-inner">
+            <p class="toc-title">On this page</p>
+            <ul>
+              {headings.map((h) => (
+                <li class={`toc-d${h.depth}`}><a href={`#${h.slug}`}>{h.text}</a></li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+      )}
+      <article class="prose">
+        {title && <h1>{title}</h1>}
+        {description && <p class="lede">{description}</p>}
+        <slot />
+      </article>
+    </div>
+  </main>
+
+  <footer id="footer-bar">
+    <a
+      class="footer-item"
+      href="https://github.com/gazelle-cloud/gazelle-cloud.github.io"
+      target="_blank"
+      rel="noopener noreferrer"
+    >Built on open source</a>
+    <span class="footer-sep">·</span>
+    <span class="footer-item">No cookies</span>
+    <span class="footer-sep">·</span>
+    <span class="footer-item">MIT</span>
+  </footer>
+
+  <script is:inline>
+    (() => {
+      // ── theme toggle ──────────────────────────────────────────────────────
+      const btn = document.getElementById('theme-toggle');
+      const paint = () => {
+        const dark = document.documentElement.dataset.theme !== 'light';
+        btn.textContent = dark ? '☀' : '☾';
+        btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+      };
+      btn.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = next === 'light' ? 'light' : '';
+        localStorage.setItem('theme', next);
+        paint();
+      });
+      paint();
+
+      // ── mobile menu ───────────────────────────────────────────────────────
+      // shell.css drives the dropdown off #top-bar.menu-open; this only toggles it.
+      const bar = document.getElementById('top-bar');
+      const menu = document.getElementById('menu-btn');
+      const setOpen = (open) => {
+        bar.classList.toggle('menu-open', open);
+        menu.textContent = open ? '✕' : '☰';
+        menu.setAttribute('aria-expanded', String(open));
+        menu.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      };
+      menu.addEventListener('click', () => setOpen(!bar.classList.contains('menu-open')));
+      document.addEventListener('pointerdown', (e) => {
+        if (bar.classList.contains('menu-open') && !bar.contains(e.target)) setOpen(false);
+      });
+    })();
+  </script>
+</Base>

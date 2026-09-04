@@ -2,12 +2,11 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 
 // ── navigation entries ───────────────────────────────────────────────────────
-// Add one object here whenever you create a new page. That's it.
-export const NAV = [
-  { label: 'Home',         href: '/' },
-  { label: 'Knowledge Graph', href: '/knowledge-graph/' },
-  { label: 'BigBang',      href: '/bigbang/' },
-];
+// Defined in nav.js (dependency-free) so Astro can read it at build time for the
+// static nav on text pages. Re-exported here so page configs keep importing it
+// from shell.js as before.
+export { NAV } from './nav.js';
+import { NAV } from './nav.js';
 
 // ── linkEnds ─────────────────────────────────────────────────────────────────
 // Extracts [sourceId, targetId] from a ForceGraph link, handling both the

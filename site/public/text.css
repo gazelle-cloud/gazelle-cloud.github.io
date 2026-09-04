@@ -1,0 +1,224 @@
+/* ── text.css ────────────────────────────────────────────────────────────────
+   Prose pages. Loaded *after* shell.css, which supplies the shared chrome
+   (top bar, nav links, theme toggle, footer, light-theme overrides). This file
+   undoes the two graph-specific reset rules and styles the article body.
+
+   shell.css is the single source of truth for chrome; never restyle it here. */
+
+/* ── undo the graph reset ───────────────────────────────────────────────────
+   shell.css pins the viewport (`overflow: hidden; height: 100%`) because a
+   canvas fills it. Prose has to scroll, so the page grows instead. The flex
+   column on <body> is kept — it is what pins the footer to the bottom. */
+html, body { overflow: visible; height: auto; }
+body { min-height: 100%; }
+
+:root {
+  --text-measure: 68ch;
+  --toc-w:        200px;
+  --text-body:    #d4daf0;
+  --text-muted:   rgba(155,175,215,0.72);
+  --text-rule:    rgba(155,175,215,0.15);
+  --text-code-bg: rgba(155,175,215,0.10);
+  --text-accent:  #7aa2f7;
+}
+[data-theme="light"] {
+  --text-body:    #1a1b26;
+  --text-muted:   rgba(26,27,38,0.66);
+  --text-rule:    rgba(0,0,0,0.10);
+  --text-code-bg: rgba(0,0,0,0.05);
+  --text-accent:  #2f5fd0;
+}
+
+/* The top bar is `position: relative` and does not scroll away with the page.
+   Make it stick so the nav stays reachable in a long document. */
+#top-bar { position: sticky; top: 0; }
+
+/* On graph pages .top-bar-right is sized to the info panel so the search box
+   lines up with it. A text page holds only the theme toggle — let it shrink. */
+#top-bar .top-bar-right { width: auto; }
+
+/* ── article ────────────────────────────────────────────────────────────── */
+#text-pane {
+  flex: 1;
+  padding: 56px 24px 80px;
+}
+
+/* Centred measure-width box. The article fills it; the TOC hangs off its left
+   edge, outside the box, so a page with a TOC and a page without line up. */
+.text-wrap {
+  max-width: var(--text-measure);
+  margin: 0 auto;
+  position: relative;
+}
+
+.prose {
+  max-width: var(--text-measure);
+  margin: 0 auto;
+  color: var(--text-body);
+  font: 16px/1.65 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+/* #top-bar is sticky, so an anchored heading would land underneath it.
+   Offset the scroll target by the bar height plus a little breathing room. */
+.prose :is(h1, h2, h3) { scroll-margin-top: calc(var(--topbar-h) + 20px); }
+
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child  { margin-bottom: 0; }
+
+.prose h1 {
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+}
+
+/* Standfirst: the description, rendered under the title. */
+.prose .lede {
+  color: var(--text-muted);
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0 0 36px;
+}
+
+.prose h2 {
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  margin: 44px 0 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--text-rule);
+}
+
+.prose h3 {
+  font-size: 17px;
+  font-weight: 500;
+  margin: 30px 0 8px;
+}
+
+.prose p { margin: 0 0 18px; }
+
+.prose a { color: var(--text-accent); text-decoration: underline; text-underline-offset: 2px; }
+.prose a:hover { text-decoration-thickness: 2px; }
+
+.prose ul, .prose ol { margin: 0 0 18px; padding-left: 22px; }
+.prose li { margin: 0 0 7px; }
+.prose li > ul, .prose li > ol { margin: 7px 0 0; }
+
+.prose strong { font-weight: 500; color: var(--text-body); }
+
+.prose blockquote {
+  margin: 0 0 18px;
+  padding: 2px 0 2px 18px;
+  border-left: 2px solid var(--text-rule);
+  color: var(--text-muted);
+}
+
+.prose hr { border: none; border-top: 1px solid var(--text-rule); margin: 36px 0; }
+
+/* ── code ───────────────────────────────────────────────────────────────── */
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--text-code-bg);
+  border-radius: 4px;
+  padding: 1.5px 5px;
+}
+
+.prose pre {
+  background: var(--text-code-bg);
+  border: 1px solid var(--text-rule);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 0 0 18px;
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+/* Shiki sets its own colours on <pre>; the inline-code chrome must not leak in. */
+.prose pre code { background: none; padding: 0; font-size: inherit; border-radius: 0; }
+
+/* ── tables ─────────────────────────────────────────────────────────────── */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 18px;
+  font-size: 15px;
+}
+.prose th, .prose td {
+  text-align: left;
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--text-rule);
+  vertical-align: top;
+}
+.prose th { font-weight: 500; color: var(--text-muted); }
+
+.prose img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* Wide content must scroll inside itself, never the page. */
+.prose .table-scroll { overflow-x: auto; }
+
+/* ── table of contents ──────────────────────────────────────────────────────
+   Lifted into the left margin of .text-wrap. `right: 100%` pins its right edge
+   to the article's left edge, so the article never moves to make room.
+
+   The <aside> is absolute and spans the article's full height (top/bottom: 0);
+   the <nav> inside it is sticky. Sticky needs a definite-height ancestor to
+   travel within — that's what the absolute box provides. */
+.toc {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  margin-right: 44px;
+  width: var(--toc-w);
+}
+
+.toc-inner {
+  position: sticky;
+  top: calc(var(--topbar-h) + 28px);
+  max-height: calc(100vh - var(--topbar-h) - 56px);
+  overflow-y: auto;
+  font: 14px/1.45 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+.toc-title {
+  margin: 0 0 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.toc-inner ul { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--text-rule); }
+.toc-inner li { margin: 0; }
+
+.toc-inner a {
+  display: block;
+  padding: 5px 0 5px 14px;
+  margin-left: -1px;
+  border-left: 1px solid transparent;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.toc-inner a:hover { color: var(--text-body); border-left-color: var(--text-accent); }
+
+.toc-d3 a { padding-left: 26px; font-size: 13.5px; }
+
+/* ── narrow desktop ─────────────────────────────────────────────────────────
+   Below this the left margin can no longer hold the TOC without colliding with
+   the article. Drop it rather than shrink it; the anchors still work. */
+@media (max-width: 1180px) {
+  .toc { display: none; }
+}
+
+/* ── mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  #text-pane { padding: 36px 20px 60px; }
+  .prose    { font-size: 15.5px; }
+  .prose h1 { font-size: 25px; }
+  .prose h2 { font-size: 19px; }
+  .prose .lede { font-size: 16px; margin-bottom: 28px; }
+}
