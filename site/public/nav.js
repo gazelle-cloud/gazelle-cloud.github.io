@@ -9,12 +9,8 @@
 //   • page configs      — if they ever need to reason about siblings
 export const NAV = [
   { label: 'Home',            href: '/' },
-  { label: 'Azure Platform',  href: '/azure-platform/' },
-  { label: 'Landing Zones',   href: '/azure-landing-zones/' },
   { label: 'AI Assistance',   href: '/ai-assistance/' },
   { label: 'Knowledge Graph', href: '/knowledge-graph/' },
-  { label: 'Getting Started', href: '/getting-started/' },
-  { label: 'BigBang',         href: '/bigbang/' },
 ];
 
 // ── github link ──────────────────────────────────────────────────────────────
