@@ -7,7 +7,7 @@ function toTitle(id: string) {
 // Shared tail — every entity carries some subset of these.
 function renderTail(obj: any, lines: string[]) {
   if (obj.anchor)             { lines.push('', `Anchor: ${obj.anchor}`); }
-  if (obj.implements?.length) { lines.push('', 'Implements:', ...obj.implements.map((i: string) => `- ${i}`)); }
+  if (obj.implements?.length) { lines.push('', 'Implements:', ...[].concat(obj.implements).map((i: string) => `- ${i}`)); }
   if (obj.links?.length)      { lines.push('', 'Links:', ...obj.links.map((l: any) =>
                                   `- ${l.target} (${l.relation})${l.note ? `: ${l.note}` : ''}`)); }
   if (obj.violations?.length) { lines.push('', 'Violations:', ...obj.violations.map((v: string) => `- ${v}`)); }

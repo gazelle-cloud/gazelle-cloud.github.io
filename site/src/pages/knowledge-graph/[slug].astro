@@ -98,7 +98,7 @@ const desc  = (node.intent || node.rule || node.decision || node.why || '').slic
       <>
         <h2>Implements</h2>
         <ul>
-          {node.implements.map((id: string) => (
+          {[].concat(node.implements).map((id: string) => (
             <li><a href={`/knowledge-graph/${id}/`}>{id}</a></li>
           ))}
         </ul>

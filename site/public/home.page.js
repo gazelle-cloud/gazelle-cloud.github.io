@@ -134,7 +134,7 @@ function fetchJson(url) {
 }
 
 // ── GitHub fetch helpers ───────────────────────────────────────────────────────
-const GH_BASE = 'https://api.github.com/repos/gazelle-cloud/Azure-landing-zones/contents/knowledge-graph';
+const GH_BASE = 'https://api.github.com/repos/gazelle-cloud/Azure-landing-zones/contents/constitution';
 
 async function ghFetch(sub) {
   const listing = await fetch(`${GH_BASE}/${sub}`).then(r => r.json());
@@ -170,7 +170,7 @@ _fetchFns['/knowledge-graph.json'] = async () => {
   };
   nodes.forEach(n => {
     if (n.anchor) add(n.id, n.anchor, 'anchored-by');
-    (n.implements ?? []).forEach(t => add(n.id, t, 'implements'));
+    [].concat(n.implements ?? []).forEach(t => add(n.id, t, 'implements'));
     (n.links ?? []).forEach(l => add(n.id, l.target, l.relation ?? 'related', l.note));
   });
   const data = { nodes, links };
