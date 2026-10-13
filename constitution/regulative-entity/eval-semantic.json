@@ -1,0 +1,20 @@
+{
+  "id": "eval-semantic",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "A semantic eval must test a constitutive rule against its own fixture files.",
+  "why": "Without fixed files, the expected count drifts with the repository and a failure stops pointing at the rule.",
+  "anchor": "no-human-touch",
+  "implements": "eval",
+  "links": [],
+  "violations": [
+    "Expected count read from the live repository.",
+    "Semantic eval run with the full graph in context."
+  ],
+  "files": [
+    "constitution/eval/semantic/"
+  ],
+  "properties": {}
+}

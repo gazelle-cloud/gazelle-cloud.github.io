@@ -1,0 +1,20 @@
+{
+  "id": "landing-zone-repo",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Every landing zone must be deployed and configured from its application's repository.",
+  "why": "Without a repo, the platform has no deployment mechanism and nowhere to write configuration for the application.",
+  "anchor": "no-platform-ops",
+  "implements": "platform-member",
+  "links": [],
+  "violations": [
+    "Bring-your-own-repo for landing zone creation.",
+    "Landing zone configuration held outside the application repo."
+  ],
+  "files": [
+    ".github/workflows/template-new-platform-members.yml"
+  ],
+  "properties": {}
+}

@@ -1,0 +1,12 @@
+diff --git a/platform-management/policy/parameters/oases/allowedResources.json b/platform-management/policy/parameters/oases/allowedResources.json
+index 0000000..0000000 100644
+--- a/platform-management/policy/parameters/oases/allowedResources.json
++++ b/platform-management/policy/parameters/oases/allowedResources.json
+@@ -12,6 +12,7 @@
+   "microsoft.network/networkwatchers",
+   "Microsoft.OperationalInsights/workspaces",
+   "Microsoft.Storage/storageAccounts",
++  "Microsoft.DocumentDB/databaseAccounts",
+   "Microsoft.Resources/deploymentStacks",
+   "Microsoft.Resources/resourceGroups",
+   "Microsoft.Resources/tags"

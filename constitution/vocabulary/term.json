@@ -1,0 +1,42 @@
+[
+    {
+        "id": "gazelle",
+        "type": "term"
+    },
+    {
+        "id": "constitution",
+        "type": "term"
+    },
+    {
+        "id": "platform",
+        "type": "term"
+    },
+    {
+        "id": "platform-test-environment",
+        "type": "term"
+    },
+    {
+        "id": "oases",
+        "type": "term"
+    },
+    {
+        "id": "landing-zone",
+        "type": "term"
+    },
+    {
+        "id": "platform-member",
+        "type": "term"
+    },
+    {
+        "id": "eval",
+        "type": "term"
+    },
+    {
+        "id": "bigbang",
+        "type": "term"
+    },
+    {
+        "id": "guardrail",
+        "type": "term"
+    }
+]

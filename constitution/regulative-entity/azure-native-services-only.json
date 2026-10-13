@@ -1,0 +1,17 @@
+{
+  "id": "azure-native-services-only",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Only services manageable through Azure Resource Manager may be adopted.",
+  "why": "Without an ARM resource representation, a service falls outside the platform's Policy, RBAC, and diagnostic controls.",
+  "anchor": "no-unapproved-resources",
+  "implements": "guardrail",
+  "links": [],
+  "violations": [],
+  "files": [
+    "platform-management/policy/parameters/oases/allowedResources.json"
+  ],
+  "properties": {}
+}

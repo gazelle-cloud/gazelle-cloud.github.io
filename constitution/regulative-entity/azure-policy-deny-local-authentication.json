@@ -1,0 +1,20 @@
+{
+    "id": "azure-policy-deny-local-authentication",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "Azure Policy must deny local authentication methods such as SAS tokens, access keys, or password.",
+    "why": "Without this, the platform cannot guarantee that authentication flows through Entra ID and Azure RBAC.",
+    "anchor": "no-unapproved-resources",
+    "implements": "guardrail",
+    "links": [],
+    "violations": [
+        "Azure resource is approved even though it lets product teams operate outside Entra ID and RBAC."
+    ],
+    "files": [
+        "platform-management/policy/bicep/oases.bicep",
+        "platform-management/policy/parameters/oases/denyLocalAuthentication.json"
+    ],
+    "properties": {}
+}

@@ -1,0 +1,62 @@
+{
+  "id": "create-landing-zone",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "A landing zone must be provisioned through requestNew-Landing-Zone workflow.",
+  "why": "Provisioning outside the workflow leaves the subscription unaccounted for in the bank and off the application invoice section.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "trigger": [
+    "create landing zone",
+    "provision environment",
+    "new environment",
+    "add azure subscription"
+  ],
+  "steps": [
+    "Collect the application name, environment (test or prod), management group (oases-prod or oases-test), and budget (default 100).",
+    "Verify the application file exists under platform-members/. If absent, complete register-platform-member before continuing.",
+    "Select a subscription from the bank with az account management-group subscription show-sub-under-mg --name subscription-bank --query \"[0].name\" -o tsv. Stop if none is returned.",
+    "Present all values, including the selected subscription ID, and wait for confirmation.",
+    "Dispatch requestNew-Landing-Zone, which opens a PR containing the parameter file and landing-zone workflow.",
+    "A platform engineer reviews the PR. Merge triggers the landing-zone workflow to provision the environment."
+  ],
+  "workflow": "requestNew-Landing-Zone",
+  "links": [
+    {
+      "target": "register-platform-member",
+      "relation": "depends-on",
+      "note": "Provisioning has no application to target until the member profile, group, and billing scope exist."
+    },
+    {
+      "target": "application-teams-own-the-cost",
+      "relation": "governed-by"
+    },
+    {
+      "target": "oases-ipam",
+      "relation": "governed-by"
+    },
+    {
+      "target": "oases-placement",
+      "relation": "governed-by"
+    },
+    {
+      "target": "landing-zone-template",
+      "relation": "governed-by"
+    },
+    {
+      "target": "deployment-branch-gated-promotion",
+      "relation": "governed-by"
+    }
+  ],
+  "violations": [
+    "Landing zone provisioned for an application with no platform member file.",
+    "Subscription created new while the bank held an empty one."
+  ],
+  "files": [
+    "platform-members/",
+    ".github/workflows/requestNew-Landing-Zone.yml"
+  ],
+  "properties": {}
+}

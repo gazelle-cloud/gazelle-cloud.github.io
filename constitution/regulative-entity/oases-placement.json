@@ -1,0 +1,17 @@
+{
+  "id": "oases-placement",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "The platform must not restrict landing zone placement to the production environment.",
+  "why": "Restricting landing zones to production prevents early adopters from testing features in the platform's test environment.",
+  "anchor": "no-platform-ops",
+  "implements": "oases",
+  "links": [],
+  "violations": [],
+  "files": [
+    ".github/workflows/requestNew-Landing-Zone.yml"
+  ],
+  "properties": {}
+}

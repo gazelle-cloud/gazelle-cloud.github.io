@@ -1,0 +1,25 @@
+{
+  "id": "azure-policy-reference",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "An exemption must resolve its assignment ID through the platform-generated reference file.",
+  "why": "A hardcoded assignment ID silently breaks every exemption when the platform redeploys.",
+  "anchor": "no-unapproved-resources",
+  "implements": "guardrail",
+  "links": [
+    {
+      "target": "azure-policy-effect-declaration",
+      "relation": "depends-on",
+      "note": "The reference file is indexed by assignment name, so the name stays stable across redeployments."
+    }
+  ],
+  "violations": [],
+  "files": [
+    ".github/workflows/lz-flow-create-policy-exemption.yml",
+    "landing-zones/*/policy-assignment-reference.json",
+    ".github/scripts/get-policyAssignmentsReference.ps1"
+  ],
+  "properties": {}
+}

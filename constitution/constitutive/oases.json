@@ -1,0 +1,28 @@
+{
+    "id": "oases",
+    "type": "constitutive",
+    "subject": {
+        "type": "entity",
+        "term": "oases"
+    },
+    "rule": "A management group counts as oases when properties.file declares it as a child of properties.parentParameter, named properties.childManagementGroupName.",
+    "anchor": "no-platform-ops",
+    "evidence": [
+        "platform-management/management-groups/bicep/managementGroups.bicep"
+    ],
+    "links": [
+        {
+            "target": "platform",
+            "relation": "depends-on",
+            "note": "Oases is a child of the platform management group."
+        }
+    ],
+    "violations": [
+        "Test landing zones assumed to belong to the test management group hierarchy."
+    ],
+    "properties": {
+        "file": "platform-management/management-groups/bicep/managementGroups.bicep",
+        "parentParameter": "topLevelManagementGroupName",
+        "childManagementGroupName": "oases-${environment}"
+    }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "self-service-policy-exemptions-defender-for-cloud",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Defender for Cloud recommendations with no free remediation path must be pre-exempted by the platform.",
+  "why": "An unactionable recommendation left on the dashboard erodes confidence in the rest of the data.",
+  "anchor": "no-unapproved-resources",
+  "implements": "guardrail",
+  "links": [],
+  "violations": [
+    "Defender for Cloud exemption list containing a recommendation with a free remediation path."
+  ],
+  "files": [
+    "landing-zones/defenderForCloudExemptions.jsonc",
+    "landing-zones/bicep/modules/azurePolicy.bicep"
+  ],
+  "properties": {}
+}

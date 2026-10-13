@@ -1,0 +1,35 @@
+{
+  "id": "knowledge-candidate",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "An observation that does not fit as a rule, a link, or a violation must be recorded as a knowledge-candidate issue rather than forced into the graph.",
+  "why": "Forcing an observation into a node shape produces an entry that passes review but gives no signal when the system drifts.",
+  "anchor": "no-human-touch",
+  "implements": "constitution",
+  "trigger": [
+    "knowledge that doesn't fit the graph",
+    "pattern across decisions",
+    "explanatory context without a dependency"
+  ],
+  "steps": [
+    "Confirm the observation does not fit as a rule, a link, or a violation. If it does, update-knowledge-base is the process instead.",
+    "Draft the issue title and body. The title names the observation, and the body states the insight and references related entry ids.",
+    "Present the draft for confirmation.",
+    "Create the issue with the knowledge-candidate label."
+  ],
+  "links": [
+    {
+      "target": "update-knowledge-base",
+      "relation": "depends-on",
+      "note": "An observation reaches this path after that process establishes it does not fit the graph as an entry."
+    }
+  ],
+  "violations": [
+    "Issue created without confirmation.",
+    "Observation recorded as a candidate when it is actually a missing rule or link."
+  ],
+  "files": [],
+  "properties": {}
+}

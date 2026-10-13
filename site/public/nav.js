@@ -11,6 +11,7 @@ export const NAV = [
   { label: 'Home',            href: '/' },
   { label: 'AI Assistance',   href: '/ai-assistance/' },
   { label: 'Knowledge Graph', href: '/knowledge-graph/' },
+  { label: 'Boom',            href: '/boom/' },
 ];
 
 // ── github link ──────────────────────────────────────────────────────────────

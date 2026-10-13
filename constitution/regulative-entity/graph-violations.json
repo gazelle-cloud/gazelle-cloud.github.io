@@ -1,0 +1,23 @@
+{
+    "id": "graph-violations",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "A rule's violations must each describe a detectable breach distinct from the rule's own criterion.",
+    "why": "A violation that mirrors the rule gives no additional signal for recognizing failure in practice, it's the same check written twice, once as an obligation and once as its reflection.",
+    "anchor": "no-human-touch",
+    "implements": "constitution",
+    "links": [],
+    "violations": [
+        "A violation entry restates the rule's decision or criterion rather than naming a new failure mode.",
+        "A violation entry describes a scenario indistinguishable from the rule passing.",
+        "Two violation entries on the same node describe the same failure mode with different wording."
+    ],
+    "files": [
+        "constitution/constitutive/*.json",
+        "constitution/regulative-entity/*.json",
+        "constitution/regulative-process/*.json"
+    ],
+    "properties": {}
+}

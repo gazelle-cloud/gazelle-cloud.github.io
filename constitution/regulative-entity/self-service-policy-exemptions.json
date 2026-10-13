@@ -1,0 +1,21 @@
+{
+  "id": "self-service-policy-exemptions",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "An exemption must be granted through a merged parameter-file PR or, for eight hours, through lz-flow-create-policy-exemption.",
+  "why": "Without a governed exemption path, blocked teams can bypass deny policies through untracked exceptions.",
+  "anchor": "no-unapproved-resources",
+  "implements": "guardrail",
+  "links": [],
+  "violations": [
+    "Exemption description that does not name the reason for the exemption."
+  ],
+  "files": [
+    "landing-zones/bicep/modules/base/policyExemption.bicep",
+    "landing-zones/bicep/modules/azurePolicy.bicep",
+    "landing-zones/managementGroup-AppName-environment.bicepparam"
+  ],
+  "properties": {}
+}

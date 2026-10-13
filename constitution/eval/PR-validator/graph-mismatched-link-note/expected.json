@@ -1,0 +1,4 @@
+{
+  "result": "FAIL",
+  "must_fail": ["update-knowledge-base"]
+}

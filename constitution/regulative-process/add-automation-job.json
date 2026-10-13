@@ -1,0 +1,49 @@
+{
+  "id": "add-automation-job",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "A new automation job must run as the landing zone identity, against the ARM API, from a publicly pullable image.",
+  "why": "A job needing its own identity, a data-plane path, or an authenticated base image cannot run unattended in every landing zone.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "trigger": [
+    "add automation job",
+    "recurring platform task",
+    "automate remediation"
+  ],
+  "steps": [
+    "Read the governing rules.",
+    "Draft the job under landing-zones/automation/, using only ARM calls and no data-plane or VNet-dependent calls.",
+    "Draft a Dockerfile with a base image pullable without authentication.",
+    "Draft registration in landing-zones/bicep/modules/landingzone-automation.bicep, following the existing job pattern.",
+    "Present all proposed changes and wait for permission to implement.",
+    "Apply the approved changes.",
+    "Verify the job uses the landing zone identity without a separate identity or secret."
+  ],
+  "workflow": "platform-automation",
+  "links": [
+    {
+      "target": "landing-zone-automation",
+      "relation": "governed-by"
+    },
+    {
+      "target": "platform-exemptions-automation",
+      "relation": "governed-by"
+    },
+    {
+      "target": "landing-zone-identity",
+      "relation": "governed-by"
+    }
+  ],
+  "violations": [
+    "Automation job authenticating with its own secret instead of the landing zone identity.",
+    "Job image hosted in a registry requiring authentication."
+  ],
+  "files": [
+    "landing-zones/automation/",
+    "landing-zones/bicep/modules/landingzone-automation.bicep"
+  ],
+  "properties": {}
+}

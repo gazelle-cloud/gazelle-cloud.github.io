@@ -1,0 +1,43 @@
+{
+  "id": "destroy-landing-zone",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "A landing zone must be decommissioned through lz-flow-destroy-landing-zone, which returns its subscription to the bank.",
+  "why": "Manual resource deletion does not return the subscription to the bank for reuse.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "trigger": [
+    "destroy landing zone",
+    "decommission landing zone",
+    "sunset environment"
+  ],
+  "steps": [
+    "Read the governing rules.",
+    "Collect the subscription ID and locate its parameter file and landing-zone workflow. Stop if either is missing.",
+    "Present what decommissioning permanently removes: deployment stack, resource groups, role assignments, budget, and Defender settings. State that the subscription returns to the bank.",
+    "Wait for explicit confirmation, then dispatch lz-flow-destroy-landing-zone with the subscription ID.",
+    "Leave file deletion to the workflow, which opens a cleanup PR. A platform engineer reviews the PR; merge initiates Azure cleanup and returns the subscription to the bank."
+  ],
+  "workflow": "lz-flow-destroy-landing-zone",
+  "links": [
+    {
+      "target": "deployment-declarative-lifecycle",
+      "relation": "governed-by"
+    },
+    {
+      "target": "application-teams-own-the-cost",
+      "relation": "governed-by"
+    }
+  ],
+  "violations": [
+    "Landing zone resources deleted by hand instead of through the workflow.",
+    "Subscription cancelled rather than returned to the bank."
+  ],
+  "files": [
+    "landing-zones/oases-prod/",
+    ".github/workflows/"
+  ],
+  "properties": {}
+}

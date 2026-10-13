@@ -1,0 +1,27 @@
+{
+    "id": "azure-policy-custom-definition",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "An Azure Policy gap must be closed by a custom definition when built-in policies do not support the desired effect.",
+    "why": "Without that, new Azure resources can enter the platform with security gaps Azure policies do not close.",
+    "anchor": "no-unapproved-resources",
+    "implements": "guardrail",
+    "links": [
+        {
+            "target": "azure-policy-effect-declaration",
+            "relation": "depends-on",
+            "note": "The custom definition's effect determines its policy control's name prefix."
+        }
+    ],
+    "violations": [
+        "Use Audit or AuditIfNotExist mode for Azure Policies that must have more restrictive effect."
+    ],
+    "files": [
+        "platform-management/policy/bicep/customPolicyDefinitions.bicep",
+        "platform-management/policy/parameters/customDefinitions/policyDefinitions.bicepparam",
+        "platform-management/policy/parameters/customDefinitions/*.json"
+    ],
+    "properties": {}
+}

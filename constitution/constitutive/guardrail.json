@@ -1,0 +1,27 @@
+{
+    "id": "guardrail",
+    "type": "constitutive",
+    "subject": {
+        "type": "entity",
+        "term": "guardrail"
+    },
+    "rule": "An Azure Policy assignment counts as a guardrail when its module's params.policyName or params.name value is listed in properties.assignmentNames.",
+    "anchor": "no-unapproved-resources",
+    "evidence": [
+        "platform-management/policy/bicep/oases.bicep",
+        "landing-zones/bicep/modules/azurePolicy.bicep"
+    ],
+    "links": [],
+    "violations": [],
+    "properties": {
+        "assignmentNames": [
+            "allowedResources",
+            "allowedLocations",
+            "denyLocalAuthentication",
+            "denyPublicNetworkAccess",
+            "denyWeakTLS",
+            "denyCrossTenantReplication",
+            "config-diagnosticSettings"
+        ]
+    }
+}

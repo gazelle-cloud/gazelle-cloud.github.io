@@ -1,0 +1,44 @@
+{
+  "id": "update-knowledge-base",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "A knowledge graph entry must be drafted and presented before any file is written.",
+  "why": "An entry written without review enters the graph unchallenged, and the graph is what every later change is read against.",
+  "anchor": "no-human-touch",
+  "implements": "constitution",
+  "trigger": [
+    "add a decision",
+    "update a decision",
+    "add an operation",
+    "update an operation",
+    "refine reasoning",
+    "add a link",
+    "update knowledge graph"
+  ],
+  "steps": [
+    "Identify whether the entry is new or existing. Read the existing file before drafting an update.",
+    "Choose the node type and follow its schema. Constitutive rules define what counts; regulative rules state requirements for entities or processes.",
+    "For individual rule files, match the ID to the filename and anchor the rule to a foundation. Constitutive subjects name vocabulary terms; regulative subjects specify entity or process.",
+    "For regulative rules, explain what fails without the requirement. Name the constitutive rules upheld in implements, or omit it when serving the foundation directly.",
+    "Add dependency links only where the source needs the target. Name the required constraint, fact, or output in the note; omit obvious relationships.",
+    "Present the complete draft and wait for permission to write.",
+    "Write the approved entry and regenerate constitution/graph.md with .github/scripts/write-knowledge-graph.ps1.",
+    "Open a pull request."
+  ],
+  "links": [],
+  "violations": [
+    "File written before a draft was presented.",
+    "Link added in both directions between two entries.",
+    "Violation that restates the rule instead of describing a detectable breach.",
+    "A decision field combining two different concerns into one rule."
+  ],
+  "files": [
+    "constitution/vocabulary/",
+    "constitution/constitutive/",
+    "constitution/regulative-entity/",
+    "constitution/regulative-process/"
+  ],
+  "properties": {}
+}

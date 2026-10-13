@@ -1,0 +1,85 @@
+---
+import GraphPage from '../../layouts/GraphPage.astro';
+import { loadBoom } from '../../boom-data';
+
+// One page per topic and rule. People see the map with this entity selected and
+// its info panel open. The HTML underneath carries the same text as that panel
+// (relations as links to their own pages), followed by the entity's full source
+// JSON, so crawlers and agents get the complete definition.
+export async function getStaticPaths() {
+  const { graph, relations, sources } = await loadBoom();
+  return graph.nodes.map((node: any) => ({
+    params: { slug: node.id },
+    props:  { node, relations, source: sources.get(node.id) },
+  }));
+}
+
+const { node, relations, source } = Astro.props as { node: any; relations: any; source: any };
+const id    = node.id;
+const label = (s: string) => s.replace(/-/g, ' ');
+const title = label(id).replace(/\b\w/g, (c: string) => c.toUpperCase());
+const entity = relations.nodes.find((n: any) => n.id === id) ?? node;
+const text   = entity.rule ?? entity.decision;
+
+// Same grouping as the info panel: outbound by relation (implements left out),
+// inbound as one list.
+const out = relations.links.filter((l: any) => l.source === id && l.relationship !== 'implements');
+const byRelation = new Map<string, any[]>();
+for (const l of out) byRelation.set(l.relationship, [...(byRelation.get(l.relationship) ?? []), l]);
+const inbound = relations.links.filter((l: any) => l.target === id);
+const heading = (r: string) => label(r).replace(/^./, c => c.toUpperCase());
+---
+<GraphPage title={title} description={(text ?? '').slice(0, 155) || undefined} page="/boom.page.js">
+  <!-- The engine selects this entity from the path (/boom/<id>/); no #id needed. -->
+  <div class="sr-only">
+    <article>
+      <h1>{label(id)}</h1>
+      {text && <p>{text}</p>}
+
+      {entity.why && (
+        <>
+          <h2>Why</h2>
+          <p>{entity.why}</p>
+        </>
+      )}
+
+      {entity.violations?.length > 0 && (
+        <>
+          <h2>Violations</h2>
+          <ul>{entity.violations.map((v: string) => <li>{v}</li>)}</ul>
+        </>
+      )}
+
+      {[...byRelation].map(([relation, links]) => (
+        <>
+          <h2>{heading(relation)}</h2>
+          <ul>
+            {links.map((l: any) => (
+              <li><a href={`/boom/${l.target}/`}>{label(l.target)}</a>{l.note && <span> — {l.note}</span>}</li>
+            ))}
+          </ul>
+        </>
+      ))}
+
+      {inbound.length > 0 && (
+        <>
+          <h2>Inbound links</h2>
+          <ul>
+            {inbound.map((l: any) => (
+              <li><a href={`/boom/${l.source}/`}>{label(l.source)}</a> ({label(l.relationship)}){l.note && <span> — {l.note}</span>}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {source && (
+        <>
+          <h2>Source</h2>
+          <pre><code>{JSON.stringify(source, null, 2)}</code></pre>
+        </>
+      )}
+
+      <p><a href="/boom/">← All rules</a></p>
+    </article>
+  </div>
+</GraphPage>

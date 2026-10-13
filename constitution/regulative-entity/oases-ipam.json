@@ -1,0 +1,22 @@
+{
+  "id": "oases-ipam",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "VNet address spaces must be allocated by querying live Azure, not by reading an assignment registry.",
+  "why": "Stale address allocations can produce overlapping VNet ranges that prevent peering.",
+  "anchor": "no-platform-ops",
+  "implements": "oases",
+  "links": [],
+  "violations": [
+    "VNet with a manually assigned address space.",
+    "Allocation recorded in a registry file and trusted without a live check."
+  ],
+  "files": [
+    "githubVariables.json",
+    ".github/workflows/template-calculate-vnet-address-space.yml",
+    "landing-zones/managementGroup-AppName-environment.bicepparam"
+  ],
+  "properties": {}
+}

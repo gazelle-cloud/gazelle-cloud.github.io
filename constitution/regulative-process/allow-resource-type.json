@@ -1,0 +1,75 @@
+{
+  "id": "allow-resource-type",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "A resource type must clear deny coverage, diagnostic settings, and job-function role review before it joins the allowed list.",
+  "why": "A type listed ahead of its controls is available to every landing zone with nothing enforcing how it is configured.",
+  "anchor": "no-unapproved-resources",
+  "implements": "guardrail",
+  "trigger": [
+    "allow resource type",
+    "approve resource type",
+    "add resource to allowed list"
+  ],
+  "steps": [
+    "Read the governing rules.",
+    "Identify the built-in diagnostic-settings policy and draft its entry in diagnosticSettings.bicepparam.",
+    "Review each control in oases/ for built-in coverage with the required effect.",
+    "Draft custom definitions for uncovered controls and register them in policyDefinitions.bicepparam.",
+    "Review defenderForCloudExemptions.jsonc for resource-specific paid-SKU recommendations and accessControl.bicepparam for required job-function actions.",
+    "Once coverage and role review are complete, draft the allowedResources.json entry alongside all required control changes.",
+    "Present the complete draft and wait for permission to implement.",
+    "Apply the approved changes together."
+  ],
+  "workflow": "platform-Azure-Policy",
+  "links": [
+    {
+      "target": "azure-policy-allowed-location",
+      "relation": "governed-by"
+    },
+    {
+      "target": "azure-policy-config-diagnostic-settings",
+      "relation": "governed-by"
+    },
+    {
+      "target": "azure-policy-deny-cross-tenant-data-replication",
+      "relation": "governed-by"
+    },
+    {
+      "target": "azure-policy-deny-local-authentication",
+      "relation": "governed-by"
+    },
+    {
+      "target": "azure-policy-deny-public-network",
+      "relation": "governed-by"
+    },
+    {
+      "target": "azure-policy-deny-weak-tls",
+      "relation": "governed-by"
+    },
+    {
+      "target": "azure-policy-custom-definition",
+      "relation": "governed-by"
+    },
+    {
+      "target": "self-service-policy-exemptions-defender-for-cloud",
+      "relation": "governed-by"
+    },
+    {
+      "target": "job-function-scoped-roles",
+      "relation": "governed-by"
+    }
+  ],
+  "violations": [
+    "Entry added to allowedResources.json before its deny policies were reviewed.",
+    "Resource type listed with no diagnostic settings definition."
+  ],
+  "files": [
+    "platform-management/policy/parameters/oases/",
+    "platform-management/policy/parameters/diagnosticSettings.bicepparam",
+    "platform-management/policy/parameters/customDefinitions/"
+  ],
+  "properties": {}
+}

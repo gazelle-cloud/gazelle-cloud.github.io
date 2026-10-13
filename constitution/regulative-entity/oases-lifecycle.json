@@ -1,0 +1,27 @@
+{
+  "id": "oases-lifecycle",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "A landing zone must draw its subscription from the Subscription Bank, and must return it there when sunset rather than cancelling it.",
+  "why": "The Azure subscription limit counts cancelled subscriptions the same as active ones, so quota is not released by cancelling.",
+  "anchor": "no-platform-ops",
+  "implements": "oases",
+  "links": [
+    {
+      "target": "application-teams-own-the-cost",
+      "relation": "depends-on",
+      "note": "A reused subscription moves to the application's invoice section before provisioning completes."
+    }
+  ],
+  "violations": [
+    "Sunset subscription cancelled rather than returned to the bank."
+  ],
+  "files": [
+    ".github/workflows/template-landing-zones.yml",
+    ".github/workflows/template-destroy-landing-zone.yml",
+    "githubVariables.json"
+  ],
+  "properties": {}
+}

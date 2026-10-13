@@ -1,0 +1,27 @@
+{
+  "id": "landing-zone-tags",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Tag values on a landing zone must be sourced from the platform member profile.",
+  "why": "Hand-typed tags drift from the member profile, so a resource stops showing who actually owns it.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "links": [
+    {
+      "target": "landing-zone-automation",
+      "relation": "depends-on",
+      "note": "Landing zone automation runs tag remediation."
+    }
+  ],
+  "violations": [
+    "Tag introduced that does not apply to all application landing zones.",
+    "ownerEmail or engineerEmail hardcoded instead of read from the profile."
+  ],
+  "files": [
+    "landing-zones/bicep/modules/azurePolicy.bicep",
+    "landing-zones/managementGroup-AppName-environment.bicepparam"
+  ],
+  "properties": {}
+}

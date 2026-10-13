@@ -1,0 +1,22 @@
+{
+    "id": "graph-why",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "A regulative rule's why must name the consequence of the rule's absence, not restate the decision or describe the rule's purpose in the abstract.",
+    "why": "A why that restates the decision gives no test for whether the rule is load-bearing, a rule can look justified while nothing would actually change if it were removed.",
+    "anchor": "no-human-touch",
+    "implements": "constitution",
+    "links": [],
+    "violations": [
+        "Why restates the decision instead of naming what breaks without it.",
+        "Why describes a benefit of the rule existing rather than a failure if it didn't.",
+        "Why is generic enough to paste onto a different node unchanged."
+    ],
+    "files": [
+        "constitution/regulative-entity/*.json",
+        "constitution/regulative-process/*.json"
+    ],
+    "properties": {}
+}

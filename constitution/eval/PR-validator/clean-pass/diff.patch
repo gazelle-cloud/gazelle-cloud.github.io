@@ -1,0 +1,13 @@
+diff --git a/landing-zones/oases-test/oases-babboom-test.bicepparam b/landing-zones/oases-test/oases-babboom-test.bicepparam
+index 0000000..0000000 100644
+--- a/landing-zones/oases-test/oases-babboom-test.bicepparam
++++ b/landing-zones/oases-test/oases-babboom-test.bicepparam
+@@ -2,7 +2,7 @@ using '../bicep/main.bicep'
+
+ param appName = 'babboom'
+ param environment = 'test'
+-param budget = 100
++param budget = 150
+ param vnetAddressSpace = [
+   '10.10.4.0/24'
+ ]

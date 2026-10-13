@@ -1,0 +1,21 @@
+{
+    "id": "azure-policy-deny-weak-tls",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "An approved resource must refuse clients connecting below TLS 1.2.",
+    "why": "Without it, traffic to approved resources can fall back to protocol versions with known breaks, exposing data in transit.",
+    "anchor": "no-unapproved-resources",
+    "implements": "guardrail",
+    "links": [],
+    "violations": [
+        "An approved resource permits non-HTTPS transport.",
+        "Minimum-TLS policy assigned with audit instead of deny."
+    ],
+    "files": [
+        "platform-management/policy/bicep/oases.bicep",
+        "platform-management/policy/parameters/oases/denyWeakTLS.json"
+    ],
+    "properties": {}
+}

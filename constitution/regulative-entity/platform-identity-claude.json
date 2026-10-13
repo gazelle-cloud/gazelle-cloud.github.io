@@ -1,0 +1,17 @@
+{
+  "id": "platform-identity-claude",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Agentic workflows must authenticate with the Claude Pro OAuth token.",
+  "why": "Without the token, every agentic workflow requires a paid API key.",
+  "anchor": "no-human-touch",
+  "implements": "constitution",
+  "links": [],
+  "violations": [
+    "Agentic workflow step using ANTHROPIC_API_KEY instead of CLAUDE_CODE_OAUTH_TOKEN."
+  ],
+  "files": [],
+  "properties": {}
+}

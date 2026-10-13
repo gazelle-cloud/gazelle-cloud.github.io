@@ -1,0 +1,27 @@
+{
+  "id": "platform-exemptions-automation",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Platform automation Docker images must be hosted outside the landing zones.",
+  "why": "Without an external registry, each landing zone needs persistent image hosting, adding always-on cost before any workload exists.",
+  "anchor": "no-fixed-cost",
+  "implements": "platform",
+  "links": [
+    {
+      "target": "azure-native-services-only",
+      "relation": "constrains",
+      "note": "GitHub Container Registry is consumed outside ARM, not adopted as a platform service."
+    }
+  ],
+  "violations": [
+    "Automation image pulled from a registry the platform pays to host.",
+    "Registry provisioned inside a landing zone to host platform images."
+  ],
+  "files": [
+    "landing-zones/bicep/modules/landingzone-automation.bicep",
+    "landing-zones/bicep/modules/base/jobs-cron.bicep"
+  ],
+  "properties": {}
+}

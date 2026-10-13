@@ -1,0 +1,26 @@
+diff --git a/constitution/regulative-entity/landing-zone-automation.json b/constitution/regulative-entity/landing-zone-automation.json
+index 0000000..0000000 100644
+--- a/constitution/regulative-entity/landing-zone-automation.json
++++ b/constitution/regulative-entity/landing-zone-automation.json
+@@ -14,7 +14,7 @@
+     {
+       "target": "platform-identity-graph",
+       "relation": "depends-on",
+-      "note": "Jobs query Entra ID, so the Graph read permissions are what make that call possible."
++      "note": "OIDC federation is scoped to the landing zone repo and environment."
+     }
+   ],
+   "violations": [
+diff --git a/constitution/regulative-entity/landing-zone-identity.json b/constitution/regulative-entity/landing-zone-identity.json
+index 0000000..0000000 100644
+--- a/constitution/regulative-entity/landing-zone-identity.json
++++ b/constitution/regulative-entity/landing-zone-identity.json
+@@ -14,7 +14,7 @@
+     {
+       "target": "landing-zone-repo",
+       "relation": "depends-on",
+-      "note": "OIDC federation is scoped to the landing zone repo and environment."
++      "note": "Jobs query Entra ID, so the Graph read permissions are what make that call possible."
+     }
+   ],
+   "violations": [

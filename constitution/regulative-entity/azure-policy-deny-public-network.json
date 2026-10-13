@@ -1,0 +1,27 @@
+{
+    "id": "azure-policy-deny-public-network",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "Azure Policy must deny public network access for every allowed resource.",
+    "why": "Without this, the platform can't guarantee that data plane access stays inside the landing zone network boundary.",
+    "anchor": "no-unapproved-resources",
+    "implements": "guardrail",
+    "links": [
+        {
+            "target": "landing-zone-github-runners",
+            "relation": "depends-on",
+            "note": "Runners inside the landing zone VNet provide data-plane access when public access is denied."
+        }
+    ],
+    "violations": [
+        "Private endpoint connectivity proposed where service endpoint access from the landing zone VNet is supported."
+    ],
+    "files": [
+        "platform-management/policy/bicep/oases.bicep",
+        "platform-management/policy/parameters/oases/denyPublicNetworkAccess.json",
+        "platform-management/policy/parameters/customDefinitions/*"
+    ],
+    "properties": {}
+}

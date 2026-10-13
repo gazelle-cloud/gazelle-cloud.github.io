@@ -1,0 +1,18 @@
+{
+    "id": "azure-policy-effect-declaration",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "An Azure Policy's name must use exactly one platform prefix: deny, config, or allowed.",
+    "why": "Without this, landing-zone users cannot tell whether a policy modifies resources on their behalf, weakening code as the source of truth.",
+    "anchor": "no-unapproved-resources",
+    "implements": "guardrail",
+    "links": [],
+    "violations": [],
+    "files": [
+        "platform-management/policy/bicep/oases.bicep",
+        "platform-management/policy/bicep/modules/assignment.bicep"
+    ],
+    "properties": {}
+}

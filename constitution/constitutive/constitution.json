@@ -1,0 +1,28 @@
+{
+    "id": "constitution",
+    "type": "constitutive",
+    "subject": {
+        "type": "entity",
+        "term": "constitution"
+    },
+    "rule": "A JSON file in properties.directories counts as constitution.",
+    "anchor": "no-human-touch",
+    "evidence": [
+        "constitution/constitutive/*.json",
+        "constitution/regulative-entity/*.json",
+        "constitution/regulative-process/*.json"
+    ],
+    "links": [],
+    "violations": [
+        "graph.md edited by hand.",
+        "Constitutive rule depending on a regulative one.",
+        "A constitutive criterion written or judged against anything but repository files."
+    ],
+    "properties": {
+        "directories": [
+            "constitutive",
+            "regulative-entity",
+            "regulative-process"
+        ]
+    }
+}

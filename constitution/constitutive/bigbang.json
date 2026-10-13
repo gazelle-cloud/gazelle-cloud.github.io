@@ -1,0 +1,25 @@
+{
+    "id": "bigbang",
+    "type": "constitutive",
+    "subject": {
+        "type": "entity",
+        "term": "bigbang"
+    },
+    "rule": "platform-BigBang.yml counts as BigBang when its jobs call every workflow in properties.requiredWorkflows.",
+    "anchor": "no-human-touch",
+    "evidence": [
+        ".github/workflows/platform-BigBang.yml"
+    ],
+    "links": [],
+    "violations": [],
+    "properties": {
+        "requiredWorkflows": [
+            "./.github/workflows/template-GitHub-environment-variables.yml",
+            "./.github/workflows/template-Management-Groups.yml",
+            "./.github/workflows/template-access-control.yml",
+            "./.github/workflows/template-Azure-Policy.yml",
+            "./.github/workflows/template-push-Docker-images.yml",
+            "./.github/workflows/template-trigger-landingzone-workflows.yml"
+        ]
+    }
+}

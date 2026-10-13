@@ -1,0 +1,24 @@
+{
+    "id": "landing-zone",
+    "type": "constitutive",
+    "subject": {
+        "type": "entity",
+        "term": "landing-zone"
+    },
+    "rule": "An Azure subscription counts as a landing zone when a file matching properties.parameterFilePattern declares its subscriptionId.",
+    "anchor": "no-human-touch",
+    "evidence": [
+        "landing-zones/*/oases-*.bicepparam"
+    ],
+    "links": [
+        {
+            "target": "platform-member",
+            "relation": "depends-on",
+            "note": "Deployed in a member's name."
+        }
+    ],
+    "violations": [],
+    "properties": {
+        "parameterFilePattern": "landing-zones/*/oases-*.bicepparam"
+    }
+}

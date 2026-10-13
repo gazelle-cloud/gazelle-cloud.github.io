@@ -1,0 +1,20 @@
+{
+    "id": "graph-evidence",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "A constitutive rule's evidence must name the exact file or pattern a check would read to test it.",
+    "why": "Without a file or pattern to inspect, a checker cannot locate the evidence needed to test the rule.",
+    "anchor": "no-human-touch",
+    "implements": "constitution",
+    "links": [],
+    "violations": [
+        "Evidence field left empty on a published constitutive rule.",
+        "Evidence naming a directory or general area instead of a specific file or pattern a check reads."
+    ],
+    "files": [
+        "constitution/constitutive/*.json"
+    ],
+    "properties": {}
+}

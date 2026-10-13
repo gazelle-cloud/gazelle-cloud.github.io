@@ -1,0 +1,17 @@
+[
+    {
+        "id": "governed-by",
+        "type": "relation",
+        "definition": "Points at a rule the process respects while it runs."
+    },
+    {
+        "id": "depends-on",
+        "type": "relation",
+        "definition": "The source is incomplete without the target, and the note names which target constraint the source relies on."
+    },
+    {
+        "id": "constrains",
+        "type": "relation",
+        "definition": "The source narrows where the target applies, and the note names what falls outside it."
+    }
+]

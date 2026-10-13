@@ -1,0 +1,20 @@
+{
+    "id": "azure-policy-config-diagnostic-settings",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "Azure Policy must configure diagnostic settings for every allowed resource.",
+    "why": "Without this, the platform cannot guarantee a consistent telemetry flow from approved resources to the landing-zone workspace.",
+    "anchor": "no-unapproved-resources",
+    "implements": "guardrail",
+    "links": [],
+    "violations": [
+        "Diagnostic settings not configured by logs category group."
+    ],
+    "files": [
+        "platform-management/policy/bicep/configDiagnosticSettings.bicep",
+        "platform-management/policy/parameters/diagnosticSettings.bicepparam"
+    ],
+    "properties": {}
+}

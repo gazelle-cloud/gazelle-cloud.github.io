@@ -40,11 +40,18 @@ export async function mount(config) {
     const size = useVizPaneSize(fgRef);
 
     const {
-      activeId, graph, activeNode, neighbours,
+      activeId, graph, activeNode, neighbours: baseNeighbours,
       setHoveredId, setFocusedId,
       onNodeClick, onBackgroundClick,
       searchQuery, setSearchQuery, searchMatchIds,
     } = useGraphState(raw, typeKeys, nodeLabelFn);
+
+    // Pages may widen the highlighted set beyond direct neighbours.
+    const neighbours = React.useMemo(() =>
+      config.neighbours && activeId
+        ? config.neighbours(activeId, graph, baseNeighbours)
+        : baseNeighbours,
+    [activeId, graph, baseNeighbours]);
 
     const handleBackgroundClick = useBraveClickFix(
       fgRef, graph.nodes, dotRadius, setFocusedId, onBackgroundClick
@@ -53,9 +60,12 @@ export async function mount(config) {
     const [searchFocused, setSearchFocused] = React.useState(false);
     const [panelHoverId, setPanelHoverId]   = React.useState(null);
 
+    // Initial focus: #id, else the last path segment (/page/<id>/) if it names a node.
     React.useEffect(() => {
       const hash = window.location.hash.slice(1);
-      if (hash && graph.nodes.some(n => n.id === hash)) setFocusedId(hash);
+      const slug = decodeURIComponent(window.location.pathname.split('/').filter(Boolean).pop() ?? '');
+      const id = [hash, slug].find(s => s && graph.nodes.some(n => n.id === s));
+      if (id) setFocusedId(id);
     }, []);
 
     React.useEffect(() => {
@@ -194,6 +204,7 @@ export async function mount(config) {
         ...physicsProps,
         ...(config.cooldownTime  != null ? { cooldownTime:  config.cooldownTime  } : {}),
         ...(config.warmupTicks  != null ? { warmupTicks:   config.warmupTicks   } : {}),
+        ...(config.maxZoom      != null ? { maxZoom:       config.maxZoom       } : {}),
         backgroundColor: bgColor,
         onNodeHover:       node => setHoveredId(node?.id ?? null),
         onNodeClick,

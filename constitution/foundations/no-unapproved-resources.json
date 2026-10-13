@@ -1,0 +1,8 @@
+{
+  "id": "no-unapproved-resources",
+  "type": "foundation",
+  "intent": "The allowed list starts empty. A resource type joins the platform only after its security controls, telemetry, and integration patterns are in place — once it is, app teams can use it freely within the boundaries Azure Policy guarantees.",
+  "violations": [
+    "Resource type added to the allowed list before Deny policies and diagnostic settings are wired."
+  ]
+}

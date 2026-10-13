@@ -1,0 +1,19 @@
+{
+    "id": "azure-policy-allowed-resources",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "Azure Policy must allow only the approved resource types.",
+    "why": "Without an allow list, the platform cannot tell whether a misconfiguration was accidental or a deliberate choice.",
+    "anchor": "no-unapproved-resources",
+    "implements": "guardrail",
+    "links": [],
+    "violations": [
+        "Resource type added to the allowed-resources list for proof-of-concept use only."
+    ],
+    "files": [
+        "platform-management/policy/parameters/oases/allowedResources.json"
+    ],
+    "properties": {}
+}

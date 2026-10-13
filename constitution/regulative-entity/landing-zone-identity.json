@@ -1,0 +1,28 @@
+{
+  "id": "landing-zone-identity",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Every workflow, job, and service integration in a landing zone must act under one shared set of permissions.",
+  "why": "Without one shared permission set, every new capability multiplies the permission surface through RBAC and OIDC sprawl.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "links": [
+    {
+      "target": "landing-zone-repo",
+      "relation": "depends-on",
+      "note": "OIDC federation is scoped to the landing zone repo and environment."
+    }
+  ],
+  "violations": [
+    "Managed identity shared across multiple landing zones.",
+    "Second identity introduced for a new capability.",
+    "Role assignment granted to a system-assigned identity of a resource inside the landing zone."
+  ],
+  "files": [
+    "landing-zones/bicep/modules/identity.bicep",
+    "landing-zones/bicep/modules/base/appRoleAssignedTo.bicep"
+  ],
+  "properties": {}
+}

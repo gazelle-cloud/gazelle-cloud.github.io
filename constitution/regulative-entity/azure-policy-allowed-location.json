@@ -1,0 +1,27 @@
+{
+    "id": "azure-policy-allowed-location",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "Azure Policy must allow only the approved location.",
+    "why": "Without this, the platform cannot prove that landing-zone resources stay in the single region.",
+    "anchor": "no-unapproved-resources",
+    "implements": "guardrail",
+    "links": [
+        {
+            "target": "deployment-config-in-repo",
+            "relation": "depends-on",
+            "note": "The allowed location comes from githubVariables.json."
+        }
+    ],
+    "violations": [
+        "Multi-region deployment treated as supported by the platform."
+    ],
+    "files": [
+        "githubVariables.json",
+        ".github/workflows/template-Azure-Policy.yml",
+        "platform-management/policy/bicep/oases.bicep"
+    ],
+    "properties": {}
+}

@@ -1,0 +1,30 @@
+{
+    "id": "gazelle",
+    "type": "constitutive",
+    "subject": {
+        "type": "entity",
+        "term": "gazelle"
+    },
+    "rule": "An Azure tenant counts as Gazelle when its ID matches properties.path in properties.file.",
+    "anchor": "no-human-touch",
+    "evidence": [
+        "githubVariables.json"
+    ],
+    "links": [
+        {
+            "target": "bigbang",
+            "relation": "depends-on",
+            "note": "BigBang builds its platform."
+        },
+        {
+            "target": "constitution",
+            "relation": "depends-on",
+            "note": "The constitution governs it."
+        }
+    ],
+    "violations": [],
+    "properties": {
+        "file": "githubVariables.json",
+        "path": "AzurePlatformVariables.repositoryVariables.AZURE_TENANT_ID"
+    }
+}

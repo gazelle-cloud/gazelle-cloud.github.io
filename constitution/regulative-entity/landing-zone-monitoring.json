@@ -1,0 +1,28 @@
+{
+    "id": "landing-zone-monitoring",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "Telemetry a landing zone produces must be stored, queried, and billed within that landing zone.",
+    "why": "A shared workspace merges ingestion costs across landing zones, which breaks the cost ownership model.",
+    "anchor": "no-platform-ops",
+    "implements": "landing-zone",
+    "links": [
+        {
+            "target": "azure-policy-config-diagnostic-settings",
+            "relation": "depends-on",
+            "note": "Azure Policy configures diagnostic settings that route telemetry to the landing-zone workspace."
+        }
+    ],
+    "violations": [
+        "Centralized Log Analytics workspace for general purpose logs.",
+        "Diagnostic setting in a landing zone sending logs to a workspace in another subscription."
+    ],
+    "files": [
+        "landing-zones/bicep/modules/monitor.bicep",
+        "landing-zones/bicep/modules/base/logAnalyticsWorkspace.bicep",
+        "landing-zones/bicep/modules/base/ActivityLogAlerts.bicep"
+    ],
+    "properties": {}
+}

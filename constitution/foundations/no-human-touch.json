@@ -1,0 +1,9 @@
+{
+  "id": "no-human-touch",
+  "type": "foundation",
+  "intent": "BigBang initializes the platform. After that, code is the only path to production — proof it can always be rebuilt from scratch.",
+  "violations": [
+    "Configuration value set manually instead of sourced from the repo.",
+    "Deployment that bypasses the branch-gated promotion flow."
+  ]
+}

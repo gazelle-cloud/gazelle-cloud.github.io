@@ -1,0 +1,22 @@
+{
+  "id": "landing-zone-action-group",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Alerts must route through the landing zone's action group, with recipients sourced from the platform member profile.",
+  "why": "Hardcoded contacts go stale, so alerts fire to former members and incidents go unanswered.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "links": [],
+  "violations": [
+    "Budget alert without an action group.",
+    "Action group holding a hand-typed email address."
+  ],
+  "files": [
+    "landing-zones/bicep/modules/base/actionGroup.bicep",
+    "landing-zones/bicep/modules/base/budget.bicep",
+    "landing-zones/bicep/modules/monitor.bicep"
+  ],
+  "properties": {}
+}

@@ -1,0 +1,25 @@
+{
+    "id": "platform-break-glass",
+    "type": "regulative",
+    "subject": {
+        "type": "entity"
+    },
+    "decision": "Break-glass must be used only where automation cannot execute the change.",
+    "why": "An unrestricted role with no usage boundary becomes the fast path, and the repository stops being the record.",
+    "anchor": "no-human-touch",
+    "implements": "platform",
+    "links": [
+        {
+            "target": "deployment-declarative-lifecycle",
+            "relation": "depends-on",
+            "note": "Break-glass access requires exclusion from stack deny assignments, which override role permissions."
+        }
+    ],
+    "violations": [],
+    "files": [
+        "platform-management/access-control/parameters/accessControl.bicepparam",
+        "platform-management/access-control/bicep/accessControl.bicep",
+        ".github/workflows/template-landing-zones.yml"
+    ],
+    "properties": {}
+}

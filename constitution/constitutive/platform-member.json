@@ -1,0 +1,32 @@
+{
+    "id": "platform-member",
+    "type": "constitutive",
+    "subject": {
+        "type": "entity",
+        "term": "platform-member"
+    },
+    "rule": "A product team counts as a platform member when a file matching properties.memberFilePattern, other than properties.excludedFiles, declares its application with each of properties.requiredFields.",
+    "anchor": "no-platform-ops",
+    "evidence": [
+        "platform-members/<AppName>.json"
+    ],
+    "links": [
+        {
+            "target": "gazelle",
+            "relation": "depends-on",
+            "note": "Membership is held in Gazelle's tenant."
+        }
+    ],
+    "violations": [],
+    "properties": {
+        "memberFilePattern": "platform-members/<AppName>.json",
+        "excludedFiles": [
+            "platform-members/template.json"
+        ],
+        "requiredFields": [
+            "applicationName",
+            "ownerEmail",
+            "engineerEmail"
+        ]
+    }
+}

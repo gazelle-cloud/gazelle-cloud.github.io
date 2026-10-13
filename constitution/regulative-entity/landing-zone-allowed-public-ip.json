@@ -1,0 +1,26 @@
+{
+  "id": "landing-zone-allowed-public-ip",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Data-plane access from outside Azure must originate from the platform-trusted public IP.",
+  "why": "Without a trusted source address, application teams cannot reach Azure data-plane resources from their laptops.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "links": [
+    {
+      "target": "deployment-config-in-repo",
+      "relation": "depends-on",
+      "note": "Teams read the trusted IP from a committed platform variable."
+    }
+  ],
+  "violations": [
+    "Platform configuring PaaS firewall rules on behalf of the application team.",
+    "IP address hardcoded in an application pipeline instead of read from the platform variable."
+  ],
+  "files": [
+    "githubVariables.json"
+  ],
+  "properties": {}
+}

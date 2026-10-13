@@ -1,0 +1,23 @@
+{
+  "id": "deployment-logic-reusable-workflow",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Deployment logic must live in a reusable workflow; an environment workflow supplies inputs and nothing more.",
+  "why": "Without reuse, a fix to deployment logic has to be repeated in every environment workflow, and environments drift apart.",
+  "anchor": "no-human-touch",
+  "implements": "bigbang",
+  "links": [],
+  "violations": [
+    "Deployment steps duplicated in an environment workflow instead of called from a template."
+  ],
+  "files": [
+    ".github/workflows/template-landing-zones.yml",
+    ".github/workflows/template-Azure-Policy.yml",
+    ".github/workflows/template-access-control.yml",
+    ".github/workflows/template-Management-Groups.yml",
+    ".github/workflows/template-lz-template.yml"
+  ],
+  "properties": {}
+}

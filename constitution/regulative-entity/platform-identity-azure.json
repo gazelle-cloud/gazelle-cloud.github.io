@@ -1,0 +1,18 @@
+{
+  "id": "platform-identity-azure",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Platform must use an Entra ID app registration as its identity",
+  "why": "BigBang must authenticate before it creates platform resources, so its identity cannot depend on those resources.",
+  "anchor": "no-human-touch",
+  "implements": "platform",
+  "links": [],
+  "violations": [
+    "Platform deployment authenticates through a managed identity.",
+    "Platform Azure identity is shared with non-platform workloads."
+  ],
+  "files": [],
+  "properties": {}
+}

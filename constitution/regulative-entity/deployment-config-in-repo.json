@@ -1,0 +1,19 @@
+{
+  "id": "deployment-config-in-repo",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Platform configuration must be defined in the repository, never set outside it.",
+  "why": "BigBang destroys and recreates GitHub environments, so configuration held outside the repo cannot be reproduced.",
+  "anchor": "no-human-touch",
+  "implements": "bigbang",
+  "links": [],
+  "violations": [
+    "Bicep parameter with a hardcoded tenant ID or location instead of readEnvironmentVariable()."
+  ],
+  "files": [
+    "githubVariables.json"
+  ],
+  "properties": {}
+}

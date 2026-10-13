@@ -1,0 +1,20 @@
+{
+  "id": "platform-identity-github",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Platform and landing zone workflows must authenticate to GitHub through the platform GitHub identity.",
+  "why": "Without a shared GitHub App, the platform has no mechanism to provision and configure application repos and environments.",
+  "anchor": "no-human-touch",
+  "implements": "platform",
+  "links": [],
+  "violations": [
+    "GITHUB_TOKEN used to write org-level variables or trigger other workflows."
+  ],
+  "files": [
+    "githubVariables.json",
+    ".github/workflows/template-landing-zones.yml"
+  ],
+  "properties": {}
+}

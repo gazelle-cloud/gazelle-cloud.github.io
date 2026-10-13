@@ -1,0 +1,30 @@
+{
+  "id": "eval-PR-validator",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "The PR validator must be tested against a fixed eval set at least weekly.",
+  "why": "An untested graph change can silently break how a rule is interpreted, and nothing would show that until a PR is wrongly passed or wrongly failed.",
+  "anchor": "no-human-touch",
+  "implements": "eval",
+  "links": [
+    {
+      "target": "validate-codebase-rules",
+      "relation": "depends-on",
+      "note": "Evals use the validator's exact prompt and verdict format."
+    }
+  ],
+  "violations": [
+    "Eval workflow not scheduled to run at least weekly.",
+    "FAIL fixture with an empty must_fail.",
+    "must_fail entry naming an id with no matching node in the graph."
+  ],
+  "files": [
+    "constitution/eval/PR-validator/",
+    ".github/workflows/eval-pr-validate-codebase-rules.yml",
+    ".github/scripts/build-combined-eval-prompt.sh",
+    ".github/scripts/check-combined-eval.sh"
+  ],
+  "properties": {}
+}

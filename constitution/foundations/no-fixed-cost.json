@@ -1,0 +1,9 @@
+{
+  "id": "no-fixed-cost",
+  "type": "foundation",
+  "intent": "Every platform component is free; if it can't be, it must be consumption-based — never a flat cost.",
+  "violations": [
+    "Platform-provisioned service with a fixed monthly cost adopted.",
+    "Applying no-fixed-cost constraints to application team."
+  ]
+}

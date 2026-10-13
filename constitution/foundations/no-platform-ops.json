@@ -1,0 +1,8 @@
+{
+  "id": "no-platform-ops",
+  "type": "foundation",
+  "intent": "The platform grows more self-sufficient, landing zones take on more ownership, and the platform team becomes less and less necessary.",
+  "violations": [
+    "Platform team operating resources inside a landing zone on behalf of the application team."
+  ]
+}

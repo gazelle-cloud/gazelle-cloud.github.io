@@ -1,0 +1,20 @@
+{
+  "id": "landing-zone-getting-started",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "An application repo must be seeded with deployable pipelines and modules from the template at creation.",
+  "why": "Without them, teams reverse-engineer platform patterns before they can deploy anything.",
+  "anchor": "no-platform-ops",
+  "implements": "platform-member",
+  "links": [],
+  "violations": [
+    "Module template customized for a specific application instead of generic.",
+    "Application repo created without deployment pipelines."
+  ],
+  "files": [
+    ".github/workflows/template-new-platform-members.yml"
+  ],
+  "properties": {}
+}

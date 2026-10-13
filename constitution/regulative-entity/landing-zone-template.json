@@ -1,0 +1,33 @@
+{
+  "id": "landing-zone-template",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Each landing zone must have its own parameter file and its own trigger workflow.",
+  "why": "A shared trigger means acting on one landing zone risks redeploying another team.",
+  "anchor": "no-human-touch",
+  "implements": "landing-zone",
+  "links": [
+    {
+      "target": "deployment-logic-reusable-workflow",
+      "relation": "depends-on",
+      "note": "Landing zone triggers call the shared deployment workflow."
+    },
+    {
+      "target": "platform-identity-azure",
+      "relation": "depends-on",
+      "note": "Template deployments authenticate as the platform Azure identity."
+    }
+  ],
+  "violations": [
+    "Generated workflow name lacks the lz-* prefix.",
+    "One parameter file covering more than one landing zone."
+  ],
+  "files": [
+    "landing-zones/managementGroup-AppName-environment.bicepparam",
+    ".github/workflows/template-lz-template.yml",
+    ".github/workflows/requestNew-Landing-Zone.yml"
+  ],
+  "properties": {}
+}

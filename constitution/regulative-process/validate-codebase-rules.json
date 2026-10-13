@@ -1,0 +1,44 @@
+{
+  "id": "validate-codebase-rules",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "Every PR must be checked for rule violations and functionality absent from the graph; either finding must block merge.",
+  "why": "Without a blocking check, rule violations and unnamed functionality can reach the default branch.",
+  "anchor": "no-human-touch",
+  "implements": "constitution",
+  "trigger": [
+    "validate codebase rules",
+    "pr rules check",
+    "constitution validation"
+  ],
+  "steps": [
+    "Prerequisite: configure the check as required on the default branch, with no admin bypass.",
+    "On pull_request opened or synchronize, check out the PR head with full history.",
+    "Collect git diff origin/<base>...HEAD and the full content of non-deleted changed files. Exclude graph.md from injected content; cap injected content at 50 KB and mark truncation.",
+    "Run claude -p from the repository root so CLAUDE.md loads. Request a verdict for every foundation, constitutive rule, and regulative rule, including rules that do not apply.",
+    "Separately identify introduced functionality, capabilities, or resource types that no vocabulary, constitutive, or regulative node names.",
+    "Require JSON with result, summary: {what, why}, foundations, constitutive, regulative, and uncovered. Each uncovered entry must describe the gap and cite its introducing file and line.",
+    "Set the result to FAIL if any rule fails or uncovered is nonempty. A FAIL must fail the workflow job.",
+    "Render failures with violations and evidence, collapse passed rules by layer, and list uncovered findings separately.",
+    "Post the PR comment with the what/why summary, findings, model, token count, and cost in EUR."
+  ],
+  "links": [
+    {
+      "target": "platform-identity-claude",
+      "relation": "governed-by"
+    },
+    {
+      "target": "functionality-named-in-graph",
+      "relation": "governed-by"
+    }
+  ],
+  "violations": [
+    "graph.md included in the injected file content."
+  ],
+  "files": [
+    ".github/workflows/pr-validate-codebase-rules.yml"
+  ],
+  "properties": {}
+}

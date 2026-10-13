@@ -1,0 +1,14 @@
+diff --git a/constitution/regulative-entity/azure-native-services-only.json b/constitution/regulative-entity/azure-native-services-only.json
+index 0000000..0000000 100644
+--- a/constitution/regulative-entity/azure-native-services-only.json
++++ b/constitution/regulative-entity/azure-native-services-only.json
+@@ -12,7 +12,8 @@
+   ],
+   "links": [],
+   "violations": [
+-    "Service adopted with no ARM resource representation, leaving it invisible to Policy, RBAC, and diagnostics."
++    "Service adopted with no ARM resource representation, leaving it invisible to Policy, RBAC, and diagnostics.",
++    "A service not reachable through Azure Resource Manager is adopted."
+   ],
+   "files": [
+     "platform-management/policy/parameters/oases/allowedResources.json"

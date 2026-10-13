@@ -1,0 +1,29 @@
+{
+  "id": "landing-zone-github-runners",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "A landing zone's pipelines must reach its data plane from inside the landing zone's own network.",
+  "why": "Public runners have no network path to the PaaS data plane once public access is denied.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "links": [
+    {
+      "target": "platform-identity-github",
+      "relation": "depends-on",
+      "note": "Runner registration authenticates through the platform GitHub App."
+    }
+  ],
+  "violations": [
+    "Application team using a separate VNet for runner integration.",
+    "Runner label implying capability differences instead of network accessibility.",
+    "Pipeline enabling public network access on a resource to reach it from a GitHub-hosted runner."
+  ],
+  "files": [
+    "landing-zones/bicep/modules/base/virtualNetwork.bicep",
+    ".github/scripts/create-landingzone-gh-runners.ps1",
+    ".github/workflows/template-landing-zones.yml"
+  ],
+  "properties": {}
+}

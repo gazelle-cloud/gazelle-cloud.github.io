@@ -1,0 +1,20 @@
+{
+  "id": "diagnostic-settings-parameter-contract",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "The main diagnostic initiative must define shared defaults; parameter files may override only policy-specific values.",
+  "why": "Without a single owner for shared defaults, diagnostic behavior can drift when parameter files repeat or replace values inconsistently.",
+  "anchor": "no-human-touch",
+  "implements": "guardrail",
+  "violations": [
+    "A shared diagnostic default is hardcoded in a parameter file instead of the main initiative.",
+    "A parameter file passes an outer-initiative parameter that the child policy does not declare."
+  ],
+  "files": [
+    "platform-management/policy/bicep/configDiagnosticSettings.bicep",
+    "platform-management/policy/parameters/diagnosticSettings.bicepparam"
+  ],
+  "properties": {}
+}

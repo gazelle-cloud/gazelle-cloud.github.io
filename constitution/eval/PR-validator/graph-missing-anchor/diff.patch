@@ -1,0 +1,23 @@
+diff --git a/constitution/constitutive/secure-defaults.json b/constitution/constitutive/secure-defaults.json
+new file mode 100644
+index 0000000..0000000
+--- /dev/null
++++ b/constitution/constitutive/secure-defaults.json
+@@ -0,0 +1,17 @@
++{
++  "id": "secure-defaults",
++  "type": "constitutive",
++  "subject": {
++    "type": "entity",
++    "term": "approved"
++  },
++  "rule": "An Azure resource counts as having secure defaults when its factory settings satisfy all Gazelle guardrails without modification.",
++  "evidence": [
++    "platform-management/policy/parameters/oases/"
++  ],
++  "links": [],
++  "violations": [
++    "Resource treated as having secure defaults that requires a custom policy to reach compliance."
++  ],
++  "properties": {}
++}

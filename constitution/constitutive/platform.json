@@ -1,0 +1,27 @@
+{
+    "id": "platform",
+    "type": "constitutive",
+    "subject": {
+        "type": "entity",
+        "term": "platform"
+    },
+    "rule": "A management group counts as the platform when its name matches properties.path in properties.file.",
+    "anchor": "no-human-touch",
+    "evidence": [
+        "githubVariables.json"
+    ],
+    "links": [
+        {
+            "target": "gazelle",
+            "relation": "depends-on",
+            "note": "The platform carries Gazelle's authority."
+        }
+    ],
+    "violations": [
+        "Platform capability hosted in a subscription rather than assigned at a management group."
+    ],
+    "properties": {
+        "file": "githubVariables.json",
+        "path": "AzurePlatformVariables.environmentVariables.TOP_LEVEL_MANAGEMENT_GROUP_NAME.prod"
+    }
+}

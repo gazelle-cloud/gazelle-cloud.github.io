@@ -1,0 +1,28 @@
+{
+    "id": "eval",
+    "type": "constitutive",
+    "subject": {
+        "type": "entity",
+        "term": "eval"
+    },
+    "rule": "A test case counts as an eval when its expected.json matches properties.fixturePattern for one of properties.kinds.",
+    "anchor": "no-human-touch",
+    "evidence": [
+        "constitution/eval/*/*/expected.json"
+    ],
+    "links": [
+        {
+            "target": "constitution",
+            "relation": "depends-on",
+            "note": "Each fixture names a node the constitution holds."
+        }
+    ],
+    "violations": [],
+    "properties": {
+        "fixturePattern": "constitution/eval/<kind>/<case>/expected.json",
+        "kinds": [
+            "PR-validator",
+            "semantic"
+        ]
+    }
+}

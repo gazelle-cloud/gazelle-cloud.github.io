@@ -1,0 +1,22 @@
+{
+  "id": "application-teams-own-the-cost",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "A subscription must bill to the owning application's invoice section.",
+  "why": "Without it, attribution falls back to tags, which is less precise and requires allocation logic to run.",
+  "anchor": "no-fixed-cost",
+  "implements": "platform-member",
+  "links": [],
+  "violations": [
+    "Cost attributed through tags rather than invoice section isolation.",
+    "Subscription billing to a shared invoice section."
+  ],
+  "files": [
+    "githubVariables.json",
+    ".github/workflows/template-new-platform-members.yml",
+    ".github/workflows/template-landing-zones.yml"
+  ],
+  "properties": {}
+}

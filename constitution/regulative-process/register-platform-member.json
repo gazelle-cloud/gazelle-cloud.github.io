@@ -1,0 +1,36 @@
+{
+  "id": "register-platform-member",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "An application must be registered through requestNew-Platform-Members before any landing zone is provisioned for it.",
+  "why": "Without the profile there is no Entra ID group, invoice section, or repo for a landing zone to attach to.",
+  "anchor": "no-platform-ops",
+  "implements": "platform-member",
+  "trigger": [
+    "register application",
+    "new application team",
+    "onboard team",
+    "new team",
+    "add application",
+    "platform member",
+    "join the platform"
+  ],
+  "steps": [
+    "Collect the application name, owner email, and engineer email.",
+    "Present the values and wait for confirmation.",
+    "Dispatch requestNew-Platform-Members, which opens a PR creating platform-members/{AppName}.json.",
+    "A platform engineer reviews the PR. After merge, template-new-platform-members provisions the application repo, Entra group, billing scope, and repository variables."
+  ],
+  "workflow": "requestNew-Platform-Members",
+  "links": [],
+  "violations": [
+    "Platform member file created by hand instead of through the workflow."
+  ],
+  "files": [
+    "platform-members/",
+    ".github/workflows/requestNew-Platform-Members.yml"
+  ],
+  "properties": {}
+}

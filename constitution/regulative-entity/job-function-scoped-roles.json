@@ -1,0 +1,21 @@
+{
+  "id": "job-function-scoped-roles",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "A role must define permissions by job function, not resource type, and be assigned to the application's Entra ID group, not an individual.",
+  "why": "Without job-function scoping, every new allowed resource type forces team re-onboarding.",
+  "anchor": "no-platform-ops",
+  "implements": "platform-member",
+  "links": [],
+  "violations": [
+    "Custom role with wildcard write permissions.",
+    "Role scoped to a resource type rather than a job function."
+  ],
+  "files": [
+    "platform-management/access-control/parameters/accessControl.bicepparam",
+    "platform-management/access-control/bicep/modules/customRoleDefinitions.bicep"
+  ],
+  "properties": {}
+}

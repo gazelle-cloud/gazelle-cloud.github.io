@@ -1,0 +1,62 @@
+{
+  "id": "update-landing-zone",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "Landing zone changes must use a merged parameter-file PR, except eight-hour exemptions granted through lz-flow-create-policy-exemption.",
+  "why": "Changes outside the parameter file or temporary-exemption workflow leave the landing zone's configuration untracked.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "trigger": [
+    "temporary policy exemption",
+    "policy exclusion",
+    "update budget",
+    "cost alert"
+  ],
+  "steps": [
+    "Read the governing rules.",
+    "Collect the application, environment, and requested change: cost, tags, or exemptions.",
+    "Locate the parameter file and its deployment workflow. If either is missing, stop the update and resolve provisioning through create-landing-zone.",
+    "For exemptions, ask whether the request is temporary or long-lived.",
+    "For a temporary exemption, collect the policy selection and subscription ID, present the eight-hour scope, and wait for confirmation. Dispatch lz-flow-create-policy-exemption and end this branch; no parameter-file edit or PR is required.",
+    "For cost, draft a change to the single budget value; additional alert thresholds are out of scope.",
+    "For tags, draft changes to subscriptionLevelTags and resourceLevelTags. Preserve ownerEmail and engineerEmail as readEnvironmentVariable references, with ownerEmail at subscription level.",
+    "For a long-lived exemption, draft an exemptions entry referencing a policy-assignment-reference.json key.",
+    "For parameter-file changes, present the complete draft and wait for permission to implement.",
+    "Apply the approved changes and open a PR. Merge redeploys the landing-zone stack with deleteAll."
+  ],
+  "workflow": "lz-oasis-{appName}-{env}",
+  "links": [
+    {
+      "target": "create-landing-zone",
+      "relation": "depends-on",
+      "note": "There is no parameter file to edit until the landing zone has been provisioned."
+    },
+    {
+      "target": "azure-policy-reference",
+      "relation": "governed-by"
+    },
+    {
+      "target": "landing-zone-tags",
+      "relation": "governed-by"
+    },
+    {
+      "target": "deployment-declarative-lifecycle",
+      "relation": "governed-by"
+    },
+    {
+      "target": "self-service-policy-exemptions",
+      "relation": "governed-by"
+    }
+  ],
+  "violations": [
+    "Exemption entry naming a literal ARM assignment ID."
+  ],
+  "files": [
+    "landing-zones/oases-prod/",
+    "landing-zones/oases-test/",
+    ".github/workflows/lz-flow-create-policy-exemption.yml"
+  ],
+  "properties": {}
+}

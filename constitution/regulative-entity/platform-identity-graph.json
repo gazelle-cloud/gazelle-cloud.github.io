@@ -1,0 +1,27 @@
+{
+  "id": "platform-identity-graph",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "A landing zone identity must hold granular Microsoft Graph read permissions and no broad directory access.",
+  "why": "Missing Graph read permissions break identity lookup; broad directory permissions expose more tenant data than applications need.",
+  "anchor": "no-platform-ops",
+  "implements": "platform",
+  "links": [
+    {
+      "target": "landing-zone-identity",
+      "relation": "depends-on",
+      "note": "Granting Graph permissions to the shared identity covers every landing zone workload."
+    }
+  ],
+  "violations": [
+    "Landing zone identity granted write permissions to Microsoft Graph.",
+    "Landing zone identity granted Directory.Read.All instead of granular read permissions."
+  ],
+  "files": [
+    "landing-zones/bicep/entra.bicep",
+    "landing-zones/bicep/modules/base/appRoleAssignedTo.bicep"
+  ],
+  "properties": {}
+}

@@ -1,0 +1,16 @@
+diff --git a/constitution/constitutive/oases.json b/constitution/constitutive/oases.json
+index 0000000..0000000 100644
+--- a/constitution/constitutive/oases.json
++++ b/constitution/constitutive/oases.json
+@@ -16,6 +16,11 @@
+       "target": "platform",
+       "relation": "depends-on",
+       "note": "The platform is what establishes oases, so there is nothing to establish one until Gazelle names a management group as the platform."
++    },
++    {
++      "target": "landing-zone",
++      "relation": "depends-on",
++      "note": "Oases exists to contain landing zones, so oases cannot be meaningful until a landing zone exists."
+     }
+   ],
+   "violations": [

@@ -1,0 +1,27 @@
+{
+  "id": "landing-zone-automation",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Automation jobs must run inside the landing zone's own subscription.",
+  "why": "Without isolation, all landing zones would share a runtime the platform has no subscription to host.",
+  "anchor": "no-fixed-cost",
+  "implements": "landing-zone",
+  "links": [
+    {
+      "target": "platform-identity-graph",
+      "relation": "depends-on",
+      "note": "Jobs querying Entra ID require the landing zone identity's Graph read permissions."
+    }
+  ],
+  "violations": [
+    "Automation job running from a resource outside the landing zone subscription."
+  ],
+  "files": [
+    "landing-zones/bicep/modules/landingzone-automation.bicep",
+    "landing-zones/bicep/modules/base/jobs-cron.bicep",
+    "landing-zones/bicep/modules/base/managedEnvironments.bicep"
+  ],
+  "properties": {}
+}

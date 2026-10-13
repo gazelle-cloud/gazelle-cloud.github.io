@@ -1,0 +1,19 @@
+{
+  "id": "landing-zone-resource-group",
+  "type": "regulative",
+  "subject": {
+    "type": "entity"
+  },
+  "decision": "Resources the landing zone template declares must live in a single dedicated resource group.",
+  "why": "Mixing template-managed and application-managed resources obscures which resources the landing zone template controls.",
+  "anchor": "no-platform-ops",
+  "implements": "landing-zone",
+  "links": [],
+  "violations": [
+    "A resource the template does not declare, deployed into the landing zone's dedicated resource group."
+  ],
+  "files": [
+    "landing-zones/bicep/main.bicep"
+  ],
+  "properties": {}
+}

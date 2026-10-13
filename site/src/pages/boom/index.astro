@@ -1,0 +1,28 @@
+---
+import GraphPage from '../../layouts/GraphPage.astro';
+import { loadBoom, ROOT_ID } from '../../boom-data';
+
+const { graph: { nodes, links } } = await loadBoom();
+const byId = Object.fromEntries(nodes.map((n: any) => [n.id, n]));
+const kids = (id: string) => links.filter((l: any) => l.source === id).map((l: any) => byId[l.target]);
+const root = byId[ROOT_ID];
+const label = (s: string) => s.replace(/-/g, ' ');
+---
+<GraphPage title="Boom" description="Gazelle constitutive rules and the regulative rules that implement each one." page="/boom.page.js">
+  <div class="sr-only">
+    <h1>Gazelle constitutive and regulative rules</h1>
+    {root?.rule && <p><a href={`/boom/${ROOT_ID}/`}>{label(ROOT_ID)}</a> — {root.rule}</p>}
+
+    {kids(ROOT_ID).map((c: any) => (
+      <section>
+        <h2><a href={`/boom/${c.id}/`}>{label(c.id)}</a></h2>
+        {c.rule && <p>{c.rule}</p>}
+        <ul>
+          {kids(c.id).map((r: any) => (
+            <li><a href={`/boom/${r.id}/`}>{label(r.id)}</a> ({r.subjectType}){r.decision && <span> — {r.decision}</span>}</li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</GraphPage>

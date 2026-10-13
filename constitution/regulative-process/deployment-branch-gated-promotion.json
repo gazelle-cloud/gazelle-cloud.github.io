@@ -1,0 +1,29 @@
+{
+  "id": "deployment-branch-gated-promotion",
+  "type": "regulative",
+  "subject": {
+    "type": "process"
+  },
+  "decision": "A platform change must pass the test environment before it reaches production.",
+  "why": "Without an enforced gate, a single push can change production infrastructure with no prior validation.",
+  "anchor": "no-human-touch",
+  "implements": "platform",
+  "links": [
+    {
+      "target": "platform-test-environment",
+      "relation": "depends-on",
+      "note": "The gate has no target to validate against without the test environment."
+    }
+  ],
+  "violations": [
+    "Workflow deploying to prod from a non-main branch.",
+    "Production change with no corresponding test deployment."
+  ],
+  "files": [
+    ".github/workflows/platform-Azure-Policy.yml",
+    ".github/workflows/platform-access-control.yml",
+    ".github/workflows/platform-Management-Groups.yml",
+    ".github/workflows/platform-automation.yml"
+  ],
+  "properties": {}
+}
