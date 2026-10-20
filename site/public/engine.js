@@ -40,7 +40,7 @@ export async function mount(config) {
     const size = useVizPaneSize(fgRef);
 
     const {
-      activeId, graph, activeNode, neighbours: baseNeighbours,
+      activeId, focusedId, hoveredId, graph, activeNode, neighbours: baseNeighbours,
       setHoveredId, setFocusedId,
       onNodeClick, onBackgroundClick,
       searchQuery, setSearchQuery, searchMatchIds,
@@ -89,14 +89,14 @@ export async function mount(config) {
     });
 
     const linkColor = React.useCallback(l => {
-      if (config.linkColor) return config.linkColor(l, { activeId, neighbours, theme });
+      if (config.linkColor) return config.linkColor(l, { activeId, focusedId, hoveredId, neighbours, theme });
       const dim   = theme === 'dark' ? 'rgba(180,195,225,0.28)' : 'rgba(80,80,100,0.15)';
       const active= theme === 'dark' ? 'rgba(235,242,255,0.95)' : 'rgba(30,30,50,0.75)';
       const faded = theme === 'dark' ? 'rgba(180,180,180,0.04)' : 'rgba(80,80,100,0.04)';
       if (!activeId) return dim;
       const [s, t] = linkEnds(l);
       return (s === activeId || t === activeId) ? active : faded;
-    }, [activeId, theme]);
+    }, [activeId, focusedId, hoveredId, neighbours, theme]);
 
     const paintNode = React.useCallback((node, ctx, globalScale) => {
       const isActive    = node.id === activeId;
@@ -109,14 +109,16 @@ export async function mount(config) {
 
       const { activeColor, backdrop } = paintNodeColors(theme);
 
-      ctx.globalAlpha = dimmed ? RENDER.dimmedAlpha : 1;
+      ctx.globalAlpha = config.nodeAlpha
+        ? config.nodeAlpha(node, { dimmed, isActive, isMatch, focusedId, hoveredId })
+        : dimmed ? RENDER.dimmedAlpha : 1;
       ctx.beginPath();
       ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
       ctx.fillStyle = isActive || node.id === panelHoverId ? activeColor : (typeColors[node.type] ?? '#ccc');
       ctx.fill();
 
       const showLabel = config.showLabel
-        ? config.showLabel(node, { activeId, isNeighbour, isMatch })
+        ? config.showLabel(node, { activeId, focusedId, hoveredId, isNeighbour, isMatch })
         : isActive || isNeighbour || isMatch;
 
       if (showLabel) {
@@ -127,7 +129,7 @@ export async function mount(config) {
         } else {
           lx = node.x + gap; ly = node.y; align = 'left';
         }
-        const text     = config.nodeLabel ? config.nodeLabel(node) : node.id.replaceAll('-', ' ');
+        const text     = config.labelText ? config.labelText(node) : config.nodeLabel ? config.nodeLabel(node) : node.id.replaceAll('-', ' ');
         const fontSize = config.labelFontSize ? config.labelFontSize(node) : RENDER.labelFontSize;
         drawLabel(ctx, text, lx, ly, align, fontSize, globalScale,
           isActive ? activeColor : (typeColors[node.type] ?? '#ccc'), backdrop);
@@ -135,7 +137,7 @@ export async function mount(config) {
 
       ctx.globalAlpha = 1;
       node.__r = r;
-    }, [activeId, neighbours, searchMatchIds, theme, panelHoverId]);
+    }, [activeId, focusedId, hoveredId, neighbours, searchMatchIds, theme, panelHoverId]);
 
     const panelContent = activeNode
       ? config.panel(activeNode, graph, { setFocusedId, theme, typeColors })
@@ -202,6 +204,8 @@ export async function mount(config) {
         linkColor,
         linkDirectionalArrowLength: 0,
         ...physicsProps,
+        // Pages whose dots move on interaction keep the camera still: fit on load and resize only.
+        ...(config.fitOnEngineStop === false ? { onEngineStop: undefined } : {}),
         ...(config.cooldownTime  != null ? { cooldownTime:  config.cooldownTime  } : {}),
         ...(config.warmupTicks  != null ? { warmupTicks:   config.warmupTicks   } : {}),
         ...(config.maxZoom      != null ? { maxZoom:       config.maxZoom       } : {}),

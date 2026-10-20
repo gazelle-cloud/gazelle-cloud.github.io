@@ -2,40 +2,70 @@ import { mount } from '/engine.js';
 import { PALETTE, RENDER, FONT_MONO, linkEnds, OpenSourceNote } from '/shell.js';
 import React from 'react';
 
-// ── layout: gazelle → topics → rules, outward ─────────────────────────────────
-// Reads from the centre out. Green dots (topics) sit on an inner ring around
-// gazelle; each island's blue dots (rules) fan outward, away from gazelle, in
-// a slice sized by how many rules it has, reaching towards the canvas edge.
-// Blue dots start from that fan with a fixed per-dot wobble (same every load),
-// then settle under light forces: a pull towards their home spot, staying
-// nearer their own green dot, clear of green labels, and a soft wall at the edge.
-// All sizes are screen px; the wall keeps the map inside the canvas, so
-// zoomToFit lands at ≥ 1× and px spacing holds on screen.
-const EDGE_PX         = 44;    // canvas edge → nearest dot or label (≥ zoomToFit's 40)
-const RING_SHAPE      = 2;     // 2 = ellipse; higher = squarer
-const RING_FILL       = 0.55;  // green ring, as a share of the way to the canvas edge
-const FAN_NEAR        = 0.5;   // nearest blue dot, as a share of the green → edge distance
-const FAN_FAR         = 1.0;   // farthest blue dot, same measure
-const FAN_REACH_PX    = 260;   // longest a spoke may get, however far the edge is
-const FAN_STEP        = 0.12;  // fan width per rule, radians …
-const FAN_MAX         = 1.6;   // … capped here
-const WOBBLE          = 0.22;  // per-dot irregularity
-const HOME_PULL       = 0.04;  // how firmly a blue dot keeps its fan shape
-const BELONG_PX       = 30;    // a blue dot is at least this much nearer its own green
+// ── layout: gazelle → topics, rules on hover or click ─────────────────────────
+// Gazelle sits in the centre, green dots (topics) on a ring around it; both
+// are pinned. Each rule has two homes. At rest it floats faint in a loose fan
+// pointing away from gazelle, with no label and no spoke; fans may overlap.
+// Hovering a green dot, or clicking it or one of its faint rules, opens the
+// island: its rules spring from the fan onto a shallow arc beside the green
+// dot, one row per rule, brighten, and show labels facing away from gazelle
+// and spokes to the green dot. Closing lets them drift back. Only one island
+// is open at a time, and only the island opening or closing moves.
+// All sizes are screen px; maxZoom 1 keeps them so on screen.
+const EDGE_PX    = 44;    // canvas edge → nearest dot or label (≥ zoomToFit's 40)
+const RING_SHAPE = 2;     // 2 = ellipse; higher = squarer
+const RING_FILL  = 0.55;  // green ring, as a share of the way to the canvas edge
+
+const FAN_NEAR     = 0.5;   // nearest resting rule, as a share of the green → edge distance
+const FAN_FAR      = 1.0;   // farthest resting rule, same measure
+const FAN_REACH_PX = 260;   // longest a fan may reach, however far the edge is
+const FAN_STEP     = 0.12;  // fan width per rule, radians …
+const FAN_MAX      = 1.6;   // … capped here
+const WOBBLE       = 0.22;  // per-dot irregularity in the fan
+
+const ROW_PX     = 24;    // one rule per row on an open arc
+const COLUMN_PX  = 70;    // green dot → arc ends, when the labels leave room
+const BOW_PX     = 36;    // how far the arc's middle bulges past its ends, at most
+const JITTER_PX  = 6;     // per-dot irregularity along the arc
+
+const OPEN_PULL  = 0.12;  // spring towards the arc; a little overshoot, settles in ~½ s
+const REST_PULL  = 0.06;  // spring back towards the fan, softer
+const SETTLE_MS  = 1500;  // how long the simulation runs after an island opens or closes
+const LEAVE_MS   = 350;   // grace after the pointer leaves an island, to cross to its rules
+
+const REST_ALPHA = 0.28;  // a closed island's rules, while no island is open
+const AWAY_ALPHA = 0.1;   // a closed island's rules, while another is open
+
+const STILL = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 const label         = id => id.replaceAll('-', ' ');
 const dotRadius     = n => n.type === 'root' ? 8 : n.type === 'constitutive' ? 5.5 : 3.5;
 const labelFontSize = n => n.type === 'regulative' ? RENDER.labelFontSize : RENDER.labelFontSize + 1;
 
 let canvasW = 1200, canvasH = 800;   // set in prepare()
+let nodeById = new Map();            // set in prepare()
+let blues = [];                      // every rule, set in layout()
+let fg = null;                       // ForceGraph instance, set in forces()
 
-// Label width in screen px, measured once with the font drawLabel uses.
+// Label width in screen px, measured with the font drawLabel uses.
+let measurer;
+function textWidth(n, text) {
+  measurer ??= document.createElement('canvas').getContext('2d');
+  measurer.font = `${labelFontSize(n)}px 'IBM Plex Sans', system-ui, sans-serif`;
+  return measurer.measureText(text).width;
+}
+
 function measureLabels(nodes) {
-  const ctx = document.createElement('canvas').getContext('2d');
-  for (const n of nodes) {
-    ctx.font = `${labelFontSize(n)}px 'IBM Plex Sans', system-ui, sans-serif`;
-    n.__labelW = ctx.measureText(label(n.id)).width;
-  }
+  for (const n of nodes) n.__labelW = textWidth(n, label(n.id));
+}
+
+// The label cut to fit maxW, ending in an ellipsis; whole when it fits.
+function fitText(n, maxW) {
+  const full = label(n.id);
+  if (n.__labelW <= maxW) return full;
+  let text = full;
+  while (text.length > 1 && textWidth(n, text + '…') > maxW) text = text.slice(0, -1);
+  return text.trimEnd() + '…';
 }
 
 // Canvas size the engine will give ForceGraph (pane content box minus padding).
@@ -73,9 +103,9 @@ function toEdge(x, y, phi) {
   return Math.max(0, Math.min(tx, ty));
 }
 
-// Home spots for an island's blue dots: a fan pointing away from gazelle.
+// Resting homes for an island's rules: a fan pointing away from gazelle.
 // Neighbouring dots alternate near/far so the fan has depth, not a single arc.
-function shapeFan(t) {
+function placeFan(t) {
   const kids = t.__kids;
   if (!kids.length) return;
   const out  = Math.atan2(t.y, t.x);
@@ -86,21 +116,51 @@ function shapeFan(t) {
     const reach = Math.min(toEdge(t.x, t.y, phi), FAN_REACH_PX);
     const depth = kids.length < 3 ? 0.6 : j % 2 ? 0.85 : 0.45;       // stagger near/far
     const share = FAN_NEAR + (FAN_FAR - FAN_NEAR) * Math.min(1, Math.max(0, depth + WOBBLE * wobble(k.id, 1)));
-    k.__homeX = t.x + Math.cos(phi) * reach * share;
-    k.__homeY = t.y + Math.sin(phi) * reach * share;
+    k.__restX = t.x + Math.cos(phi) * reach * share;
+    k.__restY = t.y + Math.sin(phi) * reach * share;
   });
+}
 
+// An island's rules on a shallow arc on the outer side of its green dot: rows
+// stay evenly spaced so labels never touch, while the middle bulges outward
+// and each dot sits a little off the line. The arc is centred on the green dot
+// and kept inside the canvas. Labels always face outward. When the longest
+// would run off the edge, the arc first moves in towards its green dot (never
+// under the green label); a label that still does not fit is cut with an
+// ellipsis, and the panel carries its full name.
+function placeArc(t) {
+  const kids = t.__kids;
+  if (!kids.length) return;
+  const xMax  = canvasW / 2 - EDGE_PX, yMax = canvasH / 2 - EDGE_PX;
+  const side  = t.x >= 0 ? 1 : -1;
+  const room  = xMax - Math.abs(t.x) - dotRadius(kids[0]) - RENDER.labelGap;
+  const h     = (kids.length - 1) * ROW_PX;
+  const bow   = Math.min(BOW_PX, h * 0.2);
+  const want  = Math.max(COLUMN_PX, t.__labelW / 2 + 24);
+  const least = t.__labelW / 2 + 12 + JITTER_PX;                // clear of the green label
+  const dx    = Math.max(least, Math.min(want, room - bow - Math.max(...kids.map(k => k.__labelW))));
+
+  const top  = Math.max(-yMax, Math.min(t.y - h / 2, yMax - h));
+  const half = Math.max(h / 2, 1);
+  kids.forEach((k, j) => {
+    const y   = top + j * ROW_PX;
+    const u   = Math.max(-1, Math.min(1, (y - t.y) / half));   // −1 above the green dot … 1 below
+    const off = dx + bow * (1 - u * u) + JITTER_PX * wobble(k.id, 1);
+    k.__arcX = t.x + side * off;
+    k.__arcY = y;
+    k.__side = side;
+    k.__text = fitText(k, room - off);
+  });
 }
 
 function layout(raw) {
-  const byId  = Object.fromEntries(raw.nodes.map(n => [n.id, n]));
   const root  = raw.nodes.find(n => n.type === 'root');
   const terms = raw.nodes.filter(n => n.type === 'constitutive');
   if (!root) { console.warn('boom: no gazelle node in /boom.json — check the build log'); return; }
 
   for (const t of terms) t.__kids = [];
   for (const l of raw.links) {
-    const s = byId[l.source], k = byId[l.target];
+    const s = nodeById.get(l.source), k = nodeById.get(l.target);
     if (s?.type === 'constitutive') { s.__kids.push(k); k.__parent = s; }
   }
   for (const t of terms) t.__kids.sort((x, y) =>
@@ -120,140 +180,108 @@ function layout(raw) {
     const [x, y] = ringPoint(slots[i], a, b);
     t.x = t.fx = x;
     t.y = t.fy = y;
-    shapeFan(t);
-    for (const k of t.__kids) { k.x = k.__homeX; k.y = k.__homeY; }
+    placeFan(t);
+    placeArc(t);
   });
+
+  blues = raw.nodes.filter(n => n.type === 'regulative');
+  for (const k of blues) { k.x = k.__restX; k.y = k.__restY; }
 }
 
 // ── labels ────────────────────────────────────────────────────────────────────
 // Gazelle and green labels sit centred under their dot. Blue labels sit beside
-// their dot, facing away from their green dot — or towards it when that would
-// run off the canvas.
+// their dot, on the arc's outer side.
 function labelAnchor(node, gap) {
   const k = (dotRadius(node) + RENDER.labelGap) / gap;        // current zoom, recovered from gap
   if (node.type === 'regulative') {
-    let side = node.x >= node.__parent.x ? 1 : -1;
-    const far = node.x + side * (gap + (node.__labelW + 8) / k);
-    if (Math.abs(far) > (canvasW / 2 - 8) / k) side = -side;
+    const side = node.__side;
     return { lx: node.x + side * gap, ly: node.y, align: side > 0 ? 'left' : 'right' };
   }
   return { lx: node.x, ly: node.y + gap + (labelFontSize(node) / 2 + 2) / k, align: 'center' };
 }
 
-// Dot + label box in graph units at zoom 1 (px).
-function nodeBox(n, withLabel = true) {
-  const r = dotRadius(n);
-  const box = { x0: n.x - r, x1: n.x + r, y0: n.y - r, y1: n.y + r };
-  if (!withLabel) return box;
-  const w = n.__labelW + 8, h = labelFontSize(n) + 8;
-  const { lx, ly, align } = labelAnchor(n, r + RENDER.labelGap);
-  const x0 = align === 'left' ? lx - 4 : align === 'right' ? lx - w + 4 : lx - w / 2;
-  return {
-    x0: Math.min(box.x0, x0), x1: Math.max(box.x1, x0 + w),
-    y0: Math.min(box.y0, ly - h / 2), y1: Math.max(box.y1, ly + h / 2),
-  };
-}
+// ── open island ───────────────────────────────────────────────────────────────
+// A clicked island stays open until it is closed (click away, Esc) or another
+// is clicked. Without a click, hovering a green dot opens its island, and it
+// stays open while the pointer is on that green dot or its open rules. Once
+// the pointer leaves, the island closes after LEAVE_MS, long enough to cross
+// the gap between the green dot and its arc. Hovering gazelle or another
+// green dot switches at once. Hovering a closed island's faint rule does not
+// open it: the rule would spring out from under the pointer, close, drift
+// back and open again. A click on it does.
+let hoverIsland = null, lastFocusedId = null, openNow = null, leaveTimer = null;
 
-// Push a and b (either may be pinned) apart along the box overlap's shorter axis.
-function separate(a, b, A, B, strength) {
-  const ox = Math.min(A.x1, B.x1) - Math.max(A.x0, B.x0);
-  const oy = Math.min(A.y1, B.y1) - Math.max(A.y0, B.y0);
-  if (ox <= 0 || oy <= 0) return;
-  const aFree = a.fx == null, bFree = b.fx == null;
-  if (!aFree && !bFree) return;
-  const share = aFree && bFree ? 0.5 : 1;
-  if (ox < oy) {
-    const d = ((A.x0 + A.x1) < (B.x0 + B.x1) ? -1 : 1) * ox * strength * share;
-    if (aFree) a.vx += d; if (bFree) b.vx -= d;
-  } else {
-    const d = ((A.y0 + A.y1) < (B.y0 + B.y1) ? -1 : 1) * oy * strength * share;
-    if (aFree) a.vy += d; if (bFree) b.vy -= d;
+const islandOf = n => n?.type === 'constitutive' ? n : n?.__parent ?? null;
+
+function stay() { clearTimeout(leaveTimer); leaveTimer = null; }
+
+function openIsland({ focusedId, hoveredId }) {
+  if (lastFocusedId && !focusedId) hoverIsland = null;          // closed by click-away or Esc
+  lastFocusedId = focusedId;
+  const f = nodeById.get(focusedId);
+  let open;
+  if (f) open = islandOf(f);
+  else {
+    const h = nodeById.get(hoveredId);
+    if (h?.type === 'constitutive')                            { stay(); hoverIsland = h; }
+    else if (h?.type === 'root')                               { stay(); hoverIsland = null; }
+    else if (h?.type === 'regulative' && h.__parent === hoverIsland) stay();
+    else if (hoverIsland && !leaveTimer) leaveTimer = setTimeout(() => {
+      leaveTimer  = null;
+      hoverIsland = null;
+      fg?.d3ReheatSimulation();                                 // redraw, so the close is seen
+    }, LEAVE_MS);
+    open = hoverIsland;
   }
+  if (open !== openNow) { openNow = open; queueMicrotask(settle); }
+  return open;
 }
 
-// ── forces ────────────────────────────────────────────────────────────────────
-// Green dots and gazelle are pinned; only blue dots move.
+// ── motion ────────────────────────────────────────────────────────────────────
+// Each rule springs towards its arc slot while its island is open, and back
+// to its fan home otherwise. The spring ignores the simulation's cooling, so
+// every dot reaches its home before the run ends. With reduced motion, dots
+// jump straight there.
+const homeX = n => n.__parent === openNow ? n.__arcX : n.__restX;
+const homeY = n => n.__parent === openNow ? n.__arcY : n.__restY;
 
-// Each blue dot is pulled back towards its home spot, so the island keeps its
-// loose shape while labels and neighbours nudge it.
-function forceHome(strength = HOME_PULL) {
-  let blues = [];
+function forceHome() {
   function force() {
     for (const n of blues) {
-      n.vx += (n.__homeX - n.x) * strength;
-      n.vy += (n.__homeY - n.y) * strength;
+      const k = n.__parent === openNow ? OPEN_PULL : REST_PULL;
+      n.vx += (homeX(n) - n.x) * k;
+      n.vy += (homeY(n) - n.y) * k;
     }
   }
-  force.initialize = ns => { blues = ns.filter(n => n.type === 'regulative'); };
+  force.initialize = () => {};
   return force;
 }
 
-// A blue dot stays clearly nearer its own green dot than any other: when
-// another green gets within BELONG_PX of that, it is pushed back home.
-function forceBelong() {
-  let greens = [], blues = [];
-  function force() {
-    for (const n of blues) {
-      const p = n.__parent;
-      const own = Math.hypot(n.x - p.x, n.y - p.y) || 1;
-      for (const g of greens) {
-        if (g === p) continue;
-        const dx = n.x - g.x, dy = n.y - g.y, d = Math.hypot(dx, dy) || 1;
-        const short = own + BELONG_PX - d;
-        if (short <= 0) continue;
-        n.vx += (dx / d) * short * 0.3 + ((p.x - n.x) / own) * short * 0.2;
-        n.vy += (dy / d) * short * 0.3 + ((p.y - n.y) / own) * short * 0.2;
-      }
-    }
-  }
-  force.initialize = ns => {
-    greens = ns.filter(n => n.type === 'constitutive');
-    blues  = ns.filter(n => n.type === 'regulative');
-  };
-  return force;
+function settle() {
+  if (STILL) for (const n of blues) { n.x = homeX(n); n.y = homeY(n); n.vx = n.vy = 0; }
+  fg?.d3ReheatSimulation();
 }
 
-// Labels: no blue dot settles under a green or gazelle label (those always show).
-function forceLabels(strength = 1.0) {
-  let fixed = [], blues = [];
-  function force() {
-    for (const L of fixed) {
-      const LB = nodeBox(L);
-      for (const n of blues) separate(L, n, LB, nodeBox(n, false), strength);
-    }
-  }
-  force.initialize = ns => {
-    fixed  = ns.filter(n => n.type !== 'regulative');
-    blues  = ns.filter(n => n.type === 'regulative');
-  };
-  return force;
+// Rules of the open island, and search matches, show in full. Every other
+// rule rests faint, fainter still while an island is open.
+function nodeAlpha(node, ctx) {
+  const dim = ctx.dimmed ? RENDER.dimmedAlpha : 1;
+  if (node.type !== 'regulative') return dim;
+  if (ctx.isMatch) return 1;
+  const open = openIsland(ctx);
+  if (node.__parent === open) return ctx.dimmed ? 0.4 : 1;
+  return open ? AWAY_ALPHA : REST_ALPHA;
 }
 
-// Soft wall: every blue dot and its label stays EDGE_PX inside the canvas.
-function forceWall(strength = 0.6) {
-  let nodes;
-  function force() {
-    const x0 = -canvasW / 2 + EDGE_PX, x1 = canvasW / 2 - EDGE_PX;
-    const y0 = -canvasH / 2 + EDGE_PX, y1 = canvasH / 2 - EDGE_PX;
-    for (const n of nodes) {
-      if (n.fx != null) continue;
-      const b = nodeBox(n);
-      if (b.x0 < x0) n.vx += (x0 - b.x0) * strength;
-      if (b.x1 > x1) n.vx -= (b.x1 - x1) * strength;
-      if (b.y0 < y0) n.vy += (y0 - b.y0) * strength;
-      if (b.y1 > y1) n.vy -= (b.y1 - y1) * strength;
-    }
-  }
-  force.initialize = ns => { nodes = ns; };
-  return force;
+function showLabel(node, ctx) {
+  return node.type !== 'regulative' || ctx.isMatch || node.__parent === openIsland(ctx);
 }
 
 // ── focus ─────────────────────────────────────────────────────────────────────
-// Hovering or clicking highlights; nothing moves and the camera stays put.
-// A green dot highlights its whole island and shows all its rule labels.
-// A blue dot keeps the default: itself, its green dot and the spoke between them.
+// A green dot highlights its whole island. A blue dot keeps the default:
+// itself, its green dot and the spoke between them.
 function neighbours(activeId, graph, base) {
-  const g = graph.nodes.find(n => n.id === activeId);
+  const g = nodeById.get(activeId);
   if (g?.type !== 'constitutive') return base;
   return new Set([g.id, ...g.__kids.map(k => k.id), ...base]);
 }
@@ -271,6 +299,7 @@ function IdlePanel({ theme }) {
       'Boom'),
     React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
       p('a', 'Each constitutive rule defines what a term counts as. The regulative rules around it say what must hold for it.'),
+      p('c', 'Hover or click a green dot to see its rules.'),
       React.createElement('hr', { style: { border: 'none', borderTop: '1px solid rgba(155,175,215,0.15)', margin: '4px 0' } }),
       p('y', swatch(PALETTE.ENTRY,     'Yellow'), ' = gazelle'),
       p('g', swatch(PALETTE.CONNECTOR, 'Green'),  ' = constitutive rules'),
@@ -360,39 +389,37 @@ mount({
   dotRadius,
 
   prepare(raw) {
-    relations = raw.relations ?? relations;
+    relations  = raw.relations ?? relations;
     entityById = new Map(relations.nodes.map(n => [n.id, n]));
+    nodeById   = new Map(raw.nodes.map(n => [n.id, n]));
     measureLabels(raw.nodes);
     layout(raw);
   },
 
-  // Gazelle and green dots are pinned; blue dots settle before the first frame.
-  forces(fg) {
-    fg.d3Force('link').strength(0);                   // spokes are drawn, the home pull does the holding
-    fg.d3Force('charge')                              // a little mutual push keeps siblings from clumping
-      .strength(n => n.type === 'regulative' ? -12 : 0)
-      .distanceMax(40);
+  // Gazelle and green dots are pinned; rules move only under forceHome.
+  forces(graph) {
+    fg = graph;
+    fg.d3Force('link').strength(0);
+    fg.d3Force('charge', null);
     fg.d3Force('center', null);
-    fg.d3Force('home',   forceHome());
-    fg.d3Force('belong', forceBelong());
-    fg.d3Force('labels', forceLabels());
-    fg.d3Force('wall',   forceWall());
+    fg.d3Force('home', forceHome());
   },
 
-  warmupTicks: 300,
-  cooldownTime: 0,
+  cooldownTime: SETTLE_MS,
+  fitOnEngineStop: false,              // the camera stays put while islands open and close
   maxZoom: 1,                          // layout is sized in screen px at 1×; never zoom past it
 
-  // Blue labels show one at a time: the hovered or clicked rule, or search
-  // matches. A green dot highlights its island; the panel lists its rules.
-  showLabel(node, { activeId, isMatch }) {
-    return node.type !== 'regulative' || node.id === activeId || isMatch;
-  },
+  nodeAlpha,
+  showLabel,
 
   labelPosition: (node, r, gap) => labelAnchor(node, gap),
   labelFontSize,
+  labelText: n => n.__text ?? label(n.id),
 
-  linkColor(l, { activeId, neighbours, theme }) {
+  // Green → rule spokes show only for the open island.
+  linkColor(l, ctx) {
+    const { activeId, neighbours, theme } = ctx;
+    if (l.source.type === 'constitutive' && l.source !== openIsland(ctx)) return 'rgba(0,0,0,0)';
     const dim    = theme === 'dark' ? 'rgba(180,195,225,0.28)' : 'rgba(80,80,100,0.15)';
     const active = theme === 'dark' ? 'rgba(235,242,255,0.95)' : 'rgba(30,30,50,0.75)';
     const faded  = theme === 'dark' ? 'rgba(180,180,180,0.04)' : 'rgba(80,80,100,0.04)';

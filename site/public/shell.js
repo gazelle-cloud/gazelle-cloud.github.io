@@ -221,7 +221,7 @@ export function useGraphState(raw, nodeTypes, nodeLabel) {
   }, [activeId, graph.links]);
 
   return {
-    activeId, graph, activeNode, neighbours, setHoveredId, setFocusedId,
+    activeId, focusedId, hoveredId, graph, activeNode, neighbours, setHoveredId, setFocusedId,
     searchQuery, setSearchQuery, searchMatchIds,
     onNodeClick:       node => {
       window.__closeNavMenu?.();

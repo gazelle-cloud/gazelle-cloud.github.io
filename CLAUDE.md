@@ -84,7 +84,11 @@ export default mount({
   labelFontSize(node) { ... },
   nodeLabel(node) { ... },
   linkColor(link, ctx) { ... },
+  labelText(node) { ... },       // drawn label text, default nodeLabel
+  nodeAlpha(node, ctx) { ... },   // dot + label opacity; ctx: dimmed, isActive, isMatch, focusedId, hoveredId
+  onRenderFramePost(ctx, gs) { ... },  // draw over the graph each frame
   cooldownTime,                   // ms, default 100
+  fitOnEngineStop,                // false: zoomToFit on load and resize only, not after each settle
 
   // UI
   idlePanel: MyIdlePanel,         // React component shown when no node is active
